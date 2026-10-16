@@ -1,0 +1,15 @@
+{
+  "_note": "DRAFT for the backend fixed-question fallback (OQ-SRS-02). Product must review the wording. Each question is <= 35 words, English, no personal data.",
+  "questions": [
+    "Hi there! I'm excited to get to know you. When you have free time, what do you enjoy doing the most?",
+    "Nice! Which school subjects do you enjoy the most, and what do you like about them?",
+    "Do you like making things look good, like drawing or designing, or figuring out how things work?",
+    "Can you tell me about a time something was hard to do? What did you try?",
+    "What games, apps or websites do you love, and what makes them fun for you?",
+    "Do you like working in a team or on your own? Tell me why.",
+    "Do you enjoy puzzles, numbers, or finding patterns in things? Can you give me an example?",
+    "Has there been something you wondered how it works, like a phone, a website or a robot?",
+    "Tell me about something you made or fixed yourself. How did you feel about it?",
+    "If you could build anything with technology, what would you create?"
+  ]
+}

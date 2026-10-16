@@ -1,0 +1,43 @@
+"""Groq speech-to-text and text-to-speech providers."""
+
+from __future__ import annotations
+
+from app.core.config import Settings
+from app.providers.base import SpeechAudio
+from app.providers.groq.client import GroqHttpClient
+from app.services.text import chunk_text
+from app.services.wav import join_wavs
+
+
+class GroqStt:
+    def __init__(self, client: GroqHttpClient, settings: Settings) -> None:
+        self._client = client
+        self._model = settings.stt_model
+        self._language = settings.stt_language
+        self._timeout = settings.stt_timeout_seconds
+
+    async def transcribe(self, audio: bytes, *, filename: str, mime_type: str) -> str:
+        return await self._client.transcribe(
+            model=self._model,
+            audio=audio,
+            filename=filename,
+            mime_type=mime_type,
+            language=self._language,
+            timeout=self._timeout,
+        )
+
+
+class GroqTts:
+    def __init__(self, client: GroqHttpClient, settings: Settings) -> None:
+        self._client = client
+        self._model = settings.tts_model
+        self._voice = settings.tts_voice
+        self._max_chars = settings.tts_max_chars
+        self._timeout = settings.tts_timeout_seconds
+
+    async def speak(self, text: str) -> SpeechAudio:
+        parts = [
+            await self._client.speak(model=self._model, voice=self._voice, text=chunk, timeout=self._timeout)
+            for chunk in chunk_text(text, self._max_chars)
+        ]
+        return SpeechAudio(join_wavs(parts), "audio/wav")

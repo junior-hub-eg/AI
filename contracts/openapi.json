@@ -1,0 +1,623 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Junior Hub Discovery AI",
+    "description": "Stateless AI service behind the Track Discovery interview.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Healthz Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readiness",
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Readyz Readyz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/discovery/turns": {
+      "post": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Answer in, next question out",
+        "operationId": "post_turn_v1_discovery_turns_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/discovery/results": {
+      "post": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Top 3 recommended tracks",
+        "operationId": "post_result_v1_discovery_results_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnswerIn": {
+        "properties": {
+          "order_index": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Order Index"
+          },
+          "question_text": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Question Text"
+          },
+          "transcript": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript"
+          },
+          "audio_base64": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 25000000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Base64"
+          },
+          "audio_mime_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Mime Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_index",
+          "question_text"
+        ],
+        "title": "AnswerIn",
+        "description": "The student's answer to the current question: typed text OR recorded audio."
+      },
+      "AnsweredOut": {
+        "properties": {
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index"
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_index",
+          "transcript"
+        ],
+        "title": "AnsweredOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Meta": {
+        "properties": {
+          "prompt_version": {
+            "type": "string",
+            "title": "Prompt Version"
+          },
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt_version",
+          "model_id",
+          "latency_ms"
+        ],
+        "title": "Meta"
+      },
+      "QA": {
+        "properties": {
+          "order_index": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Order Index"
+          },
+          "question_text": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Question Text"
+          },
+          "transcript": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Transcript"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_index",
+          "question_text",
+          "transcript"
+        ],
+        "title": "QA",
+        "description": "One answered question."
+      },
+      "QuestionOut": {
+        "properties": {
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index"
+          },
+          "question_text": {
+            "type": "string",
+            "title": "Question Text"
+          },
+          "audio_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Base64"
+          },
+          "audio_mime_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Mime Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_index",
+          "question_text"
+        ],
+        "title": "QuestionOut"
+      },
+      "RecommendationOut": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Rank"
+          },
+          "track_code": {
+            "type": "string",
+            "title": "Track Code"
+          },
+          "match_percent": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Match Percent"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "track_code",
+          "match_percent",
+          "reason"
+        ],
+        "title": "RecommendationOut"
+      },
+      "ResultRequest": {
+        "properties": {
+          "interview_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Interview Id"
+          },
+          "student_ref": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Student Ref"
+          },
+          "grade": {
+            "type": "integer",
+            "maximum": 13.0,
+            "minimum": 1.0,
+            "title": "Grade"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/Track"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 3,
+            "title": "Tracks"
+          },
+          "responses": {
+            "items": {
+              "$ref": "#/components/schemas/QA"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Responses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "interview_id",
+          "student_ref",
+          "grade",
+          "tracks",
+          "responses"
+        ],
+        "title": "ResultRequest"
+      },
+      "ResultResponse": {
+        "properties": {
+          "interview_id": {
+            "type": "string",
+            "title": "Interview Id"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendationOut"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "interview_id",
+          "recommendations",
+          "summary",
+          "meta"
+        ],
+        "title": "ResultResponse"
+      },
+      "Track": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9_]+$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "profile": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Profile"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "profile"
+        ],
+        "title": "Track"
+      },
+      "TurnRequest": {
+        "properties": {
+          "interview_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Interview Id"
+          },
+          "student_ref": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Student Ref"
+          },
+          "grade": {
+            "type": "integer",
+            "maximum": 13.0,
+            "minimum": 1.0,
+            "title": "Grade"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/Track"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Tracks"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/QA"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "History"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnswerIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_questions": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Questions",
+            "default": 10
+          },
+          "speak": {
+            "type": "boolean",
+            "title": "Speak",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "interview_id",
+          "student_ref",
+          "grade",
+          "tracks"
+        ],
+        "title": "TurnRequest"
+      },
+      "TurnResponse": {
+        "properties": {
+          "interview_id": {
+            "type": "string",
+            "title": "Interview Id"
+          },
+          "answered": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnsweredOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_question": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuestionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "finished": {
+            "type": "boolean",
+            "title": "Finished"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "interview_id",
+          "finished",
+          "meta"
+        ],
+        "title": "TurnResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

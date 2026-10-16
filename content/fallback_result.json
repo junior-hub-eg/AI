@@ -1,0 +1,12 @@
+{
+  "_note": "DRAFT static result for the backend fallback. Same shape as POST /v1/discovery/results. Track codes must exist in the seeded Track table.",
+  "recommendations": [
+    {"rank": 1, "track_code": "FRONTEND", "match_percent": 86,
+     "reason": "You enjoy making things you can see and click, and that is exactly what Frontend developers build every day."},
+    {"rank": 2, "track_code": "UIUX", "match_percent": 74,
+     "reason": "You care about how things look and feel to the people using them, which is the heart of UI/UX design."},
+    {"rank": 3, "track_code": "DATA", "match_percent": 61,
+     "reason": "You like spotting patterns and working things out, which helps a lot when exploring data."}
+  ],
+  "summary": "You like creating things and working out how they behave. Frontend, UI/UX and Data all match what you told us. Try a short video from each one and choose what feels most fun!"
+}
