@@ -81,12 +81,16 @@ class GroqHttpClient:
         mime_type: str,
         language: str,
         timeout: float,
+        prompt: str = "",
     ) -> str:
+        data = {"model": model, "language": language, "response_format": "json", "temperature": "0"}
+        if prompt:
+            data["prompt"] = prompt
         response = await self._send(
             "audio/transcriptions",
             timeout,
             files={"file": (filename, audio, mime_type)},
-            data={"model": model, "language": language, "response_format": "json", "temperature": "0"},
+            data=data,
         )
         try:
             return str(response.json()["text"])
@@ -109,8 +113,10 @@ class GroqHttpClient:
         try:
             response = await self._client.post(path, timeout=timeout, **kwargs)
         except httpx.TimeoutException:
+            log_event(logger, logging.WARNING, "groq_timeout", path=path, timeout_s=timeout)
             raise ProviderTimeout(f"{path} timed out") from None
         except httpx.TransportError as exc:
+            log_event(logger, logging.WARNING, "groq_network_error", path=path, error=type(exc).__name__)
             raise ProviderServerError(f"{path} network error: {type(exc).__name__}") from None
         if response.is_success:
             return response
@@ -135,6 +141,9 @@ class GroqHttpClient:
             status=status,
             error_code=err_code,
             error_type=err_type,
+            retry_after=response.headers.get("retry-after", ""),
+            limit_tokens=response.headers.get("x-ratelimit-limit-tokens", ""),
+            reset_tokens=response.headers.get("x-ratelimit-reset-tokens", ""),
         )
         if status in (401, 403):
             raise ProviderAuthError("Groq rejected the API key (check GROQ_API_KEY in .env)")

@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from app.core.config import Settings
 from app.core.security import Authenticator, build_authenticator
 from app.providers.base import LlmProvider, SttProvider, TtsProvider
+from app.providers.elevenlabs import ElevenLabsStt, ElevenLabsTts, FallbackStt, FallbackTts
 from app.providers.fake import FakeLlm, FakeStt, FakeTts
 from app.providers.groq.client import GroqHttpClient
 from app.providers.groq.llm import GroqLlm
@@ -41,6 +42,14 @@ def build_container(settings: Settings) -> Container:
         client = GroqHttpClient(api_key=settings.groq_key_value, base_url=settings.groq_base_url)
         closers.append(client.aclose)
         llm, stt, tts = GroqLlm(client, settings), GroqStt(client, settings), GroqTts(client, settings)
+        if settings.stt_provider == "elevenlabs":
+            scribe = ElevenLabsStt(settings)
+            closers.append(scribe.aclose)
+            stt = FallbackStt(scribe, stt, "elevenlabs", "groq-whisper")
+        if settings.tts_provider == "elevenlabs":
+            voice = ElevenLabsTts(settings)
+            closers.append(voice.aclose)
+            tts = FallbackTts(voice, tts, "elevenlabs", "groq-orpheus")
 
     prompts = PromptStore(
         settings.prompts_dir,
@@ -53,6 +62,6 @@ def build_container(settings: Settings) -> Container:
         settings=settings,
         auth=build_authenticator(settings),
         turn_service=TurnService(settings=settings, llm=llm, stt=stt, tts=tts, prompts=prompts),
-        result_service=ResultService(settings=settings, llm=llm, prompts=prompts),
+        result_service=ResultService(settings=settings, llm=llm, prompts=prompts, tts=tts),
         _closers=closers,
     )

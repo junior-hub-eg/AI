@@ -72,17 +72,41 @@ class Settings(BaseSettings):
     llm_turn_max_tokens: int = Field(default=1024, ge=64)
     llm_result_max_tokens: int = Field(default=2048, ge=64)
 
+    # Speech-to-text provider: "groq" (Whisper) or "elevenlabs" (Scribe v2: much better on
+    # Egyptian Arabic mixed with English; Groq Whisper is used automatically as a fallback).
+    stt_provider: Literal["groq", "elevenlabs"] = "groq"
+    elevenlabs_api_key: SecretStr | None = None
+    elevenlabs_stt_model: str = "scribe_v2"
+    # Words the speech-to-text should expect (ElevenLabs "keyterms"; comma-separated).
+    stt_keyterms: str = (
+        "Frontend,Backend,UI/UX,Data,AI,App,Website,Game,Coding,Python,Scratch,Roblox,Minecraft,"
+        "Fortnite,PUBG,FIFA,TikTok,YouTube,Instagram,Canva,Photoshop,Robot,Arduino,Cybersecurity,Mobile"
+    )
+    # Hint sentence for Whisper (style + spelling of English terms). Empty = no prompt.
+    stt_prompt: str = (
+        "بحب ألعب Minecraft و Roblox، وبحب البرمجة بـ Python و Scratch، "
+        "ونفسي أعمل App أو Website أو Game، وبحب الـ Design والـ AI."
+    )
     stt_model: str = "whisper-large-v3"
-    stt_language: str = "en"
-    tts_model: str = "canopylabs/orpheus-v1-english"
-    tts_voice: str = "autumn"
+    # "ar" = Arabic interview (English programming words are still understood).
+    stt_language: str = "ar"
+    # Arabic voice (Saudi accent). Voices: fahad, sultan, abdullah (male) / noura, lulwa, aisha (female).
+    # English version: TTS_MODEL=canopylabs/orpheus-v1-english, TTS_VOICE=autumn
+    # Text-to-speech provider: "groq" (Orpheus Arabic, Saudi accent) or "elevenlabs" (more natural;
+    # needs ELEVENLABS_VOICE_ID). With elevenlabs, Groq Orpheus is used automatically if it fails.
+    tts_provider: Literal["groq", "elevenlabs"] = "groq"
+    elevenlabs_tts_model: str = "eleven_multilingual_v2"
+    elevenlabs_voice_id: str = ""
+    tts_model: str = "canopylabs/orpheus-arabic-saudi"
+    tts_voice: str = "fahad"
     # Orpheus accepts short inputs; longer text is split on sentence bounds.
     tts_max_chars: int = Field(default=200, ge=40)
 
     # ----------------------------------------------------------------- prompts
     prompts_dir: Path = PROJECT_ROOT / "prompts"
-    prompt_turn_version: str = "v1"
-    prompt_result_version: str = "v1"
+    # v1 = English interview, v2 = Arabic interview with English programming terms.
+    prompt_turn_version: str = "v2"
+    prompt_result_version: str = "v2"
     # Token savers (important on the free plan: 8,000 tokens per minute).
     include_tracks_in_turn: bool = True
     profile_max_chars_turn: int = Field(default=300, ge=50)
@@ -90,8 +114,13 @@ class Settings(BaseSettings):
     transcript_max_chars_in_prompt: int = Field(default=700, ge=100)
 
     # ------------------------------------------------------------- interview
+    # Shown on screen. Never calls the LLM; its audio is cached.
     opening_question: str = (
-        "Hi there! I'm excited to get to know you. When you have free time, what do you enjoy doing the most?"
+        "أهلًا وسهلًا، يسعدني أن أتعرف عليك. عندما يكون عندك وقت فراغ، ما أكثر شيء تحب أن تفعله؟"
+    )
+    # Read aloud by TTS (Arabic script only, with a few diacritics). Empty = same as opening_question.
+    opening_question_speech: str = (
+        "أهلا وسهلا، يسعدني أتعرف عليك. لما يكون عندك وقت فراغ، ما أكثر شيء تحب أن تفعله؟"
     )
     result_min_responses: int = Field(default=5, ge=1)
     result_max_responses: int = Field(default=20, ge=1)
@@ -115,6 +144,10 @@ class Settings(BaseSettings):
     def groq_key_value(self) -> str:
         return self.groq_api_key.get_secret_value().strip() if self.groq_api_key else ""
 
+    @property
+    def elevenlabs_key_value(self) -> str:
+        return self.elevenlabs_api_key.get_secret_value().strip() if self.elevenlabs_api_key else ""
+
     @model_validator(mode="after")
     def _check_consistency(self) -> Settings:
         if self.app_env == "production":
@@ -124,6 +157,18 @@ class Settings(BaseSettings):
                 raise ValueError("FAKE_MODELS must be false when APP_ENV=production")
         if not self.fake_models and self.groq_key_value in ("", GROQ_KEY_PLACEHOLDER):
             raise ValueError(_MISSING_GROQ_KEY)
+        if not self.fake_models and self.stt_provider == "elevenlabs" and not self.elevenlabs_key_value:
+            raise ValueError(
+                "STT_PROVIDER=elevenlabs needs ELEVENLABS_API_KEY in .env (or set STT_PROVIDER=groq)"
+            )
+        if (
+            not self.fake_models
+            and self.tts_provider == "elevenlabs"
+            and not (self.elevenlabs_key_value and self.elevenlabs_voice_id)
+        ):
+            raise ValueError(
+                "TTS_PROVIDER=elevenlabs needs ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID in .env"
+            )
         if not self.auth_disabled and not (self.jwt_public_key or self.jwt_public_key_file):
             raise ValueError(
                 "JWT_PUBLIC_KEY or JWT_PUBLIC_KEY_FILE is required "

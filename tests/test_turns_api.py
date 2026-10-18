@@ -20,7 +20,7 @@ def test_text_answer_returns_next_question(client):
     assert r.status_code == 200
     assert data["answered"] == {"order_index": 1, "transcript": "I like drawing."}
     assert data["next_question"]["order_index"] == 2
-    assert data["meta"]["prompt_version"] == "discovery_turn@v1"
+    assert data["meta"]["prompt_version"] == "discovery_turn@v2"
 
 
 def test_audio_answer_is_transcribed(client):
@@ -108,3 +108,28 @@ def test_validation_error_never_echoes_student_text(client):
     r = client.post("/v1/discovery/turns", json=turn_body(answer=answer))
     assert r.status_code == 400
     assert "SECRET-ANSWER" not in r.text
+
+
+async def test_opening_audio_is_retried_after_a_network_blip():
+    from app.providers.base import SpeechAudio
+    from app.providers.errors import ProviderServerError
+    from app.providers.fake import FakeLlm, FakeStt
+    from app.services.prompts import PromptStore
+    from app.services.turn_service import TurnService
+    from app.services.wav import silent_wav
+    from tests.conftest import make_settings
+
+    class FlakyTts:
+        calls = 0
+
+        async def speak(self, text):
+            FlakyTts.calls += 1
+            if FlakyTts.calls == 1:
+                raise ProviderServerError("network")
+            return SpeechAudio(silent_wav(), "audio/wav")
+
+    s = make_settings()
+    prompts = PromptStore(s.prompts_dir, {"discovery_turn": "v2", "discovery_result": "v2"})
+    svc = TurnService(settings=s, llm=FakeLlm(), stt=FakeStt(), tts=FlakyTts(), prompts=prompts)
+    await svc.warm_up(attempts=1)
+    assert svc._opening_audio is not None and FlakyTts.calls == 2

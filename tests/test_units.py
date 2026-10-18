@@ -83,7 +83,7 @@ def test_join_wavs_concatenates_frames():
 
 
 def test_parse_result_sorts_ranks_and_trims():
-    recs, summary = parse_result(
+    recs, summary, _speech = parse_result(
         {
             "recommendations": [rec("data", "61%"), rec("FRONTEND", 86, "x" * 500), rec("UIUX", 74.4)],
             "summary": "One. Two. Three. Four. Five.",

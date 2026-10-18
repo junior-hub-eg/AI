@@ -16,6 +16,8 @@ class ResultRequest(ApiModel):
     tracks: list[Track] = Field(min_length=3, max_length=20)
     # The 5..10 bounds are enforced by the service (they are configurable).
     responses: list[QA] = Field(min_length=1, max_length=50)
+    # true = also return the summary as speech (used by the call-style interview page).
+    speak: bool = False
 
     @model_validator(mode="after")
     def _unique_codes(self) -> Self:
@@ -36,4 +38,7 @@ class ResultResponse(ApiModel):
     interview_id: str
     recommendations: list[RecommendationOut]
     summary: str
+    # Only when the request had speak=true and speech synthesis worked.
+    summary_audio_base64: str | None = None
+    summary_audio_mime_type: str | None = None
     meta: Meta

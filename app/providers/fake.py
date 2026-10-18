@@ -8,14 +8,24 @@ from typing import Any
 from app.providers.base import LlmResult, LlmTask, Message, SpeechAudio, T
 from app.services.wav import silent_wav
 
+# (shown on screen, read aloud)
 _QUESTIONS = (
-    "Nice! Which school subjects do you enjoy the most, and why?",
-    "Do you like making things look good, or figuring out how they work?",
-    "Can you tell me about a time something was hard and what you did?",
-    "What games or apps do you love, and what makes them fun?",
-    "Do you prefer working in a team or on your own?",
-    "What have you been curious about lately?",
-    "If you could build anything with technology, what would it be?",
+    (
+        "رائع! ما المواد الدراسية التي تحبها أكثر، ولماذا؟",
+        "رَائِع! مَا المَوَادُّ الدِّرَاسِيَّةُ الَّتِي تُحِبُّهَا أَكْثَر، وَلِمَاذَا؟",
+    ),
+    (
+        "هل تحب أن تجعل الأشياء تبدو جميلة، أم تحب أن تفهم كيف تعمل؟",
+        "هَلْ تُحِبُّ أَنْ تَجْعَلَ الأَشْيَاءَ تَبْدُو جَمِيلَة، أَمْ تُحِبُّ أَنْ تَفْهَمَ كَيْفَ تَعْمَل؟",
+    ),
+    ("احكِ لي عن مرة كان فيها شيء صعب، وماذا فعلت؟", "احْكِ لِي عَنْ مَرَّةٍ كَانَ فِيهَا شَيْءٌ صَعْب، وَمَاذَا فَعَلْت؟"),
+    (
+        "ما الـ Games أو الـ Apps التي تحبها، وما الممتع فيها؟",
+        "مَا الجيمز أَوِ الآبس الَّتِي تُحِبُّهَا، وَمَا المُمْتِعُ فِيهَا؟",
+    ),
+    ("هل تحب العمل في فريق أم وحدك؟", "هَلْ تُحِبُّ العَمَلَ فِي فَرِيقٍ أَمْ وَحْدَك؟"),
+    ("ما الشيء الذي تتساءل كيف يعمل؟", "مَا الشَّيْءُ الَّذِي تَتَسَاءَلُ كَيْفَ يَعْمَل؟"),
+    ("لو تستطيع أن تصنع أي شيء بالـ Coding، ماذا ستصنع؟", "لَوْ تَسْتَطِيعُ أَنْ تَصْنَعَ أَيَّ شَيْءٍ بِالكودينج، مَاذَا سَتَصْنَع؟"),
 )
 
 
@@ -32,7 +42,8 @@ class FakeLlm:
     ) -> LlmResult[T]:
         if task is LlmTask.TURN:
             answers = messages[-1]["content"].count("<student_answer>")
-            data: dict[str, Any] = {"question_text": _QUESTIONS[answers % len(_QUESTIONS)]}
+            text, speech = _QUESTIONS[answers % len(_QUESTIONS)]
+            data: dict[str, Any] = {"question_text": text, "speech_text": speech}
         else:
             codes = list((context or {}).get("track_codes", []))[:3]
             data = {
@@ -40,13 +51,17 @@ class FakeLlm:
                     {
                         "track_code": code,
                         "match_percent": pct,
-                        "reason": f"You showed real interest that fits {code.title()}.",
+                        "reason": f"أظهرت اهتمامًا حقيقيًا يناسب {code.title()}.",
                     }
                     for code, pct in zip(codes, (86, 74, 61), strict=False)
                 ],
                 "summary": (
-                    "You love creating and solving problems. "
-                    "These tracks fit what you told us. Have fun exploring them!"
+                    "شكرًا لك على هذه الدردشة الجميلة! "
+                    "أنت تحب الإبداع وحل المشكلات، وهذه الـ Tracks تناسب ما قلته لنا. استمتع باستكشافها!"
+                ),
+                "summary_speech": (
+                    "شُكْرًا لَكَ عَلَى هَذِهِ الدَّرْدَشَةِ الجَمِيلَة! "
+                    "أَنْتَ تُحِبُّ الإِبْدَاعَ وَحَلَّ المُشْكِلَات، وَهَذِهِ التراكس تُنَاسِبُ مَا قُلْتَهُ لَنَا. اسْتَمْتِعْ بِاسْتِكْشَافِهَا!"
                 ),
             }
         return LlmResult(parse(data), self.model_id)
@@ -58,7 +73,7 @@ class FakeStt:
     async def transcribe(self, audio: bytes, *, filename: str, mime_type: str) -> str:
         if audio.startswith(b"TEXT:"):
             return audio[5:].decode("utf-8", errors="ignore")
-        return "I like building small games and fixing computers."
+        return "بحب أعمل Games صغيرة وأصلح الكمبيوتر."
 
 
 class FakeTts:

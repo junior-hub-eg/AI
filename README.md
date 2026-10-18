@@ -47,6 +47,39 @@ If Streamlit asks for an email on first start, just press Enter. Use Chrome or E
 Sidebar: service URL (buttons for real `:8000` and mock `:8001`), JWT, grade, max questions, speech on/off,
 editable tracks JSON. With auth on: `TOKEN=$(python scripts/make_dev_token.py) ./scripts/run_playground.sh`.
 
+## Arabic voice-call interview (v2)
+
+The interview now runs **in Arabic** (simple MSA) while programming terms stay in **English**
+(Frontend, Data, Game...). Prompts `@v2` are the default; `@v1` (English) is unchanged
+(`PROMPT_TURN_VERSION=v1`, `PROMPT_RESULT_VERSION=v1`, `STT_LANGUAGE=en`, `TTS_MODEL=canopylabs/orpheus-v1-english`).
+
+- **Display vs speech text:** each question has `question_text` (shown, English terms in Latin letters)
+  and `speech_text` (read aloud, 100% Arabic script, e.g. `فرونت إند`) so the Arabic voice pronounces terms correctly.
+- **STT:** `STT_PROVIDER=groq` (Whisper `whisper-large-v3`, `STT_LANGUAGE=ar`, with a hint prompt) or
+  `STT_PROVIDER=elevenlabs` (Scribe v2 + `STT_KEYTERMS`; much better on Egyptian Arabic mixed with English).
+  With ElevenLabs, Groq Whisper is used automatically if it fails.
+- **TTS:** `TTS_PROVIDER=groq` (Orpheus `canopylabs/orpheus-arabic-saudi`, voices fahad/sultan/abdullah/noura/lulwa/aisha;
+  accept the model terms once in the Groq console) or `TTS_PROVIDER=elevenlabs` (`ELEVENLABS_VOICE_ID`).
+  Orpheus is the fallback. Question 1 audio is generated at startup; network blips are retried once.
+- **Results:** reasons/summary in Arabic, track names in English. `POST /v1/discovery/results` accepts
+  `"speak": true` and then also returns `summary_audio_base64` / `summary_audio_mime_type`.
+- **Privacy checks** also catch Arabic personal-data questions (اسمك، ساكن فين، عمرك...); Arabic Whisper
+  hallucinations on silence are dropped.
+
+### Call page (`/call/`, development only)
+
+`http://127.0.0.1:<port>/call/` is a hands-free call: the AI speaks, captions are shown, recording starts
+automatically and is sent after ~2.6 s of silence (voice-activity detection with noise calibration and
+hysteresis), 7 questions, then the top-3 tracks with the summary read aloud. A **debug panel** on the left shows
+every transcript, question, request/latency/model, TTS/STT status and the live server logs (`GET /debug/logs`,
+metadata only, disabled in production).
+
+### Windows quick start
+
+`START_HERE.bat` creates a dedicated `.venv` (Python 3.12 via `uv` if needed), installs packages and starts the
+API on port 8010 plus the Streamlit playground, then opens the call page. `SET_GROQ_KEY.bat` and
+`SET_ELEVENLABS_KEY.bat` write the keys into `.env` (never committed).
+
 ## Folder map
 
 ```
@@ -68,7 +101,7 @@ mock/                mock server with fixed answers + failure scenarios (for the
 scripts/             smoke_test, dev keys/tokens, openapi export, run_dev
 contracts/           openapi.json (regenerate: python -m scripts.export_openapi)
 playground/          Streamlit test app: voice interview, endpoint tester, automatic checks
-tests/               62 tests (no network, no key needed)
+tests/               90 tests (no network, no key needed)
 ```
 
 ## Where to change things

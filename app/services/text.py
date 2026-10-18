@@ -6,7 +6,8 @@ import re
 
 _MARKDOWN = re.compile(r"[*_`#>~|]+")
 _EMOJI = re.compile("[\U0001f000-\U0001ffff\u2600-\u27bf\ufe0f\u200d]")
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+_SENTENCE_END = re.compile(r"(?<=[.!?\u061f\u06d4])\s+")  # also Arabic ؟ and ۔
+_ARABIC_DIACRITICS = re.compile("[\u064b-\u0652\u0640]")  # tashkeel + tatweel
 
 # Whisper tends to invent these phrases when it is given silence or noise.
 _HALLUCINATIONS = frozenset(
@@ -19,6 +20,15 @@ _HALLUCINATIONS = frozenset(
         "bye",
         "bye bye",
         "subtitles by the amaraorg community",
+        # Arabic phrases Whisper invents on silence (diacritics removed).
+        "شكرا",
+        "شكرا لكم",
+        "شكرا للمشاهدة",
+        "اشتركوا في القناة",
+        "اشترك في القناة",
+        "ترجمة نانسي قنقر",
+        "موسيقى",
+        "السلام عليكم",
     }
 )
 
@@ -84,5 +94,11 @@ def clean_transcript(text: str) -> str:
     text = collapse_whitespace(text)
     if sum(ch.isalnum() for ch in text) < 2:
         return ""
-    normalised = re.sub(r"[^a-z ]", "", text.lower()).strip()
+    plain = _ARABIC_DIACRITICS.sub("", text.lower())
+    normalised = collapse_whitespace(re.sub(r"[^a-z\u0621-\u064a ]", "", plain))
     return "" if normalised in _HALLUCINATIONS else text
+
+
+def question_marks(text: str) -> int:
+    """Count question marks in English and Arabic."""
+    return text.count("?") + text.count("\u061f")

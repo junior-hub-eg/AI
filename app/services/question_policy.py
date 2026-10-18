@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
+from typing import Any
 
-from app.services.text import clean_spoken_text
+from app.services.text import clean_spoken_text, question_marks
 
 MAX_WORDS = 45
 
@@ -34,6 +36,26 @@ _PERSONAL_INFO = re.compile(
 )
 
 
+# Same idea in Arabic (MSA and Egyptian/Gulf colloquial). Diacritics are removed before matching.
+_PERSONAL_INFO_AR = re.compile(
+    r"(?:اسمك|إسمك|اسم حضرتك|اسمكم|اسم عائلتك|اسم مدرستك|مدرستك اسمها|ما هي مدرستك|في أي مدرسة|في اي مدرسة"
+    r"|ساكن فين|ساكنة فين|تسكن|تعيش فين|أين تسكن|اين تسكن|أين تعيش|اين تعيش|عنوانك|عنوان بيتك"
+    r"|رقم (?:تليفونك|تلفونك|موبايلك|هاتفك|جوالك|تلفون)|رقمك|إيميلك|ايميلك|بريدك"
+    r"|عندك كام سنة|عمرك كام|كم عمرك|كام سنة عمرك|سنك كام|عيد ميلادك|تاريخ ميلادك"
+    r"|كلمة السر|كلمة المرور|الباسورد|باسوردك"
+    r"|حسابك على|اكونتك|أكاونتك|يوزرك)"
+)
+_DIACRITICS = re.compile("[\u064b-\u0652\u0640]")
+
+
+@dataclass(frozen=True)
+class TurnQuestion:
+    """What the student reads (may contain English programming terms) and what the TTS says."""
+
+    text: str
+    speech: str
+
+
 def focus_for(question_number: int, max_questions: int) -> str:
     if question_number >= max_questions:
         return FOCUS_PLAN[-1]
@@ -47,8 +69,16 @@ def validate_question(raw: str) -> str:
         raise ValueError("question_text is empty")
     if len(text.split()) > MAX_WORDS:
         raise ValueError("the question is too long: use at most 35 words")
-    if text.count("?") > 2:
+    if question_marks(text) > 2:
         raise ValueError("ask exactly one question")
-    if _PERSONAL_INFO.search(text):
+    if _PERSONAL_INFO.search(text) or _PERSONAL_INFO_AR.search(_DIACRITICS.sub("", text)):
         raise ValueError("the question asks for personal information; ask about interests instead")
     return text
+
+
+def validate_turn(data: dict[str, Any]) -> TurnQuestion:
+    """Parse the model's JSON: question_text (shown) + optional speech_text (read aloud)."""
+    text = validate_question(str(data["question_text"]))
+    raw_speech = data.get("speech_text")
+    speech = validate_question(str(raw_speech)) if raw_speech else text
+    return TurnQuestion(text=text, speech=speech)

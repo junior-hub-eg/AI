@@ -11,14 +11,14 @@ from app.core.config import Settings
 from app.core.errors import AudioUnintelligible, DeadlineExceeded
 from app.core.logging import log_event
 from app.providers.base import LlmProvider, LlmTask, SttProvider, TtsProvider
-from app.providers.errors import ProviderError
+from app.providers.errors import ProviderError, ProviderServerError
 from app.schemas.common import QA, Meta
 from app.schemas.turn import AnsweredOut, AnswerIn, QuestionOut, TurnRequest, TurnResponse
 from app.services.audio import decode_audio
 from app.services.errors_map import to_app_error
 from app.services.prompt_builder import build_turn_messages
 from app.services.prompts import PromptStore
-from app.services.question_policy import validate_question
+from app.services.question_policy import TurnQuestion, validate_turn
 from app.services.text import clean_transcript, collapse_whitespace
 
 logger = logging.getLogger(__name__)
@@ -75,13 +75,15 @@ class TurnService:
 
         number = answered_count + 1
         if number == 1:
-            text, model_id = self._s.opening_question, FIXED_MODEL_ID
+            opening = self._s.opening_question
+            q, model_id = TurnQuestion(opening, self._s.opening_question_speech or opening), FIXED_MODEL_ID
         else:
-            text, model_id = await self._next_question(req, conversation, number)
+            q, model_id = await self._next_question(req, conversation, number)
+        text = q.text
 
         audio_b64 = mime = None
         if req.speak:
-            audio = await self._speak(text, cacheable=number == 1)
+            audio = await self._speak(q.speech, cacheable=number == 1)
             if audio:
                 audio_b64, mime = audio
         question = QuestionOut(
@@ -106,7 +108,9 @@ class TurnService:
             raise AudioUnintelligible("No speech could be understood in the recording")
         return text[: self._s.max_text_chars]
 
-    async def _next_question(self, req: TurnRequest, conversation: list[QA], number: int) -> tuple[str, str]:
+    async def _next_question(
+        self, req: TurnRequest, conversation: list[QA], number: int
+    ) -> tuple[TurnQuestion, str]:
         messages = build_turn_messages(
             self._prompt,
             self._s,
@@ -119,18 +123,39 @@ class TurnService:
         result = await self._llm.generate_json(
             task=LlmTask.TURN,
             messages=messages,
-            parse=lambda data: validate_question(str(data["question_text"])),
+            parse=validate_turn,
         )
         return result.value, result.model_id
+
+    async def warm_up(self, attempts: int = 4) -> None:
+        """Synthesize the opening question at startup so question 1 always has a voice."""
+        speech = self._s.opening_question_speech or self._s.opening_question
+        for attempt in range(1, attempts + 1):
+            if await self._speak(speech, cacheable=True):
+                log_event(logger, logging.INFO, "opening_audio_ready", attempt=attempt)
+                return
+            await asyncio.sleep(2 * attempt)
+        log_event(logger, logging.WARNING, "opening_audio_not_ready", attempts=attempts)
 
     async def _speak(self, text: str, *, cacheable: bool) -> tuple[str, str] | None:
         if cacheable and self._opening_audio:
             return self._opening_audio
-        try:
-            speech = await asyncio.wait_for(self._tts.speak(text), timeout=self._s.tts_timeout_seconds)
-        except (ProviderError, TimeoutError) as exc:
-            # Speech is optional: the text question is always returned.
-            log_event(logger, logging.WARNING, "tts_failed", reason=type(exc).__name__)
+        speech = None
+        for attempt in (1, 2):
+            try:
+                speech = await asyncio.wait_for(self._tts.speak(text), timeout=self._s.tts_timeout_seconds)
+                break
+            except ProviderServerError as exc:
+                # Network blip / 5xx: these fail fast, so one quick retry is cheap.
+                log_event(logger, logging.WARNING, "tts_failed", reason=type(exc).__name__, attempt=attempt)
+                if attempt == 2:
+                    return None
+                await asyncio.sleep(0.5)
+            except (ProviderError, TimeoutError) as exc:
+                # Speech is optional: the text question is always returned.
+                log_event(logger, logging.WARNING, "tts_failed", reason=type(exc).__name__, attempt=attempt)
+                return None
+        if speech is None:
             return None
         encoded = (base64.b64encode(speech.data).decode("ascii"), speech.mime_type)
         if cacheable:

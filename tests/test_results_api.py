@@ -28,7 +28,7 @@ def test_result_has_three_ranked_distinct_tracks(client):
     assert len({x["track_code"] for x in recs}) == 3
     assert [x["match_percent"] for x in recs] == sorted((x["match_percent"] for x in recs), reverse=True)
     assert all(len(x["reason"]) <= 300 for x in recs)
-    assert data["summary"] and data["meta"]["prompt_version"] == "discovery_result@v1"
+    assert data["summary"] and data["meta"]["prompt_version"] == "discovery_result@v2"
 
 
 def test_too_few_responses_rejected(client):

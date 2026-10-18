@@ -159,7 +159,7 @@ async def test_transcription_request_shape():
     text = await stt.transcribe(b"AUDIO", filename="answer.webm", mime_type="audio/webm")
     assert text == " I like robots "
     assert seen["url"].endswith("/audio/transcriptions")
-    for needle in (b"whisper-large-v3", b'name="language"', b"\r\nen\r\n", b"answer.webm", b"AUDIO"):
+    for needle in (b"whisper-large-v3", b'name="language"', b"\r\nar\r\n", b"answer.webm", b"AUDIO"):
         assert needle in seen["body"]
 
 
@@ -169,7 +169,7 @@ async def test_tts_splits_long_text_and_joins_audio():
     def handler(request):
         body = json.loads(request.content)
         inputs.append(body["input"])
-        assert body["response_format"] == "wav" and body["voice"] == "autumn"
+        assert body["response_format"] == "wav" and body["voice"] == "fahad"
         return httpx.Response(200, content=silent_wav(0.1))
 
     tts = GroqTts(groq_client(handler), settings())

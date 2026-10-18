@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import base64
+import logging
 import re
 import time
 from typing import Any
@@ -11,7 +13,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.config import Settings
 from app.core.errors import DeadlineExceeded, InvalidRequest
-from app.providers.base import LlmProvider, LlmTask
+from app.core.logging import log_event
+from app.providers.base import LlmProvider, LlmTask, TtsProvider
 from app.providers.errors import ProviderError
 from app.schemas.common import Meta
 from app.schemas.result import RecommendationOut, ResultRequest, ResultResponse
@@ -45,9 +48,14 @@ class _LlmResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
     recommendations: list[_LlmRecommendation]
     summary: str = Field(min_length=1)
+    # Same summary in Arabic script only, for TTS. Optional.
+    summary_speech: str | None = None
 
 
-def parse_result(data: dict[str, Any], allowed_codes: set[str]) -> tuple[list[RecommendationOut], str]:
+logger = logging.getLogger(__name__)
+
+
+def parse_result(data: dict[str, Any], allowed_codes: set[str]) -> tuple[list[RecommendationOut], str, str]:
     """Validate and normalise the model output. Raises ValueError when unusable."""
     parsed = _LlmResult.model_validate(data)
     seen: set[str] = set()
@@ -74,13 +82,18 @@ def parse_result(data: dict[str, Any], allowed_codes: set[str]) -> tuple[list[Re
     ]
     sentences = split_sentences(clean_spoken_text(parsed.summary))
     summary = truncate_words(" ".join(sentences[:SUMMARY_MAX_SENTENCES]), SUMMARY_MAX_CHARS)
-    return recommendations, summary
+    speech = clean_spoken_text(parsed.summary_speech or "") or summary
+    speech = truncate_words(" ".join(split_sentences(speech)[: SUMMARY_MAX_SENTENCES + 1]), SUMMARY_MAX_CHARS)
+    return recommendations, summary, speech
 
 
 class ResultService:
-    def __init__(self, *, settings: Settings, llm: LlmProvider, prompts: PromptStore) -> None:
+    def __init__(
+        self, *, settings: Settings, llm: LlmProvider, prompts: PromptStore, tts: TtsProvider | None = None
+    ) -> None:
         self._s = settings
         self._llm = llm
+        self._tts = tts
         self._prompt = prompts.get("discovery_result")
 
     async def run(self, req: ResultRequest) -> ResultResponse:
@@ -110,11 +123,23 @@ class ResultService:
             parse=lambda data: parse_result(data, codes),
             context={"track_codes": [t.code for t in req.tracks]},
         )
-        recommendations, summary = result.value
+        recommendations, summary, speech = result.value
+        audio_b64 = mime = None
+        if req.speak and self._tts:
+            try:
+                audio = await asyncio.wait_for(
+                    self._tts.speak(speech), timeout=self._s.tts_timeout_seconds * 2
+                )
+                audio_b64, mime = base64.b64encode(audio.data).decode("ascii"), audio.mime_type
+            except (ProviderError, TimeoutError) as exc:
+                # Speech is optional: the text result is always returned.
+                log_event(logger, logging.WARNING, "result_tts_failed", reason=type(exc).__name__)
         return ResultResponse(
             interview_id=req.interview_id,
             recommendations=recommendations,
             summary=summary,
+            summary_audio_base64=audio_b64,
+            summary_audio_mime_type=mime,
             meta=Meta(
                 prompt_version=self._prompt.label,
                 model_id=result.model_id,

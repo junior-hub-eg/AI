@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Junior Hub – مكالمة الاكتشاف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14213d;        /* night-sky ink: page */
+    --ink-2: #1d2d52;      /* raised surfaces */
+    --sun: #fca311;        /* the AI's voice */
+    --mint: #2ec4b6;       /* the student's voice */
+    --cloud: #e9edf5;      /* text */
+    --mist: #9aa8c4;       /* secondary text */
+    --danger: #ef476f;
+    --display: "Baloo Bhaijaan 2", "IBM Plex Sans Arabic", system-ui, sans-serif;
+    --body: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(120% 80% at 50% 0%, #22335e 0%, var(--ink) 60%) fixed, var(--ink);
+    color: var(--cloud);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.7;
+  }
+  .latin { direction: ltr; unicode-bidi: isolate; }
+  main {
+    max-width: 560px; margin: 0 auto; min-height: 100%;
+    padding: 18px 16px 24px;
+    display: flex; flex-direction: column;
+  }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: .2px; }
+  .brand b { color: var(--sun); font-weight: 800; }
+  .timer { color: var(--mist); font-variant-numeric: tabular-nums; font-size: 15px; }
+  .steps { display: flex; gap: 7px; justify-content: center; margin: 14px 0 0; padding: 0; list-style: none; }
+  .steps li { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-2); outline: 1.5px solid #34466f; transition: background .3s; }
+  .steps li.done { background: var(--mint); outline-color: var(--mint); }
+  .steps li.now { background: var(--sun); outline-color: var(--sun); }
+
+  /* ---------- the orb: the one memorable thing ---------- */
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 22px 0 8px; }
+  .orb-wrap { position: relative; width: 210px; height: 210px; }
+  .orb {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff6 0 12%, transparent 13%), radial-gradient(circle at 50% 55%, var(--c, var(--sun)) 0 58%, color-mix(in srgb, var(--c, var(--sun)) 55%, var(--ink)) 100%);
+    transform: scale(calc(.82 + var(--lvl, 0) * .38));
+    transition: transform .08s linear, background .4s;
+    box-shadow: 0 0 calc(30px + var(--lvl, 0) * 70px) color-mix(in srgb, var(--c, var(--sun)) 55%, transparent);
+  }
+  .orb-wrap::before, .orb-wrap::after {
+    content: ""; position: absolute; inset: -14px; border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--c, var(--sun)) 40%, transparent);
+    transform: scale(calc(.9 + var(--lvl, 0) * .5)); transition: transform .12s linear, border-color .4s;
+  }
+  .orb-wrap::after { inset: -32px; opacity: .45; transform: scale(calc(.9 + var(--lvl, 0) * .8)); }
+  .orb-wrap.thinking .orb { animation: breathe 1.4s ease-in-out infinite; }
+  .orb-wrap.idle .orb { --lvl: .05; }
+  @keyframes breathe { 50% { transform: scale(.9); filter: brightness(1.15); } }
+  .status { font-family: var(--display); font-weight: 700; font-size: 20px; min-height: 34px; text-align: center; color: var(--c, var(--sun)); }
+
+  /* ---------- captions ---------- */
+  .captions { width: 100%; display: flex; flex-direction: column; gap: 12px; min-height: 120px; }
+  .say { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(22px, 5.4vw, 27px); line-height: 1.55; text-align: center; text-wrap: balance; }
+  .reply {
+    align-self: flex-start; max-width: 92%;
+    background: color-mix(in srgb, var(--mint) 14%, var(--ink-2));
+    border: 1px solid color-mix(in srgb, var(--mint) 45%, transparent);
+    border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 16px; color: #d7f6f2;
+  }
+  .reply:empty { display: none; }
+  .hint { text-align: center; color: var(--mist); font-size: 15px; margin: 0; min-height: 24px; }
+
+  /* ---------- controls ---------- */
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding-top: 10px; }
+  button {
+    font: 600 16px/1 var(--body); color: var(--ink); background: var(--cloud);
+    border: 0; border-radius: 999px; padding: 14px 20px; cursor: pointer; min-height: 48px;
+  }
+  button:focus-visible, textarea:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+  button.primary { background: var(--sun); font: 800 20px/1 var(--display); padding: 18px 34px; }
+  button.mint { background: var(--mint); }
+  button.ghost { background: transparent; color: var(--cloud); outline: 1.5px solid #3b4f7c; }
+  button.hang { background: var(--danger); color: #fff; }
+  button[hidden] { display: none; }
+  button:disabled { opacity: .45; cursor: default; }
+  .typing { display: none; width: 100%; gap: 8px; }
+  .typing.on { display: flex; }
+  textarea {
+    flex: 1; resize: none; height: 52px; border-radius: 16px; border: 1.5px solid #3b4f7c;
+    background: var(--ink-2); color: var(--cloud); font: 16px/1.5 var(--body); padding: 12px 14px;
+  }
+
+  /* ---------- start ---------- */
+  .intro { text-align: center; }
+  .intro h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 8vw, 40px); line-height: 1.25; margin: 0 0 8px; }
+  .intro p { color: var(--mist); margin: 0 auto 4px; max-width: 34ch; }
+
+  /* ---------- result ---------- */
+  .result { display: none; padding-top: 18px; }
+  .result.on { display: block; }
+  .result h2 { font-family: var(--display); font-weight: 800; font-size: 30px; margin: 6px 0 4px; text-align: center; }
+  .result .summary { color: var(--cloud); text-align: center; margin: 0 auto 18px; max-width: 46ch; }
+  .tracks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .track {
+    display: grid; grid-template-columns: 74px 1fr; gap: 14px; align-items: center;
+    background: var(--ink-2); border-radius: 22px; padding: 14px 16px;
+    opacity: 0; transform: translateY(14px); animation: rise .6s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .track:nth-child(1) { border: 2px solid var(--sun); animation-delay: .15s; }
+  .track:nth-child(2) { animation-delay: .55s; }
+  .track:nth-child(3) { animation-delay: .95s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .ring { --p: 0; width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center;
+    background: conic-gradient(var(--sun) calc(var(--p) * 1%), #2c3d66 0); }
+  .track:not(:first-child) .ring { background: conic-gradient(var(--mint) calc(var(--p) * 1%), #2c3d66 0); }
+  .ring span { width: 58px; height: 58px; border-radius: 50%; background: var(--ink-2); display: grid; place-items: center; font: 800 18px/1 var(--display); direction: ltr; }
+  .track h3 { margin: 0; font: 800 22px/1.3 var(--display); }
+  .track p { margin: 2px 0 0; color: #c6d0e6; font-size: 15px; line-height: 1.6; }
+  .note { color: var(--mist); font-size: 14px; text-align: center; margin: 16px 0 0; }
+  .error { color: #ffb4c4; text-align: center; margin: 0; }
+
+
+  /* ---------- debug panel (left side) ---------- */
+  .dbg {
+    position: fixed; top: 0; left: 0; bottom: 0; width: min(420px, 42vw); z-index: 5;
+    direction: ltr; display: flex; flex-direction: column;
+    background: #0b1428; border-right: 1px solid #2a3a63; font: 12.5px/1.5 ui-monospace, Consolas, monospace;
+  }
+  .dbg[hidden] { display: none !important; }
+  .dbg-head { display: flex; gap: 6px; align-items: center; padding: 8px 10px; border-bottom: 1px solid #2a3a63; color: var(--mist); }
+  .dbg-head strong { color: var(--cloud); margin-right: auto; font: 700 13px/1 var(--body); }
+  .dbg-head button { font: 600 12px/1 var(--body); padding: 7px 10px; min-height: 0; border-radius: 8px; background: #22335e; color: var(--cloud); }
+  .dbg-head label { display: flex; gap: 4px; align-items: center; font-size: 12px; }
+  .dbg-list { flex: 1; overflow-y: auto; padding: 6px 0; margin: 0; list-style: none; }
+  .dbg-list li { padding: 3px 10px; border-bottom: 1px solid #14203c; white-space: pre-wrap; word-break: break-word; }
+  .dbg-list time { color: #5d6e93; margin-right: 6px; }
+  .dbg-list b { display: inline-block; min-width: 54px; font-weight: 700; margin-right: 6px; }
+  .dbg-list .rtl { direction: rtl; unicode-bidi: isolate; display: block; font: 15px/1.6 var(--body); color: #fff; padding: 2px 0 2px; }
+  .k-you b { color: var(--mint); } .k-you { background: #0f2a2f; }
+  .k-ai b { color: var(--sun); }  .k-ai { background: #2a2312; }
+  .k-net b { color: #8ab4ff; }
+  .k-mic b { color: #b39dff; }
+  .k-audio b { color: #ffd38a; }
+  .k-server b { color: #9aa8c4; } .k-server { color: #9aa8c4; }
+  .k-err b, .k-err { color: #ff8fab; } .k-err { background: #2b1020; }
+  .k-ok b { color: #7ee2a8; }
+  .dbg-toggle { position: fixed; right: 10px; bottom: 10px; z-index: 6; font: 600 13px/1 var(--body); padding: 10px 14px; min-height: 0; background: #22335e; color: var(--cloud); }
+  @media (min-width: 1000px) { body.debug main { margin-left: calc(min(420px, 42vw) + max(16px, (100vw - min(420px, 42vw) - 560px) / 2)); } }
+  @media (max-width: 999px) { .dbg { top: auto; width: 100%; height: 42vh; border-right: 0; border-top: 1px solid #2a3a63; } body.debug main { padding-bottom: 44vh; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb, .orb-wrap::before, .orb-wrap::after { transition: none; }
+    .orb-wrap.thinking .orb { animation: none; }
+    .track { animation: none; opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body class="debug">
+
+<aside class="dbg" id="dbg" aria-label="Debug logs">
+  <div class="dbg-head">
+    <strong>Debug logs</strong>
+    <label><input type="checkbox" id="dbgServer" checked> server</label>
+    <label><input type="checkbox" id="dbgMic"> mic level</label>
+    <label title="off = only the button sends"><input type="checkbox" id="autoSend" checked> auto-send</label>
+    <button id="dbgCopy">Copy</button>
+    <button id="dbgClear">Clear</button>
+  </div>
+  <ol class="dbg-list" id="dbgList"></ol>
+</aside>
+<button class="dbg-toggle" id="dbgToggle">Logs</button>
+<main>
+  <header>
+    <div class="brand"><span class="latin">Junior <b>Hub</b></span></div>
+    <div class="timer" id="timer" aria-label="مدة المكالمة">00:00</div>
+  </header>
+  <ol class="steps" id="steps" aria-label="الأسئلة"></ol>
+
+  <section class="stage" id="stage">
+    <div class="orb-wrap idle" id="orbWrap" aria-hidden="true"><div class="orb" id="orb"></div></div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <div class="intro" id="intro">
+      <h1>هيا نتعرف عليك!</h1>
+      <p>مكالمة قصيرة فيها 7 أسئلة عن الأشياء التي تحبها. لا توجد إجابات خاطئة، تكلم براحتك.</p>
+    </div>
+
+    <div class="captions" id="captions" hidden>
+      <p class="say" id="say"></p>
+      <div class="reply" id="reply"></div>
+    </div>
+    <p class="hint" id="hint"></p>
+    <p class="error" id="error" role="alert"></p>
+  </section>
+
+  <div class="controls" id="controls">
+    <button class="primary" id="startBtn">ابدأ المكالمة</button>
+    <button class="mint" id="doneBtn" hidden>أنهيت كلامي</button>
+    <button class="ghost" id="typeBtn" hidden>أكتب بدل الكلام</button>
+    <button class="ghost" id="retryBtn" hidden>حاول مرة أخرى</button>
+    <button class="hang" id="hangBtn" hidden aria-label="إنهاء المكالمة">إنهاء</button>
+    <div class="typing" id="typing">
+      <textarea id="typed" placeholder="اكتب إجابتك هنا…" aria-label="إجابتك"></textarea>
+      <button class="mint" id="sendBtn">إرسال</button>
+    </div>
+  </div>
+
+  <section class="result" id="result" aria-live="polite">
+    <h2>هذه ترشيحاتك</h2>
+    <p class="summary" id="summary"></p>
+    <ol class="tracks" id="tracks"></ol>
+    <div class="controls">
+      <button class="ghost" id="replayBtn">اسمع الرسالة مرة أخرى</button>
+      <button class="primary" id="againBtn">مكالمة جديدة</button>
+    </div>
+    <p class="note">هذه مجرد اقتراحات، ويمكنك اختيار أي Track تحبه.</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  // ------------------------------------------------------------------ setup
+  const MAX_Q = 7;
+  const GRADE = 8;
+  const API = "";   // same origin as this page
+  const TRACKS = [
+    { code: "FRONTEND", name: "Frontend", profile: "Builds the parts of websites people see and click. Loves design, colours and making things interactive." },
+    { code: "BACKEND", name: "Backend", profile: "Builds the hidden engine of apps. Loves logic, rules and making systems work." },
+    { code: "UIUX", name: "UI/UX", profile: "Designs how apps look and feel. Loves drawing, empathy and making things easy to use." },
+    { code: "DATA", name: "Data", profile: "Finds patterns in numbers and tells stories with charts. Loves puzzles and statistics." },
+    { code: "MOBILE", name: "Mobile", profile: "Builds apps for phones. Loves the apps and games they use every day." },
+    { code: "GAMES", name: "Game Dev", profile: "Builds games. Loves playing games, stories, characters and worlds." },
+    { code: "AI", name: "AI", profile: "Teaches computers to learn. Loves robots, science fiction and clever tricks." },
+    { code: "CYBER", name: "Cybersecurity", profile: "Protects people online. Loves secrets, puzzles and catching bugs." },
+  ];
+  // Voice activity detection
+  const SILENCE_AFTER_SPEECH_MS = 2600;  // stop this long after the child stops talking (+1.2 s for short answers)
+  const NO_SPEECH_HINT_MS = 9000;
+  const NO_SPEECH_GIVEUP_MS = 25000;
+  const MAX_ANSWER_MS = 90000;
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    orbWrap: $("orbWrap"), orb: $("orb"), status: $("status"), intro: $("intro"), captions: $("captions"),
+    say: $("say"), reply: $("reply"), hint: $("hint"), error: $("error"), steps: $("steps"), timer: $("timer"),
+    startBtn: $("startBtn"), doneBtn: $("doneBtn"), typeBtn: $("typeBtn"), retryBtn: $("retryBtn"), hangBtn: $("hangBtn"),
+    typing: $("typing"), typed: $("typed"), sendBtn: $("sendBtn"), stage: $("stage"), controls: $("controls"),
+    result: $("result"), summary: $("summary"), tracks: $("tracks"), replayBtn: $("replayBtn"), againBtn: $("againBtn"),
+  };
+
+  let ctx, micStream, micSource, micAnalyser, outAnalyser;
+  let iv, recorder, chunks, vadTimer, levelRaf, clockTimer, summaryAudio, retryAction, currentSource;
+
+
+  // ------------------------------------------------------------------ debug panel
+  const dbgEl = { box: $("dbg"), list: $("dbgList"), server: $("dbgServer"), mic: $("dbgMic") };
+  const dbgLines = [];
+  const T0 = performance.now();
+  function dbg(kind, label, text, arabic) {
+    const t = ((performance.now() - T0) / 1000).toFixed(1).padStart(6, " ") + "s";
+    dbgLines.push(`${t} [${label}] ${text || ""}${arabic ? " | " + arabic : ""}`);
+    const li = document.createElement("li"); li.className = "k-" + kind;
+    const tm = document.createElement("time"); tm.textContent = t;
+    const b = document.createElement("b"); b.textContent = label;
+    li.append(tm, b, document.createTextNode(text || ""));
+    if (arabic) { const a = document.createElement("span"); a.className = "rtl"; a.textContent = arabic; li.appendChild(a); }
+    const stick = dbgEl.list.scrollHeight - dbgEl.list.scrollTop - dbgEl.list.clientHeight < 40;
+    dbgEl.list.appendChild(li);
+    while (dbgEl.list.children.length > 600) dbgEl.list.firstChild.remove();
+    if (stick) dbgEl.list.scrollTop = dbgEl.list.scrollHeight;
+  }
+  const autoSendOn = () => $("autoSend").checked;
+  const kb = (n) => n > 1024 * 1024 ? (n / 1048576).toFixed(2) + " MB" : (n / 1024).toFixed(1) + " KB";
+  $("dbgToggle").onclick = () => { dbgEl.box.hidden = !dbgEl.box.hidden; document.body.classList.toggle("debug", !dbgEl.box.hidden); };
+  $("dbgClear").onclick = () => { dbgEl.list.innerHTML = ""; dbgLines.length = 0; };
+  $("dbgCopy").onclick = async () => { try { await navigator.clipboard.writeText(dbgLines.join("\n")); dbg("ok", "copy", dbgLines.length + " lines copied"); } catch { dbg("err", "copy", "clipboard blocked"); } };
+
+  // Server logs (metadata only): GET /debug/logs
+  let serverSeq = 0, serverFirst = true;
+  const SKIP = new Set(["ts", "level", "logger", "event", "seq", "request_id"]);
+  async function pollServer() {
+    try {
+      const r = await fetch(API + "/debug/logs?after=" + serverSeq);
+      if (r.ok) {
+        const { items } = await r.json();
+        for (const it of items) {
+          serverSeq = Math.max(serverSeq, it.seq);
+          if (serverFirst) continue;                         // skip history from before this page load
+          if (!dbgEl.server.checked) continue;
+          if (it.event === "request" && it.path === "/debug/logs") continue;
+          const fields = Object.entries(it).filter(([k]) => !SKIP.has(k)).map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`).join(" ");
+          const bad = it.level === "WARNING" || it.level === "ERROR" || (it.status && it.status >= 400);
+          dbg(bad ? "err" : "server", "server", `${it.event} ${fields}`);
+        }
+        serverFirst = false;
+      }
+    } catch {}
+    setTimeout(pollServer, 1200);
+  }
+  pollServer();
+  dbg("ok", "page", "loaded " + location.href + " | " + navigator.userAgent.split(") ").pop());
+
+  const COLORS = { ai: "var(--sun)", kid: "var(--mint)" };
+
+  // ------------------------------------------------------------------ ui helpers
+  function setMode(mode, text) {
+    el.orbWrap.className = "orb-wrap " + (mode === "thinking" ? "thinking" : mode === "idle" ? "idle" : "");
+    const c = mode === "listening" ? COLORS.kid : COLORS.ai;
+    el.orbWrap.style.setProperty("--c", c);
+    el.orb.style.setProperty("--c", c);
+    el.status.style.setProperty("--c", c);
+    el.status.textContent = text || "";
+  }
+  function show(btns) {
+    for (const k of ["doneBtn", "typeBtn", "retryBtn", "hangBtn", "startBtn"]) el[k].hidden = !btns.includes(k);
+  }
+  function renderSteps() {
+    el.steps.innerHTML = "";
+    for (let i = 1; i <= MAX_Q; i++) {
+      const li = document.createElement("li");
+      if (iv && i <= iv.history.length) li.className = "done";
+      else if (iv && i === iv.history.length + 1 && iv.current) li.className = "now";
+      el.steps.appendChild(li);
+    }
+  }
+  // Wrap Latin words so English terms read left-to-right inside Arabic text.
+  function setMixed(node, text) {
+    node.textContent = "";
+    for (const part of text.split(/([A-Za-z][A-Za-z0-9/+.#\- ]*[A-Za-z0-9+#]|[A-Za-z])/)) {
+      if (!part) continue;
+      if (/^[A-Za-z]/.test(part)) { const s = document.createElement("span"); s.className = "latin"; s.textContent = part; node.appendChild(s); }
+      else node.appendChild(document.createTextNode(part));
+    }
+  }
+  function setError(msg) { el.error.textContent = msg || ""; }
+  function startClock() {
+    const t0 = Date.now();
+    clearInterval(clockTimer);
+    clockTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      el.timer.textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    }, 500);
+  }
+
+  // Orb follows real loudness (AI audio or the microphone).
+  function rms(analyser) {
+    const buf = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf);
+    let sum = 0;
+    for (const v of buf) sum += v * v;
+    return Math.sqrt(sum / buf.length);
+  }
+  function followLevel(analyser) {
+    cancelAnimationFrame(levelRaf);
+    const tick = () => {
+      el.orb.style.setProperty("--lvl", Math.min(1, rms(analyser) * 6).toFixed(3));
+      el.orbWrap.style.setProperty("--lvl", Math.min(1, rms(analyser) * 6).toFixed(3));
+      levelRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  function stopLevel() { cancelAnimationFrame(levelRaf); el.orb.style.setProperty("--lvl", 0); el.orbWrap.style.setProperty("--lvl", 0); }
+
+  // ------------------------------------------------------------------ audio out
+  function b64ToBuf(b64) {
+    const bin = atob(b64); const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out.buffer;
+  }
+  async function playB64(b64, fallbackText) {
+    if (!b64) { await wait(Math.min(6000, 1200 + (fallbackText || "").length * 45)); return; }
+    let buffer;
+    try { buffer = await ctx.decodeAudioData(b64ToBuf(b64)); } catch (e) { dbg("err", "play", "cannot decode audio: " + e); await wait(1500); return; }
+    dbg("audio", "play", `speaking ${buffer.duration.toFixed(1)} s`);
+    return new Promise((resolve) => {
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(outAnalyser);
+      currentSource = src;
+      followLevel(outAnalyser);
+      src.onended = () => { stopLevel(); currentSource = null; dbg("audio", "play", "finished"); resolve(); };
+      src.start();
+    });
+  }
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // ------------------------------------------------------------------ api
+  async function post(path, body) {
+    const t = performance.now();
+    const a = body.answer;
+    const what = path.endsWith("turns")
+      ? (a ? (a.audio_base64 ? `answer #${a.order_index} AUDIO ${a.audio_mime_type} ${kb(a.audio_base64.length * 3 / 4)}` : `answer #${a.order_index} TEXT`) : "first question")
+      : `${body.responses.length} answers, speak=${body.speak}`;
+    dbg("net", "→ POST", `${path}  (${what})`);
+    let r;
+    try { r = await fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+    catch (e) { dbg("err", "net", `${path} failed: ${e.message} (is the API running?)`); throw e; }
+    let data = null;
+    try { data = await r.json(); } catch {}
+    const ms = Math.round(performance.now() - t);
+    if (r.ok) {
+      const m = data.meta || {};
+      dbg("ok", "← " + r.status, `${path} in ${ms} ms | model=${m.model_id} prompt=${m.prompt_version} service=${m.latency_ms} ms | request_id=${r.headers.get("x-request-id") || "-"}`);
+    } else {
+      dbg("err", "← " + r.status, `${path} in ${ms} ms | ${(data && data.error && data.error.code) || ""} ${(data && data.error && data.error.message) || ""}`);
+    }
+    if (!r.ok) { const e = new Error((data && data.error && data.error.message) || ("HTTP " + r.status)); e.code = data && data.error && data.error.code; e.status = r.status; throw e; }
+    return data;
+  }
+  function turnBody(answer) {
+    return { interview_id: iv.id, student_ref: "demo", grade: GRADE, tracks: TRACKS, history: iv.history, answer, max_questions: MAX_Q, speak: true };
+  }
+
+  // ------------------------------------------------------------------ flow
+  async function start() {
+    setError("");
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    await ctx.resume();
+    if (!outAnalyser) { outAnalyser = ctx.createAnalyser(); outAnalyser.fftSize = 1024; outAnalyser.connect(ctx.destination); }
+    try {
+      micStream = micStream || await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      micSource = micSource || ctx.createMediaStreamSource(micStream);
+      if (!micAnalyser) { micAnalyser = ctx.createAnalyser(); micAnalyser.fftSize = 1024; micSource.connect(micAnalyser); }
+      const tr = micStream.getAudioTracks()[0];
+      dbg("mic", "mic", `OK: ${tr.label || "microphone"} | sampleRate=${ctx.sampleRate}`);
+    } catch (e) {
+      micStream = null;
+      dbg("err", "mic", "microphone blocked/unavailable: " + (e && e.name));
+      setError("لم أستطع استخدام الميكروفون. يمكنك الإجابة بالكتابة.");
+    }
+    iv = { id: "call_" + Date.now().toString(36), history: [], current: null };
+    dbg("ok", "call", `started ${iv.id} | max_questions=${MAX_Q} grade=${GRADE}`);
+    el.intro.hidden = true; el.captions.hidden = false; el.result.classList.remove("on"); el.stage.hidden = false; el.controls.hidden = false;
+    el.reply.textContent = ""; el.say.textContent = "";
+    startClock();
+    renderSteps();
+    await nextTurn(null);
+  }
+
+  async function nextTurn(answer) {
+    setMode("thinking", answer ? "لحظة، أفكر…" : "جارٍ الاتصال…");
+    show(["hangBtn"]); el.hint.textContent = ""; closeTyping();
+    let data;
+    try { data = await post("/v1/discovery/turns", turnBody(answer)); }
+    catch (e) {
+      dbg("err", "turn", `failed: status=${e.status} code=${e.code || "-"} ${e.message}`);
+      if (e.code === "AUDIO_UNINTELLIGIBLE") {
+        el.reply.textContent = "";
+        setMode("listening", "لم أسمعك جيدًا، هل يمكنك أن تعيد؟");
+        await wait(1200);
+        return listen();
+      }
+      return fail("انقطع الاتصال لحظة. اضغط «حاول مرة أخرى».", () => nextTurn(answer));
+    }
+    if (data.answered) {
+      dbg("you", "YOU", `answer #${data.answered.order_index} transcript:`, data.answered.transcript);
+      setMixed(el.reply, data.answered.transcript);
+      iv.history.push({ order_index: data.answered.order_index, question_text: iv.current.question_text, transcript: data.answered.transcript });
+    }
+    if (data.finished || !data.next_question) { iv.current = null; renderSteps(); return finish(); }
+    iv.current = data.next_question;
+    dbg("ai", "AI", `question #${iv.current.order_index}:`, iv.current.question_text);
+    dbg(iv.current.audio_base64 ? "audio" : "err", "voice", iv.current.audio_base64
+      ? `TTS ok: ${iv.current.audio_mime_type} ${kb(iv.current.audio_base64.length * 3 / 4)}`
+      : "TTS FAILED: audio is null → no voice (see server log: tts_failed / groq_error)");
+    renderSteps();
+    if (data.answered) await wait(900);
+    el.reply.textContent = "";
+    setMixed(el.say, iv.current.question_text);
+    setMode("speaking", "");
+    await playB64(iv.current.audio_base64, iv.current.question_text);
+    if (iv) listen();
+  }
+
+  async function listen() {
+    if (!iv) return;
+    if (!micStream) { setMode("listening", "دورك! اكتب إجابتك"); openTyping(); show(["hangBtn"]); return; }
+    setMode("listening", "دورك! تكلم الآن");
+    show(["doneBtn", "typeBtn", "hangBtn"]);
+    el.hint.textContent = "";
+    chunks = [];
+    const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"].find((m) => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
+    recorder = new MediaRecorder(micStream, mime ? { mimeType: mime } : undefined);
+    recorder.ondataavailable = (ev) => ev.data.size && chunks.push(ev.data);
+    recorder.onstop = onRecorded;
+    recorder.start(250);
+    dbg("mic", "rec", `recording started (${recorder.mimeType || "default"}) – waiting for speech`);
+    followLevel(micAnalyser);
+    let lastMicLog = 0;
+
+    // Voice-activity detection:
+    //  - ignore the first 300 ms (echo of the AI voice), then learn the room noise from the QUIET
+    //    part of the next 500 ms (20th percentile, not the max, so early speech is not taken as noise)
+    //  - smoothed level + two thresholds (hysteresis): a loud one to START, a lower one to KEEP talking
+    //  - longer patience when the answer is still short (the child may be thinking)
+    const t0 = performance.now();
+    const calib = [];
+    let floor = 0.006, smooth = 0, heard = false, speechStart = 0, lastVoice = 0, hinted = false, warned = false;
+    let startThr = 0.02, keepThr = 0.01;
+    clearInterval(vadTimer);
+    vadTimer = setInterval(() => {
+      const now = performance.now(), raw = rms(micAnalyser), elapsed = now - t0;
+      smooth = smooth * 0.6 + raw * 0.4;
+      if (elapsed < 300) return;
+      if (elapsed < 800 && !heard) {
+        calib.push(raw);
+        if (raw > 0.05) { heard = true; speechStart = lastVoice = now; dbg("mic", "vad", "speech started immediately"); }
+        return;
+      }
+      if (calib.length && floor === 0.006) {
+        const sorted = [...calib].sort((x, y) => x - y);
+        floor = Math.min(0.02, Math.max(0.002, sorted[Math.floor(sorted.length * 0.2)]));
+        startThr = Math.max(0.015, floor * 3);
+        keepThr = Math.max(0.007, floor * 1.6);
+        dbg("mic", "vad", `noise floor ${floor.toFixed(4)} → start>${startThr.toFixed(4)} keep>${keepThr.toFixed(4)}`);
+      }
+      const voice = heard ? smooth > keepThr : smooth > startThr;
+      if (dbgEl.mic.checked && now - lastMicLog > 500) { lastMicLog = now; dbg("mic", "level", `rms=${smooth.toFixed(4)} ${voice ? "VOICE" : "silence"} (start ${startThr.toFixed(4)} / keep ${keepThr.toFixed(4)})`); }
+      if (voice) {
+        if (!heard) { speechStart = now; dbg("mic", "vad", `speech detected after ${(elapsed / 1000).toFixed(1)} s`); }
+        heard = true; lastVoice = now;
+        if (warned) { warned = false; dbg("mic", "vad", "kept talking → not sending"); }
+        el.hint.textContent = "أستمع إليك…";
+      }
+      if (heard) {
+        const spoken = lastVoice - speechStart;
+        const patience = spoken < 2500 ? SILENCE_AFTER_SPEECH_MS + 1200 : SILENCE_AFTER_SPEECH_MS;
+        const quiet = now - lastVoice;
+        if (autoSendOn() && quiet > patience - 1200 && !warned) { warned = true; el.hint.textContent = "سأرسل إجابتك الآن… أكمل كلامك إذا لم تنته"; }
+        if (autoSendOn() && quiet > patience) {
+          dbg("mic", "vad", `quiet ${(quiet / 1000).toFixed(1)} s after ${(spoken / 1000).toFixed(1)} s of speech → stop & send`);
+          return stopListening(true);
+        }
+      }
+      if (!heard && !hinted && elapsed > NO_SPEECH_HINT_MS) { hinted = true; el.hint.textContent = "أنا أسمعك… تكلم عندما تكون مستعدًا"; }
+      if (!heard && elapsed > NO_SPEECH_GIVEUP_MS) { dbg("err", "vad", `no speech for ${NO_SPEECH_GIVEUP_MS / 1000} s → gave up (mic too quiet? wrong mic?)`); stopListening(false); el.hint.textContent = "لم أسمع شيئًا. اضغط «حاول مرة أخرى» أو اكتب إجابتك."; show(["retryBtn", "typeBtn", "hangBtn"]); retryAction = listen; }
+      if (elapsed > MAX_ANSWER_MS) { dbg("mic", "vad", "max answer length reached → send"); stopListening(true); }
+    }, 80);
+  }
+
+  function stopListening(send) {
+    clearInterval(vadTimer); stopLevel();
+    if (recorder && recorder.state !== "inactive") { recorder._send = send; recorder.stop(); }
+  }
+
+  async function onRecorded() {
+    if (!recorder._send || !iv) return;
+    const type = (recorder.mimeType || "audio/webm").split(";")[0];
+    const blob = new Blob(chunks, { type });
+    dbg("mic", "rec", `stopped: ${kb(blob.size)} ${type}, ${chunks.length} chunks`);
+    if (blob.size < 2000) { setMode("listening", "لم أسمعك جيدًا، هل يمكنك أن تعيد؟"); await wait(1000); return listen(); }
+    const b64 = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); });
+    el.hint.textContent = "";
+    await nextTurn({ order_index: iv.current.order_index, question_text: iv.current.question_text, audio_base64: b64, audio_mime_type: type });
+  }
+
+  function openTyping() { el.typing.classList.add("on"); el.typed.value = ""; el.typed.focus(); }
+  function closeTyping() { el.typing.classList.remove("on"); }
+  async function sendTyped() {
+    const text = el.typed.value.trim();
+    if (!text || !iv || !iv.current) return;
+    closeTyping();
+    dbg("you", "YOU", "typed answer:", text);
+    setMixed(el.reply, text);
+    await nextTurn({ order_index: iv.current.order_index, question_text: iv.current.question_text, transcript: text });
+  }
+
+  async function finish() {
+    clearInterval(vadTimer);
+    setMode("thinking", "رائع! أجهز لك ترشيحاتك…");
+    el.say.textContent = "شكرًا لك على هذه المكالمة الجميلة!";
+    el.reply.textContent = ""; show([]);
+    let data;
+    try {
+      data = await post("/v1/discovery/results", { interview_id: iv.id, student_ref: "demo", grade: GRADE, tracks: TRACKS, responses: iv.history, speak: true });
+    } catch { return fail("لم أستطع تجهيز الترشيحات. اضغط «حاول مرة أخرى».", finish); }
+    clearInterval(clockTimer);
+    for (const rec of data.recommendations) dbg("ai", "result", `#${rec.rank} ${rec.track_code} ${rec.match_percent}%`, rec.reason);
+    dbg("ai", "summary", "", data.summary);
+    dbg(data.summary_audio_base64 ? "audio" : "err", "voice", data.summary_audio_base64 ? "summary TTS ok " + kb(data.summary_audio_base64.length * 3 / 4) : "summary TTS FAILED (audio is null)");
+    showResult(data);
+    summaryAudio = data.summary_audio_base64;
+    setMode("speaking", "");
+    await playB64(summaryAudio, data.summary);
+    setMode("idle", "");
+  }
+
+  function showResult(data) {
+    el.stage.hidden = true; el.controls.hidden = true;
+    setMixed(el.summary, data.summary);
+    el.tracks.innerHTML = "";
+    for (const rec of data.recommendations) {
+      const track = TRACKS.find((t) => t.code === rec.track_code);
+      const li = document.createElement("li"); li.className = "track";
+      const ring = document.createElement("div"); ring.className = "ring"; ring.style.setProperty("--p", rec.match_percent);
+      const pct = document.createElement("span"); pct.textContent = rec.match_percent + "%"; ring.appendChild(pct);
+      const body = document.createElement("div");
+      const h = document.createElement("h3"); h.className = "latin"; h.style.textAlign = "right"; h.textContent = track ? track.name : rec.track_code;
+      const p = document.createElement("p"); setMixed(p, rec.reason);
+      body.append(h, p); li.append(ring, body); el.tracks.appendChild(li);
+    }
+    el.result.classList.add("on");
+    el.result.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function fail(msg, action) {
+    clearInterval(vadTimer); stopLevel();
+    setMode("idle", ""); setError(msg); retryAction = action;
+    show(["retryBtn", "hangBtn"]);
+  }
+
+  function hangUp() {
+    dbg("ok", "call", "hang up pressed");
+    clearInterval(vadTimer); clearInterval(clockTimer); stopLevel();
+    if (recorder && recorder.state !== "inactive") { recorder._send = false; recorder.stop(); }
+    if (currentSource) { try { currentSource.stop(); } catch {} }
+    if (iv && iv.history.length >= 5) return finish();   // enough answers: still give a result
+    iv = null;
+    el.captions.hidden = true; el.intro.hidden = false; closeTyping(); el.hint.textContent = ""; setError("");
+    setMode("idle", ""); show(["startBtn"]); renderSteps(); el.timer.textContent = "00:00";
+  }
+
+  // ------------------------------------------------------------------ events
+  el.startBtn.onclick = start;
+  el.doneBtn.onclick = () => { dbg("mic", "rec", "button: أنهيت كلامي → send"); stopListening(true); };
+  el.typeBtn.onclick = () => { stopListening(false); show(["hangBtn"]); setMode("listening", "دورك! اكتب إجابتك"); openTyping(); };
+  el.sendBtn.onclick = sendTyped;
+  el.typed.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendTyped(); } });
+  el.retryBtn.onclick = () => { setError(""); el.hint.textContent = ""; const a = retryAction; retryAction = null; a && a(); };
+  el.hangBtn.onclick = hangUp;
+  el.replayBtn.onclick = async () => { if (!ctx) return; await ctx.resume(); setMode("speaking", ""); await playB64(summaryAudio, el.summary.textContent); };
+  el.againBtn.onclick = () => { el.result.classList.remove("on"); iv = null; start(); };
+
+  setMode("idle", "");
+  renderSteps();
+})();
+</script>
+</body>
+</html>
