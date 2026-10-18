@@ -395,6 +395,11 @@
             "maxItems": 50,
             "minItems": 1,
             "title": "Responses"
+          },
+          "speak": {
+            "type": "boolean",
+            "title": "Speak",
+            "default": false
           }
         },
         "type": "object",
@@ -423,6 +428,28 @@
           "summary": {
             "type": "string",
             "title": "Summary"
+          },
+          "summary_audio_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Audio Base64"
+          },
+          "summary_audio_mime_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Audio Mime Type"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

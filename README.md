@@ -86,6 +86,56 @@ metadata only, disabled in production).
 API on port 8010 plus the Streamlit playground, then opens the call page. `SET_GROQ_KEY.bat` and
 `SET_ELEVENLABS_KEY.bat` write the keys into `.env` (never committed).
 
+## Using the API without Streamlit (sharing it with another app or person)
+
+**Streamlit is not needed.** The service is the FastAPI app (`uvicorn`, port 8010 with `START_HERE.bat`).
+The Streamlit playground and the `/call/` page are only clients of it. Any app (the .NET backend, a website,
+a mobile app, Postman, curl) can call it directly:
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/discovery/turns` | send the student's answer (audio or text), get the transcript + next question (text + WAV audio) |
+| `POST /v1/discovery/results` | send all answers, get the top-3 tracks (`"speak": true` adds the spoken summary) |
+| `GET /healthz`, `GET /readyz` | health probes |
+
+Full contract: `contracts/openapi.json` (regenerate with `python -m scripts.export_openapi`) and `/docs` while running.
+
+Minimal flow:
+
+```bash
+# 1) first question (answer = null)
+curl -s http://127.0.0.1:8010/v1/discovery/turns -H "Content-Type: application/json" -d '{
+  "interview_id": "iv_1", "student_ref": "stu_1", "grade": 8,
+  "tracks": [{"code": "FRONTEND", "name": "Frontend", "profile": "Builds what people see and click."},
+             {"code": "DATA", "name": "Data", "profile": "Finds patterns in numbers."},
+             {"code": "GAMES", "name": "Game Dev", "profile": "Builds games."}],
+  "history": [], "answer": null, "max_questions": 7, "speak": true }'
+
+# 2) each answer: same body + the answer (typed text, or audio_base64 + audio_mime_type), and the history so far
+#    "answer": {"order_index": 1, "question_text": "<question 1>", "transcript": "I like Minecraft"}
+# 3) after the last answer (finished: true): POST /v1/discovery/results with "responses": [...history...]
+```
+
+The service is **stateless**: the caller keeps `history` and sends it every turn.
+
+### Who can reach it right now
+
+By default it listens on `127.0.0.1` only, so **only the machine it runs on** can call it, and only while the
+API window is open. To let someone else use it:
+
+| Who | How |
+|---|---|
+| Someone on the same Wi-Fi / LAN | start uvicorn with `--host 0.0.0.0` and give them `http://<your-LAN-IP>:8010` (allow it in the Windows firewall) |
+| Someone over the internet (quick test) | a tunnel, e.g. `ngrok http 8010`, gives a public `https://...` URL while your machine is on |
+| Real use | deploy the service on a server (Render, Railway, a VPS...) behind HTTPS |
+
+**Before sharing it outside your machine, turn auth on.** With `AUTH_DISABLED=true` anyone who can reach the
+URL spends your Groq / ElevenLabs quota. Set `AUTH_DISABLED=false`, create keys with `python scripts/gen_dev_keys.py`
+(`JWT_PUBLIC_KEY_FILE=.keys/jwt_public.pem`), and give callers a token from `python scripts/make_dev_token.py`;
+they send `Authorization: Bearer <token>`. In production the backend signs tokens with its private key and this
+service only needs the public key. The `/call/` page, `/call-config` and `/debug/logs` are disabled when
+`APP_ENV=production`. For integration work without spending quota, use the mock server (`mock/mock_server.py`, port 8001).
+
 ## Folder map
 
 ```
