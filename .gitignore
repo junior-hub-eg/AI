@@ -8,3 +8,5 @@ __pycache__/
 
 # local run logs
 *_log.txt
+.env.*
+!.env.example

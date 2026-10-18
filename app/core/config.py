@@ -28,6 +28,43 @@ _MISSING_GROQ_KEY = """
 """
 
 
+LANGUAGE_PRESETS: dict[str, dict[str, str]] = {
+    "ar": {
+        "prompt_turn_version": "v2",
+        "prompt_result_version": "v2",
+        "stt_language": "ar",
+        "stt_prompt": (
+            "بحب ألعب Minecraft و Roblox، وبحب البرمجة بـ Python و Scratch، "
+            "ونفسي أعمل App أو Website أو Game، وبحب الـ Design والـ AI."
+        ),
+        "tts_model": "canopylabs/orpheus-arabic-saudi",
+        "tts_voice": "lulwa",
+        "opening_question": (
+            "أهلًا وسهلًا، يسعدني أن أتعرف عليك. عندما يكون عندك وقت فراغ، ما أكثر شيء تحب أن تفعله؟"
+        ),
+        "opening_question_speech": (
+            "أهلا وسهلا، يسعدني أتعرف عليك. لما يكون عندك وقت فراغ، ما أكثر شيء تحب أن تفعله؟"
+        ),
+    },
+    "en": {
+        "prompt_turn_version": "v1",
+        "prompt_result_version": "v1",
+        "stt_language": "en",
+        "stt_prompt": (
+            "I love playing Minecraft and Roblox, coding in Python and Scratch, "
+            "and I want to build an App, a Website or a Game."
+        ),
+        "tts_model": "canopylabs/orpheus-v1-english",
+        "tts_voice": "autumn",
+        "opening_question": (
+            "Hi there! I'm excited to get to know you. "
+            "When you have free time, what do you enjoy doing the most?"
+        ),
+        "opening_question_speech": "",
+    },
+}
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
@@ -56,6 +93,12 @@ class Settings(BaseSettings):
     groq_api_key: SecretStr | None = None
     groq_base_url: str = "https://api.groq.com/openai/v1"
 
+    # -------------------------------------------------------------- language
+    # ONE switch for the whole interview: "ar" (Arabic, English programming terms) or "en" (English).
+    # It picks the prompts, speech-to-text language, voice and opening question below.
+    # Any of those set explicitly in .env still wins.
+    interview_language: Literal["ar", "en"] = "ar"
+
     # ---------------------------------------------------------------- models
     # Two different gpt-oss models are used on purpose: on the free plan each
     # model has its own quota, and each acts as the other's fallback.
@@ -82,31 +125,27 @@ class Settings(BaseSettings):
         "Frontend,Backend,UI/UX,Data,AI,App,Website,Game,Coding,Python,Scratch,Roblox,Minecraft,"
         "Fortnite,PUBG,FIFA,TikTok,YouTube,Instagram,Canva,Photoshop,Robot,Arduino,Cybersecurity,Mobile"
     )
-    # Hint sentence for Whisper (style + spelling of English terms). Empty = no prompt.
-    stt_prompt: str = (
-        "بحب ألعب Minecraft و Roblox، وبحب البرمجة بـ Python و Scratch، "
-        "ونفسي أعمل App أو Website أو Game، وبحب الـ Design والـ AI."
-    )
+    # Hint sentence for Whisper (style + spelling of English terms). None = language preset, "" = no prompt.
+    stt_prompt: str | None = None
     stt_model: str = "whisper-large-v3"
-    # "ar" = Arabic interview (English programming words are still understood).
-    stt_language: str = "ar"
-    # Arabic voice (Saudi accent). Voices: fahad, sultan, abdullah (male) / noura, lulwa, aisha (female).
-    # English version: TTS_MODEL=canopylabs/orpheus-v1-english, TTS_VOICE=autumn
+    stt_language: str | None = None  # None = language preset (ar / en)
     # Text-to-speech provider: "groq" (Orpheus Arabic, Saudi accent) or "elevenlabs" (more natural;
     # needs ELEVENLABS_VOICE_ID). With elevenlabs, Groq Orpheus is used automatically if it fails.
     tts_provider: Literal["groq", "elevenlabs"] = "groq"
     elevenlabs_tts_model: str = "eleven_multilingual_v2"
     elevenlabs_voice_id: str = ""
-    tts_model: str = "canopylabs/orpheus-arabic-saudi"
-    tts_voice: str = "fahad"
+    tts_model: str | None = None  # None = language preset
+    # Orpheus voices. Arabic (orpheus-arabic-saudi): lulwa, noura, aisha / fahad, sultan, abdullah.
+    # English (orpheus-v1-english): autumn, diana, hannah / austin, daniel, troy.
+    tts_voice: str | None = None  # None = language preset
     # Orpheus accepts short inputs; longer text is split on sentence bounds.
     tts_max_chars: int = Field(default=200, ge=40)
 
     # ----------------------------------------------------------------- prompts
     prompts_dir: Path = PROJECT_ROOT / "prompts"
     # v1 = English interview, v2 = Arabic interview with English programming terms.
-    prompt_turn_version: str = "v2"
-    prompt_result_version: str = "v2"
+    prompt_turn_version: str | None = None  # None = language preset (ar: v2, en: v1)
+    prompt_result_version: str | None = None
     # Token savers (important on the free plan: 8,000 tokens per minute).
     include_tracks_in_turn: bool = True
     profile_max_chars_turn: int = Field(default=300, ge=50)
@@ -114,14 +153,10 @@ class Settings(BaseSettings):
     transcript_max_chars_in_prompt: int = Field(default=700, ge=100)
 
     # ------------------------------------------------------------- interview
-    # Shown on screen. Never calls the LLM; its audio is cached.
-    opening_question: str = (
-        "أهلًا وسهلًا، يسعدني أن أتعرف عليك. عندما يكون عندك وقت فراغ، ما أكثر شيء تحب أن تفعله؟"
-    )
-    # Read aloud by TTS (Arabic script only, with a few diacritics). Empty = same as opening_question.
-    opening_question_speech: str = (
-        "أهلا وسهلا، يسعدني أتعرف عليك. لما يكون عندك وقت فراغ، ما أكثر شيء تحب أن تفعله؟"
-    )
+    # Question 1 (never calls the LLM; its audio is cached). None = language preset.
+    opening_question: str | None = None
+    # Read aloud by TTS. None = language preset, "" = same as opening_question.
+    opening_question_speech: str | None = None
     result_min_responses: int = Field(default=5, ge=1)
     result_max_responses: int = Field(default=20, ge=1)
 
@@ -147,6 +182,13 @@ class Settings(BaseSettings):
     @property
     def elevenlabs_key_value(self) -> str:
         return self.elevenlabs_api_key.get_secret_value().strip() if self.elevenlabs_api_key else ""
+
+    @model_validator(mode="after")
+    def _apply_language_preset(self) -> Settings:
+        for name, value in LANGUAGE_PRESETS[self.interview_language].items():
+            if getattr(self, name) is None:
+                object.__setattr__(self, name, value)
+        return self
 
     @model_validator(mode="after")
     def _check_consistency(self) -> Settings:

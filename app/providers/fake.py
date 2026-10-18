@@ -29,8 +29,22 @@ _QUESTIONS = (
 )
 
 
+_QUESTIONS_EN = (
+    "Nice! Which school subjects do you enjoy the most, and why?",
+    "Do you like making things look good, or figuring out how they work?",
+    "Can you tell me about a time something was hard and what you did?",
+    "What games or apps do you love, and what makes them fun?",
+    "Do you prefer working in a team or on your own?",
+    "What have you been curious about lately?",
+    "If you could build anything with technology, what would it be?",
+)
+
+
 class FakeLlm:
     model_id = "fake-llm"
+
+    def __init__(self, language: str = "ar") -> None:
+        self._en = language == "en"
 
     async def generate_json(
         self,
@@ -42,8 +56,11 @@ class FakeLlm:
     ) -> LlmResult[T]:
         if task is LlmTask.TURN:
             answers = messages[-1]["content"].count("<student_answer>")
-            text, speech = _QUESTIONS[answers % len(_QUESTIONS)]
-            data: dict[str, Any] = {"question_text": text, "speech_text": speech}
+            if self._en:
+                data: dict[str, Any] = {"question_text": _QUESTIONS_EN[answers % len(_QUESTIONS_EN)]}
+            else:
+                text, speech = _QUESTIONS[answers % len(_QUESTIONS)]
+                data = {"question_text": text, "speech_text": speech}
         else:
             codes = list((context or {}).get("track_codes", []))[:3]
             data = {
@@ -51,15 +68,26 @@ class FakeLlm:
                     {
                         "track_code": code,
                         "match_percent": pct,
-                        "reason": f"أظهرت اهتمامًا حقيقيًا يناسب {code.title()}.",
+                        "reason": (
+                            f"You showed real interest that fits {code.title()}."
+                            if self._en
+                            else f"أظهرت اهتمامًا حقيقيًا يناسب {code.title()}."
+                        ),
                     }
                     for code, pct in zip(codes, (86, 74, 61), strict=False)
                 ],
                 "summary": (
+                    "Thank you for the nice chat! You love creating and solving problems. "
+                    "These tracks fit what you told us. Have fun exploring them!"
+                )
+                if self._en
+                else (
                     "شكرًا لك على هذه الدردشة الجميلة! "
                     "أنت تحب الإبداع وحل المشكلات، وهذه الـ Tracks تناسب ما قلته لنا. استمتع باستكشافها!"
                 ),
-                "summary_speech": (
+                "summary_speech": None
+                if self._en
+                else (
                     "شُكْرًا لَكَ عَلَى هَذِهِ الدَّرْدَشَةِ الجَمِيلَة! "
                     "أَنْتَ تُحِبُّ الإِبْدَاعَ وَحَلَّ المُشْكِلَات، وَهَذِهِ التراكس تُنَاسِبُ مَا قُلْتَهُ لَنَا. اسْتَمْتِعْ بِاسْتِكْشَافِهَا!"
                 ),

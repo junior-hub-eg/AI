@@ -169,7 +169,7 @@ async def test_tts_splits_long_text_and_joins_audio():
     def handler(request):
         body = json.loads(request.content)
         inputs.append(body["input"])
-        assert body["response_format"] == "wav" and body["voice"] == "fahad"
+        assert body["response_format"] == "wav" and body["voice"] == "lulwa"
         return httpx.Response(200, content=silent_wav(0.1))
 
     tts = GroqTts(groq_client(handler), settings())

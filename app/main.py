@@ -45,6 +45,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             result_model=settings.llm_result_model,
             stt_model=settings.stt_model,
             tts_model=settings.tts_model,
+            language=settings.interview_language,
         )
         # Prepare question 1's audio in the background (never blocks startup).
         warm = None if settings.fake_models else asyncio.create_task(active.turn_service.warm_up())
@@ -70,6 +71,11 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     if not production and web_dir.is_dir():
         # Call-style interview page for local demos: http://127.0.0.1:<port>/call/
         app.mount("/call", StaticFiles(directory=web_dir, html=True), name="call")
+
+        @app.get("/call-config", include_in_schema=False)
+        async def _call_config() -> dict[str, object]:
+            # Lets the call page match the interview language (ar = RTL Arabic UI, en = English UI).
+            return {"language": settings.interview_language}
 
         @app.get("/debug/logs", include_in_schema=False)
         async def _debug_logs(after: int = 0) -> dict[str, object]:

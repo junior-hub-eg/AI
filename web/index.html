@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Junior Hub – مكالمة الاكتشاف</title>
+<title>Junior Hub – Discovery call</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
@@ -143,7 +143,7 @@
   .dbg-list li { padding: 3px 10px; border-bottom: 1px solid #14203c; white-space: pre-wrap; word-break: break-word; }
   .dbg-list time { color: #5d6e93; margin-right: 6px; }
   .dbg-list b { display: inline-block; min-width: 54px; font-weight: 700; margin-right: 6px; }
-  .dbg-list .rtl { direction: rtl; unicode-bidi: isolate; display: block; font: 15px/1.6 var(--body); color: #fff; padding: 2px 0 2px; }
+  .dbg-list .rtl { unicode-bidi: plaintext; text-align: start; display: block; font: 15px/1.6 var(--body); color: #fff; padding: 2px 0 2px; }
   .k-you b { color: var(--mint); } .k-you { background: #0f2a2f; }
   .k-ai b { color: var(--sun); }  .k-ai { background: #2a2312; }
   .k-net b { color: #8ab4ff; }
@@ -180,17 +180,17 @@
 <main>
   <header>
     <div class="brand"><span class="latin">Junior <b>Hub</b></span></div>
-    <div class="timer" id="timer" aria-label="مدة المكالمة">00:00</div>
+    <div class="timer" id="timer" data-i18n-aria="timer">00:00</div>
   </header>
-  <ol class="steps" id="steps" aria-label="الأسئلة"></ol>
+  <ol class="steps" id="steps" data-i18n-aria="steps"></ol>
 
   <section class="stage" id="stage">
     <div class="orb-wrap idle" id="orbWrap" aria-hidden="true"><div class="orb" id="orb"></div></div>
     <div class="status" id="status" role="status" aria-live="polite"></div>
 
     <div class="intro" id="intro">
-      <h1>هيا نتعرف عليك!</h1>
-      <p>مكالمة قصيرة فيها 7 أسئلة عن الأشياء التي تحبها. لا توجد إجابات خاطئة، تكلم براحتك.</p>
+      <h1 data-i18n="introTitle"></h1>
+      <p data-i18n="introText"></p>
     </div>
 
     <div class="captions" id="captions" hidden>
@@ -202,26 +202,26 @@
   </section>
 
   <div class="controls" id="controls">
-    <button class="primary" id="startBtn">ابدأ المكالمة</button>
-    <button class="mint" id="doneBtn" hidden>أنهيت كلامي</button>
-    <button class="ghost" id="typeBtn" hidden>أكتب بدل الكلام</button>
-    <button class="ghost" id="retryBtn" hidden>حاول مرة أخرى</button>
-    <button class="hang" id="hangBtn" hidden aria-label="إنهاء المكالمة">إنهاء</button>
+    <button class="primary" id="startBtn" data-i18n="start"></button>
+    <button class="mint" id="doneBtn" hidden data-i18n="done"></button>
+    <button class="ghost" id="typeBtn" hidden data-i18n="type"></button>
+    <button class="ghost" id="retryBtn" hidden data-i18n="retry"></button>
+    <button class="hang" id="hangBtn" hidden data-i18n="hang" data-i18n-aria="hangAria"></button>
     <div class="typing" id="typing">
-      <textarea id="typed" placeholder="اكتب إجابتك هنا…" aria-label="إجابتك"></textarea>
-      <button class="mint" id="sendBtn">إرسال</button>
+      <textarea id="typed" data-i18n-ph="typedPh" data-i18n-aria="typedAria"></textarea>
+      <button class="mint" id="sendBtn" data-i18n="send"></button>
     </div>
   </div>
 
   <section class="result" id="result" aria-live="polite">
-    <h2>هذه ترشيحاتك</h2>
+    <h2 data-i18n="resultTitle"></h2>
     <p class="summary" id="summary"></p>
     <ol class="tracks" id="tracks"></ol>
     <div class="controls">
-      <button class="ghost" id="replayBtn">اسمع الرسالة مرة أخرى</button>
-      <button class="primary" id="againBtn">مكالمة جديدة</button>
+      <button class="ghost" id="replayBtn" data-i18n="replay"></button>
+      <button class="primary" id="againBtn" data-i18n="again"></button>
     </div>
-    <p class="note">هذه مجرد اقتراحات، ويمكنك اختيار أي Track تحبه.</p>
+    <p class="note" data-i18n="note"></p>
   </section>
 </main>
 
@@ -307,6 +307,56 @@
   }
   pollServer();
   dbg("ok", "page", "loaded " + location.href + " | " + navigator.userAgent.split(") ").pop());
+
+  // ------------------------------------------------------------------ language (ar / en from the server)
+  const STR = {
+    ar: {
+      timer: "مدة المكالمة", steps: "الأسئلة", introTitle: "هيا نتعرف عليك!",
+      introText: "مكالمة قصيرة فيها 7 أسئلة عن الأشياء التي تحبها. لا توجد إجابات خاطئة، تكلم براحتك.",
+      start: "ابدأ المكالمة", done: "أنهيت كلامي", type: "أكتب بدل الكلام", retry: "حاول مرة أخرى",
+      hang: "إنهاء", hangAria: "إنهاء المكالمة", typedPh: "اكتب إجابتك هنا…", typedAria: "إجابتك", send: "إرسال",
+      resultTitle: "هذه ترشيحاتك", replay: "اسمع الرسالة مرة أخرى", again: "مكالمة جديدة",
+      note: "هذه مجرد اقتراحات، ويمكنك اختيار أي Track تحبه.",
+      micBlocked: "لم أستطع استخدام الميكروفون. يمكنك الإجابة بالكتابة.",
+      thinking: "لحظة، أفكر…", connecting: "جارٍ الاتصال…", didntHear: "لم أسمعك جيدًا، هل يمكنك أن تعيد؟",
+      connLost: "انقطع الاتصال لحظة. اضغط «حاول مرة أخرى».", yourTurnType: "دورك! اكتب إجابتك",
+      yourTurnSpeak: "دورك! تكلم الآن", listening: "أستمع إليك…",
+      aboutToSend: "سأرسل إجابتك الآن… أكمل كلامك إذا لم تنته",
+      waitingHint: "أنا أسمعك… تكلم عندما تكون مستعدًا",
+      heardNothing: "لم أسمع شيئًا. اضغط «حاول مرة أخرى» أو اكتب إجابتك.",
+      preparing: "رائع! أجهز لك ترشيحاتك…", thanks: "شكرًا لك على هذه المكالمة الجميلة!",
+      resultFailed: "لم أستطع تجهيز الترشيحات. اضغط «حاول مرة أخرى».",
+    },
+    en: {
+      timer: "Call time", steps: "Questions", introTitle: "Let's get to know you!",
+      introText: "A short call with 7 questions about the things you enjoy. There are no wrong answers, just talk freely.",
+      start: "Start the call", done: "I'm done", type: "Type instead", retry: "Try again",
+      hang: "End", hangAria: "End the call", typedPh: "Type your answer here…", typedAria: "Your answer", send: "Send",
+      resultTitle: "Your recommendations", replay: "Hear the message again", again: "New call",
+      note: "These are only suggestions. You can choose any track you like.",
+      micBlocked: "I couldn't use the microphone. You can answer by typing.",
+      thinking: "One moment, thinking…", connecting: "Connecting…", didntHear: "I didn't catch that. Could you say it again?",
+      connLost: "The connection dropped for a moment. Press “Try again”.", yourTurnType: "Your turn! Type your answer",
+      yourTurnSpeak: "Your turn! Speak now", listening: "Listening…",
+      aboutToSend: "Sending your answer… keep talking if you're not done",
+      waitingHint: "I'm listening… talk whenever you're ready",
+      heardNothing: "I didn't hear anything. Press “Try again” or type your answer.",
+      preparing: "Great! Preparing your recommendations…", thanks: "Thank you for this nice chat!",
+      resultFailed: "I couldn't prepare the recommendations. Press “Try again”.",
+    },
+  };
+  let LANG = "ar";
+  const t = (key) => (STR[LANG] && STR[LANG][key]) || STR.ar[key] || key;
+  function applyLanguage(lang) {
+    LANG = STR[lang] ? lang : "ar";
+    document.documentElement.lang = LANG;
+    document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+    document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = t(n.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-aria]").forEach((n) => n.setAttribute("aria-label", t(n.dataset.i18nAria)));
+    document.querySelectorAll("[data-i18n-ph]").forEach((n) => n.setAttribute("placeholder", t(n.dataset.i18nPh)));
+  }
+  applyLanguage("ar");
+  fetch(API + "/call-config").then((r) => r.json()).then((c) => { applyLanguage(c.language); dbg("ok", "lang", "interview language: " + LANG); }).catch(() => {});
 
   const COLORS = { ai: "var(--sun)", kid: "var(--mint)" };
 
@@ -434,7 +484,7 @@
     } catch (e) {
       micStream = null;
       dbg("err", "mic", "microphone blocked/unavailable: " + (e && e.name));
-      setError("لم أستطع استخدام الميكروفون. يمكنك الإجابة بالكتابة.");
+      setError(t("micBlocked"));
     }
     iv = { id: "call_" + Date.now().toString(36), history: [], current: null };
     dbg("ok", "call", `started ${iv.id} | max_questions=${MAX_Q} grade=${GRADE}`);
@@ -446,7 +496,7 @@
   }
 
   async function nextTurn(answer) {
-    setMode("thinking", answer ? "لحظة، أفكر…" : "جارٍ الاتصال…");
+    setMode("thinking", answer ? t("thinking") : t("connecting"));
     show(["hangBtn"]); el.hint.textContent = ""; closeTyping();
     let data;
     try { data = await post("/v1/discovery/turns", turnBody(answer)); }
@@ -454,11 +504,11 @@
       dbg("err", "turn", `failed: status=${e.status} code=${e.code || "-"} ${e.message}`);
       if (e.code === "AUDIO_UNINTELLIGIBLE") {
         el.reply.textContent = "";
-        setMode("listening", "لم أسمعك جيدًا، هل يمكنك أن تعيد؟");
+        setMode("listening", t("didntHear"));
         await wait(1200);
         return listen();
       }
-      return fail("انقطع الاتصال لحظة. اضغط «حاول مرة أخرى».", () => nextTurn(answer));
+      return fail(t("connLost"), () => nextTurn(answer));
     }
     if (data.answered) {
       dbg("you", "YOU", `answer #${data.answered.order_index} transcript:`, data.answered.transcript);
@@ -482,8 +532,8 @@
 
   async function listen() {
     if (!iv) return;
-    if (!micStream) { setMode("listening", "دورك! اكتب إجابتك"); openTyping(); show(["hangBtn"]); return; }
-    setMode("listening", "دورك! تكلم الآن");
+    if (!micStream) { setMode("listening", t("yourTurnType")); openTyping(); show(["hangBtn"]); return; }
+    setMode("listening", t("yourTurnSpeak"));
     show(["doneBtn", "typeBtn", "hangBtn"]);
     el.hint.textContent = "";
     chunks = [];
@@ -528,20 +578,20 @@
         if (!heard) { speechStart = now; dbg("mic", "vad", `speech detected after ${(elapsed / 1000).toFixed(1)} s`); }
         heard = true; lastVoice = now;
         if (warned) { warned = false; dbg("mic", "vad", "kept talking → not sending"); }
-        el.hint.textContent = "أستمع إليك…";
+        el.hint.textContent = t("listening");
       }
       if (heard) {
         const spoken = lastVoice - speechStart;
         const patience = spoken < 2500 ? SILENCE_AFTER_SPEECH_MS + 1200 : SILENCE_AFTER_SPEECH_MS;
         const quiet = now - lastVoice;
-        if (autoSendOn() && quiet > patience - 1200 && !warned) { warned = true; el.hint.textContent = "سأرسل إجابتك الآن… أكمل كلامك إذا لم تنته"; }
+        if (autoSendOn() && quiet > patience - 1200 && !warned) { warned = true; el.hint.textContent = t("aboutToSend"); }
         if (autoSendOn() && quiet > patience) {
           dbg("mic", "vad", `quiet ${(quiet / 1000).toFixed(1)} s after ${(spoken / 1000).toFixed(1)} s of speech → stop & send`);
           return stopListening(true);
         }
       }
-      if (!heard && !hinted && elapsed > NO_SPEECH_HINT_MS) { hinted = true; el.hint.textContent = "أنا أسمعك… تكلم عندما تكون مستعدًا"; }
-      if (!heard && elapsed > NO_SPEECH_GIVEUP_MS) { dbg("err", "vad", `no speech for ${NO_SPEECH_GIVEUP_MS / 1000} s → gave up (mic too quiet? wrong mic?)`); stopListening(false); el.hint.textContent = "لم أسمع شيئًا. اضغط «حاول مرة أخرى» أو اكتب إجابتك."; show(["retryBtn", "typeBtn", "hangBtn"]); retryAction = listen; }
+      if (!heard && !hinted && elapsed > NO_SPEECH_HINT_MS) { hinted = true; el.hint.textContent = t("waitingHint"); }
+      if (!heard && elapsed > NO_SPEECH_GIVEUP_MS) { dbg("err", "vad", `no speech for ${NO_SPEECH_GIVEUP_MS / 1000} s → gave up (mic too quiet? wrong mic?)`); stopListening(false); el.hint.textContent = t("heardNothing"); show(["retryBtn", "typeBtn", "hangBtn"]); retryAction = listen; }
       if (elapsed > MAX_ANSWER_MS) { dbg("mic", "vad", "max answer length reached → send"); stopListening(true); }
     }, 80);
   }
@@ -556,7 +606,7 @@
     const type = (recorder.mimeType || "audio/webm").split(";")[0];
     const blob = new Blob(chunks, { type });
     dbg("mic", "rec", `stopped: ${kb(blob.size)} ${type}, ${chunks.length} chunks`);
-    if (blob.size < 2000) { setMode("listening", "لم أسمعك جيدًا، هل يمكنك أن تعيد؟"); await wait(1000); return listen(); }
+    if (blob.size < 2000) { setMode("listening", t("didntHear")); await wait(1000); return listen(); }
     const b64 = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); });
     el.hint.textContent = "";
     await nextTurn({ order_index: iv.current.order_index, question_text: iv.current.question_text, audio_base64: b64, audio_mime_type: type });
@@ -575,13 +625,13 @@
 
   async function finish() {
     clearInterval(vadTimer);
-    setMode("thinking", "رائع! أجهز لك ترشيحاتك…");
-    el.say.textContent = "شكرًا لك على هذه المكالمة الجميلة!";
+    setMode("thinking", t("preparing"));
+    el.say.textContent = t("thanks");
     el.reply.textContent = ""; show([]);
     let data;
     try {
       data = await post("/v1/discovery/results", { interview_id: iv.id, student_ref: "demo", grade: GRADE, tracks: TRACKS, responses: iv.history, speak: true });
-    } catch { return fail("لم أستطع تجهيز الترشيحات. اضغط «حاول مرة أخرى».", finish); }
+    } catch { return fail(t("resultFailed"), finish); }
     clearInterval(clockTimer);
     for (const rec of data.recommendations) dbg("ai", "result", `#${rec.rank} ${rec.track_code} ${rec.match_percent}%`, rec.reason);
     dbg("ai", "summary", "", data.summary);
@@ -603,7 +653,7 @@
       const ring = document.createElement("div"); ring.className = "ring"; ring.style.setProperty("--p", rec.match_percent);
       const pct = document.createElement("span"); pct.textContent = rec.match_percent + "%"; ring.appendChild(pct);
       const body = document.createElement("div");
-      const h = document.createElement("h3"); h.className = "latin"; h.style.textAlign = "right"; h.textContent = track ? track.name : rec.track_code;
+      const h = document.createElement("h3"); h.className = "latin"; h.style.textAlign = "start"; h.textContent = track ? track.name : rec.track_code;
       const p = document.createElement("p"); setMixed(p, rec.reason);
       body.append(h, p); li.append(ring, body); el.tracks.appendChild(li);
     }
@@ -630,8 +680,8 @@
 
   // ------------------------------------------------------------------ events
   el.startBtn.onclick = start;
-  el.doneBtn.onclick = () => { dbg("mic", "rec", "button: أنهيت كلامي → send"); stopListening(true); };
-  el.typeBtn.onclick = () => { stopListening(false); show(["hangBtn"]); setMode("listening", "دورك! اكتب إجابتك"); openTyping(); };
+  el.doneBtn.onclick = () => { dbg("mic", "rec", "button: done → send"); stopListening(true); };
+  el.typeBtn.onclick = () => { stopListening(false); show(["hangBtn"]); setMode("listening", t("yourTurnType")); openTyping(); };
   el.sendBtn.onclick = sendTyped;
   el.typed.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendTyped(); } });
   el.retryBtn.onclick = () => { setError(""); el.hint.textContent = ""; const a = retryAction; retryAction = null; a && a(); };

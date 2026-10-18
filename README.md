@@ -49,6 +49,12 @@ editable tracks JSON. With auth on: `TOKEN=$(python scripts/make_dev_token.py) .
 
 ## Arabic voice-call interview (v2)
 
+**One switch for the language:** `INTERVIEW_LANGUAGE=ar` (default) or `INTERVIEW_LANGUAGE=en` in `.env`.
+It picks the prompts (v2 / v1), the speech-to-text language, the Orpheus voice model and voice
+(`lulwa` / `autumn`), the opening question and the call page language (RTL Arabic / LTR English).
+Any of `PROMPT_*_VERSION`, `STT_LANGUAGE`, `STT_PROMPT`, `TTS_MODEL`, `TTS_VOICE`, `OPENING_QUESTION`
+set explicitly in `.env` still overrides the language preset.
+
 The interview now runs **in Arabic** (simple MSA) while programming terms stay in **English**
 (Frontend, Data, Game...). Prompts `@v2` are the default; `@v1` (English) is unchanged
 (`PROMPT_TURN_VERSION=v1`, `PROMPT_RESULT_VERSION=v1`, `STT_LANGUAGE=en`, `TTS_MODEL=canopylabs/orpheus-v1-english`).
@@ -101,7 +107,7 @@ mock/                mock server with fixed answers + failure scenarios (for the
 scripts/             smoke_test, dev keys/tokens, openapi export, run_dev
 contracts/           openapi.json (regenerate: python -m scripts.export_openapi)
 playground/          Streamlit test app: voice interview, endpoint tester, automatic checks
-tests/               90 tests (no network, no key needed)
+tests/               94 tests (no network, no key needed)
 ```
 
 ## Where to change things

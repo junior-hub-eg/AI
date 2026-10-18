@@ -37,7 +37,7 @@ def build_container(settings: Settings) -> Container:
     stt: SttProvider
     tts: TtsProvider
     if settings.fake_models:
-        llm, stt, tts = FakeLlm(), FakeStt(), FakeTts()
+        llm, stt, tts = FakeLlm(settings.interview_language), FakeStt(), FakeTts()
     else:
         client = GroqHttpClient(api_key=settings.groq_key_value, base_url=settings.groq_base_url)
         closers.append(client.aclose)
