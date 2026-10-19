@@ -1,3 +1,17 @@
+[project]
+name = "junior-hub-discovery-ai"
+version = "0.1.0"
+description = "Junior Hub Track Discovery AI service"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.30,<1.0",
+    "pydantic>=2.8,<3",
+    "pydantic-settings>=2.4,<3",
+    "httpx>=0.27,<1.0",
+    "PyJWT[crypto]>=2.9,<3",
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
