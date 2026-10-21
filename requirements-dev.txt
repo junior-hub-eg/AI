@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest>=8
+httpx>=0.27
+langchain-cohere>=0.4  # for tests/test_cohere.py
