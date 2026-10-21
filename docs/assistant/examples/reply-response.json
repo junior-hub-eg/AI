@@ -1,0 +1,25 @@
+{
+  "reply": "اترشحلك Frontend لأنك بتحب تشوف شغلك على الشاشة على طول (86% match). الخطوة الجاية: كمّل درس Functions، إنت واقف عند Try it.",
+  "suggestions": [
+    "اشرحلي الـ functions",
+    "مين المنتور بتاعي؟"
+  ],
+  "links": [
+    {
+      "kind": "lesson",
+      "ref": "dab266be-e6a4-5efd-a5f4-503784941482",
+      "label": "Functions"
+    },
+    {
+      "kind": "discovery",
+      "ref": "",
+      "label": "نتيجة Track Discovery"
+    }
+  ],
+  "topic": "discovery",
+  "meta": {
+    "prompt_version": "assistant@v1",
+    "model_id": "openai:gpt-4.1-mini",
+    "latency_ms": 2140
+  }
+}

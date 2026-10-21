@@ -1,0 +1,29 @@
+{
+  "today": "2026-10-20",
+  "student": {
+    "grade": null,
+    "is_independent": true,
+    "total_xp": 0,
+    "streak_days": 0,
+    "last_active_date": null
+  },
+  "discovery": {
+    "status": "InProgress",
+    "path": "Exploring",
+    "completed_utc": null,
+    "summary": null,
+    "recommendations": []
+  },
+  "tracks": [],
+  "exploration": [],
+  "learning": null,
+  "achievements": {
+    "badges": [],
+    "recent_xp": []
+  },
+  "squad": null,
+  "mentor": null,
+  "recruitment": {
+    "applications": []
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "today": "2026-10-20",
+  "student": {
+    "grade": 9,
+    "is_independent": false,
+    "total_xp": 40,
+    "streak_days": 0,
+    "last_active_date": null
+  },
+  "discovery": {
+    "status": "NotStarted",
+    "path": null,
+    "completed_utc": null,
+    "summary": null,
+    "recommendations": []
+  },
+  "tracks": [],
+  "exploration": [],
+  "learning": null,
+  "achievements": {
+    "badges": [],
+    "recent_xp": [
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-17T12:00:00Z"
+      },
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-15T12:00:00Z"
+      }
+    ]
+  },
+  "squad": {
+    "name": "Code Hunters",
+    "project_title": "School Events App",
+    "project_description": "An app where students see school events and sign up for them.",
+    "my_role": "Frontend",
+    "members": [
+      {
+        "role": "Frontend",
+        "is_me": true
+      },
+      {
+        "role": "Backend",
+        "is_me": false,
+        "name": "Omar"
+      },
+      {
+        "role": "UIUX",
+        "is_me": false,
+        "name": "Nour"
+      },
+      {
+        "role": "Testing",
+        "is_me": false,
+        "name": "Youssef"
+      }
+    ],
+    "sprint": {
+      "name": "Sprint 04",
+      "start_date": "2026-10-11",
+      "end_date": "2026-10-24",
+      "status": "Active",
+      "tasks_done": 5,
+      "tasks_total": 8
+    },
+    "my_tasks": [
+      {
+        "title": "Build the events list page",
+        "status": "Done",
+        "story_points": 3
+      },
+      {
+        "title": "Add the event details page",
+        "status": "Done",
+        "story_points": 2
+      },
+      {
+        "title": "Build the sign-up form",
+        "status": "Review",
+        "story_points": 3
+      }
+    ]
+  },
+  "mentor": null,
+  "recruitment": {
+    "applications": []
+  }
+}

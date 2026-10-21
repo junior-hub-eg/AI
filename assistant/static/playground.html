@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Junior Hub Assistant — Local Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a top bar to pick the student, the chosen student's data as a panel of cards, then the chat */
+:root {
+  --bg: #f5f6fb; --surface: #ffffff; --sunk: #eceef7; --fg: #171a33; --muted: #5d6283; --line: #dcdfee;
+  --accent: #3b4bd8; --accent-ink: #ffffff; --spark: #f2b632; --me: #e7e9ff;
+  --ok: #1f8a5b; --ok-bg: #e2f4ec; --warn: #b25e09; --warn-bg: #fbeedd; --idle: #6b7091; --idle-bg: #eceef3;
+  --f-ui: "Readex Pro", "Segoe UI", Tahoma, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10121f; --surface: #181b2d; --sunk: #20243a; --fg: #e8eaf7; --muted: #9ca1c2; --line: #2c3150;
+  --accent: #8b97ff; --accent-ink: #10121f; --spark: #f5c453; --me: #262c55;
+  --ok: #52c993; --ok-bg: #173628; --warn: #f0a050; --warn-bg: #3a2a16; --idle: #a3a8c4; --idle-bg: #262a40; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #10121f; --surface: #181b2d; --sunk: #20243a; --fg: #e8eaf7; --muted: #9ca1c2; --line: #2c3150;
+  --accent: #8b97ff; --accent-ink: #10121f; --spark: #f5c453; --me: #262c55;
+  --ok: #52c993; --ok-bg: #173628; --warn: #f0a050; --warn-bg: #3a2a16; --idle: #a3a8c4; --idle-bg: #262a40; color-scheme: dark }
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-ui); font-size: 15px; line-height: 1.55; }
+.page { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding-block: 16px 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Top bar */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.top h1 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+.top h1 b { color: var(--accent); }
+.pick { display: flex; align-items: center; gap: 8px; flex: 1 1 320px; min-width: 0; }
+.pick label { font-weight: 600; white-space: nowrap; }
+.pick select { flex: 1; min-width: 0; width: 100%; font: inherit; font-weight: 600; background: var(--surface); color: var(--fg); border: 1.5px solid var(--accent); border-radius: 10px; padding: 8px 10px; }
+.meta { display: flex; align-items: center; gap: 8px; margin-inline-start: auto; }
+.pill { font-family: var(--f-mono); font-size: .75rem; color: var(--muted); background: var(--sunk); padding: 3px 8px; border-radius: 999px; direction: ltr; }
+.btn { font: inherit; font-weight: 600; border-radius: 10px; padding: 8px 14px; border: 1px solid transparent; cursor: pointer; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: var(--surface); color: var(--fg); border-color: var(--line); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+button:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Student panel */
+.student { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 12px; }
+.student-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.student-head h2 { margin: 0; font-size: 1.15rem; }
+.student-head p { margin: 0; color: var(--muted); font-size: .9rem; }
+.student-head .toggle { margin-inline-start: auto; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card h3 { margin: 0; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.big { font-family: var(--f-mono); font-size: 1.7rem; font-weight: 500; line-height: 1.1; }
+.big small { font-family: var(--f-ui); font-size: .85rem; color: var(--muted); }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; font-size: .86rem; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .86rem; }
+.list li { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.list li.dim { opacity: .55; }
+.list li.next { font-weight: 600; }
+.note { color: var(--muted); font-size: .82rem; }
+.none { color: var(--muted); font-size: .86rem; }
+.tag { font-size: .72rem; padding: 0 7px; border-radius: 999px; white-space: nowrap; background: var(--idle-bg); color: var(--idle); }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.warn { background: var(--warn-bg); color: var(--warn); }
+.tag.focus { background: var(--me); color: var(--accent); }
+.num { font-family: var(--f-mono); font-size: .8rem; direction: ltr; unicode-bidi: isolate; }
+.raw summary { cursor: pointer; color: var(--muted); font-size: .82rem; }
+.raw pre, .sources pre { max-height: 300px; overflow: auto; background: var(--sunk); padding: 8px; border-radius: 6px; font-family: var(--f-mono); font-size: .72rem; direction: ltr; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0 0; }
+
+/* Chat */
+main { min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; height: 72vh; min-height: 460px; overflow: hidden; }
+.thread { overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.empty { margin: auto; text-align: center; color: var(--muted); max-width: 46ch; display: grid; gap: 6px; }
+.empty .spark { color: var(--spark); font-size: 1.6rem; }
+.msg { max-width: min(80%, 680px); display: grid; gap: 6px; }
+.msg.student { align-self: flex-start; }
+.msg.bot { align-self: flex-end; }
+.bubble { padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+.student .bubble { background: var(--accent); color: var(--accent-ink); border-start-start-radius: 4px; }
+.bot .bubble { background: var(--sunk); border-start-end-radius: 4px; }
+.bot.error .bubble { border: 1px solid var(--warn); }
+.bot .bubble.thinking { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: .82rem; background: var(--surface); color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; unicode-bidi: plaintext; }
+.chip:hover { border-color: var(--accent); }
+.chip.link { color: var(--fg); cursor: default; background: var(--me); border-color: transparent; }
+.chip.link::before { content: "↗ "; color: var(--accent); }
+.trace { font-family: var(--f-mono); font-size: .7rem; color: var(--muted); direction: ltr; text-align: left; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.trace .topic { color: var(--ok); }
+.trace .tool { background: var(--sunk); padding: 0 5px; border-radius: 4px; }
+.sources summary { cursor: pointer; font-size: .78rem; color: var(--muted); }
+.source { margin-top: 6px; }
+.source-title { font-family: var(--f-mono); font-size: .72rem; color: var(--accent); direction: ltr; text-align: left; }
+.starters { padding: 0 18px 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+form.composer { border-top: 1px solid var(--line); padding: 12px; display: flex; gap: 8px; align-items: flex-end; }
+form.composer textarea { flex: 1; min-width: 0; resize: none; font: inherit; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; min-height: 44px; max-height: 140px; unicode-bidi: plaintext; }
+.notice { font-size: .84rem; color: var(--warn); padding: 0 18px 8px; }
+@media (prefers-reduced-motion: no-preference) { .msg { animation: rise .18s ease-out; } @keyframes rise { from { transform: translateY(4px); opacity: .4; } } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <h1 dir="ltr">Junior Hub <b>Assistant</b></h1>
+    <div class="pick">
+      <label for="persona">الطالب</label>
+      <select id="persona"></select>
+    </div>
+    <div class="meta">
+      <span class="pill" id="model">model: …</span>
+      <button class="btn ghost" id="reset" type="button">محادثة جديدة</button>
+    </div>
+  </header>
+
+  <section class="student" aria-labelledby="student-name">
+    <div class="student-head">
+      <h2 id="student-name">…</h2>
+      <p id="student-desc"></p>
+      <button class="btn ghost toggle" id="toggle" type="button" aria-expanded="true">إخفاء البيانات</button>
+    </div>
+    <div id="student-body">
+      <div class="cards" id="cards"></div>
+      <details class="raw"><summary>الـ JSON الكامل اللي بيتبعت للبوت (context)</summary><pre id="raw"></pre></details>
+    </div>
+  </section>
+
+  <main>
+    <div class="thread" id="thread" aria-live="polite"></div>
+    <div>
+      <div class="notice" id="notice" hidden></div>
+      <div class="starters" id="starters"></div>
+      <form class="composer" id="composer">
+        <textarea id="input" rows="1" maxlength="1000" placeholder="اكتب سؤالك… مثلاً: الدرس الجاي إيه؟" dir="auto"></textarea>
+        <button class="btn ghost" id="stop" type="button" hidden>إيقاف</button>
+        <button class="btn primary" id="send" type="submit">إرسال</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+const PERSONA_INFO = {
+  frontend_beginner: ["Frontend مبتدئ", "خلّص Variables، واقف في Functions عند Try it، المنتور Sara"],
+  new_student: ["طالب جديد", "مالوش track ولا منتور، في Code Hunters وعنده tasks"],
+  discovery_in_progress: ["بدأ Discovery وما كمّلش", "مستقل، طريقة Exploring، 0 XP"],
+  frontend_all_done: ["Frontend Advanced خلّص كله", "مفيش دروس فاضلة، السبرنت بيخلص النهارده، معاه شهادة"],
+  intermediate_two_tracks: ["Intermediate بتراكين", "مستقل، Frontend + Data، نجح في انترفيو تجريبي"],
+  uiux_no_lessons: ["UI/UX من غير دروس", "اختاره بنفسه، ما نجحش في الكويز، المنتور Layla"],
+  data_failed_simulation: ["Data وفشل في الانترفيو", "مرتين وأحسن نتيجة 40%، الـ streak وقع"],
+  testing_applied: ["Testing وقدّم على وظيفة", "لسه ما امتحنش، ماعندوش منتور"],
+};
+const STARTERS = {
+  frontend_beginner: ["الدرس الجاي إيه؟", "اشرحلي الـ functions ببساطة", "مين معايا في الفريق؟", "ليه اترشحلي Frontend؟", "قولي إجابة السؤال الأول في كويز Functions", "فاضلي بادجات إيه؟"],
+  new_student: ["أبدأ منين؟", "عندي كام XP؟", "مين الـ Backend في فريقي؟", "يعني إيه Track Discovery؟"],
+  discovery_in_progress: ["أكمّل الانترفيو إزاي؟", "يعني إيه Exploring؟", "إيه التراكات الموجودة؟", "عندي كام XP؟"],
+  frontend_all_done: ["خلّصت كل الدروس، أعمل إيه؟", "السبرنت هيخلص إمتى؟", "الشهادة بتاعتي فين؟", "أجرّب تراك Backend؟"],
+  intermediate_two_tracks: ["أنا واقف فين في Frontend؟", "ليه Variables مش من ضمن مساري؟", "فيه وظايف تجريبية لـ Data؟", "الـ XP بتاعي جه منين؟"],
+  uiux_no_lessons: ["ليه مفيش دروس في UI/UX؟", "إزاي أنجح في الكويز؟", "مين Layla Adel؟", "ساعدني في واجب الكيميا"],
+  data_failed_simulation: ["ليه ما نجحتش في الانترفيو؟", "ليه الـ streak بقى صفر؟", "مين معايا في الفريق؟", "محدش في الفريق بيكلمني وأنا زعلان"],
+  testing_applied: ["الانترفيو بتاعي امتى؟", "أختار منتور إزاي؟", "مين الأول في الـ leaderboard؟", "اكتبلي test cases للـ sign-up"],
+};
+
+
+const $ = id => document.getElementById(id);
+let personas = [];
+const contexts = {};
+let persona = null;
+let history = [];
+let busy = false;
+let ctl = null;
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+const focusTrack = c => c.tracks.find(t => t.in_focus) || c.tracks[0] || null;
+const fmtDate = v => v ? String(v).slice(0, 10) : "—";
+
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw { status: res.status, body };
+  return body;
+}
+
+// ----- Labels for the values in the context ----------------------------------------------------------------
+const LESSON_STATUS = { Done: ["خلص", "ok"], InProgress: ["شغال فيه", "warn"], NotStarted: ["لسه", ""] };
+const STEP = { SchoolLink: "ربط المدرسة", Video: "الفيديو", TryIt: "Try it", Quiz: "الكويز", Done: "خلص" };
+const TASK_STATUS = { Done: ["Done", "ok"], Review: ["Review", "warn"], InProgress: ["In progress", "warn"], ToDo: ["To do", ""] };
+const DISCOVERY = { Completed: ["خلّصه", "ok"], InProgress: ["بدأه وما كمّلش", "warn"], NotStarted: ["ما بدأش", ""] };
+const APP_STATUS = { InterviewPassed: ["نجح", "ok"], InterviewNotPassed: ["ما نجحش", "warn"], Applied: ["قدّم ولسه ما امتحنش", ""] };
+const XP_REASON = { VideoWatched: "فيديو", TrackQuizPassed: "كويز تراك", LessonPassed: "درس", TaskDone: "task", SimulationCompleted: "انترفيو تجريبي" };
+
+function tag(text, kind) { return el("span", "tag" + (kind ? " " + kind : ""), text); }
+function num(text) { return el("span", "num", text); }
+function card(title, ...children) { const c = el("div", "card"); c.append(el("h3", null, title), ...children); return c; }
+function kv(rows) { const d = el("dl", "kv"); for (const [k, v] of rows) { d.append(el("dt", null, k)); const dd = el("dd"); dd.append(v instanceof Node ? v : document.createTextNode(v)); d.append(dd); } return d; }
+function list(items) { const ul = el("ul", "list"); for (const li of items) ul.append(li); return ul; }
+function li(cls, ...parts) { const l = el("li", cls); for (const p of parts) l.append(p instanceof Node ? p : document.createTextNode(p)); return l; }
+const none = text => el("div", "none", text);
+
+// ----- The chosen student's data, as cards ------------------------------------------------------------------
+function renderStudent() {
+  const c = contexts[persona];
+  const [name, desc] = PERSONA_INFO[persona] || [persona, ""];
+  $("student-name").textContent = name;
+  $("student-desc").textContent = desc;
+  const cards = $("cards"); cards.replaceChildren();
+  if (!c) { cards.append(none("مش قادر أجيب داتا الطالب ده.")); return; }
+  $("raw").textContent = JSON.stringify(c, null, 2);
+  const s = c.student;
+
+  // Profile
+  const xp = el("div", "big", String(s.total_xp)); xp.append(el("small", null, " XP"));
+  cards.append(card("الملف", xp, kv([
+    ["الـ streak", `${s.streak_days} يوم`],
+    ["آخر نشاط", fmtDate(s.last_active_date)],
+    ["المدرسة", s.is_independent ? "مستقل (من غير مدرسة)" : `طالب مدرسة، الصف ${s.grade}`],
+    ["النهارده", fmtDate(c.today)],
+  ])));
+
+  // Discovery
+  const d = c.discovery; const [dLabel, dKind] = DISCOVERY[d.status] || [d.status, ""];
+  const dParts = [kv([["الحالة", tag(dLabel, dKind)], ["الطريقة", d.path || "—"], ["خلص في", fmtDate(d.completed_utc)]])];
+  if (d.recommendations.length) dParts.push(list(d.recommendations.map(r =>
+    li(null, num(`${r.rank}.`), r.track_code, num(`${r.match_percent}%`), tag(r.level), el("span", "note", r.reason)))));
+  if (d.summary) dParts.push(el("div", "note", d.summary));
+  cards.append(card("Track Discovery", ...dParts));
+
+  // Tracks + videos/quiz
+  const tParts = c.tracks.length ? [list(c.tracks.map(t => li(null, el("strong", null, t.name), tag(t.level), t.in_focus ? tag("in focus", "focus") : "",
+      t.lessons_total ? num(`${t.lessons_done}/${t.lessons_total} دروس`) : el("span", "note", "مفيش دروس لسه"),
+      el("span", "note", t.source === "Recommended" ? "من الترشيح" : "اختاره بنفسه"))))] : [none("مش بيتعلم أي تراك لسه")];
+  if (c.exploration.length) tParts.push(el("div", "note", "الفيديوهات والكويز:"), list(c.exploration.map(e =>
+    li(null, e.track_code, num(`فيديو ${e.videos_completed}/${e.videos_total}`), e.quiz_passed ? tag("نجح في الكويز", "ok") : tag("ما نجحش في الكويز", e.best_quiz_score != null ? "warn" : ""),
+      e.best_quiz_score != null ? num(`أحسن نتيجة ${e.best_quiz_score}/${e.quiz_total}`) : ""))));
+  cards.append(card("التراكات", ...tParts));
+
+  // Lessons of the track in focus
+  let lParts;
+  if (!c.learning) lParts = [none("مفيش تراك، فمفيش دروس")];
+  else if (!c.learning.lessons.length) lParts = [none(`${c.learning.track_code}: التراك ده لسه مفيهوش دروس`)];
+  else lParts = [el("div", "note", c.learning.track_code + (c.learning.next_lesson_id ? "" : " · خلّص كل دروس مساره")), list(c.learning.lessons.map(l => {
+    const [st, kind] = LESSON_STATUS[l.status] || [l.status, ""];
+    const isNext = l.id === c.learning.next_lesson_id;
+    return li(!l.in_path ? "dim" : isNext ? "next" : null, isNext ? "◀" : "", l.title, tag(l.level), tag(st, kind),
+      l.status === "InProgress" && l.current_step ? el("span", "note", "عند " + (STEP[l.current_step] || l.current_step)) : "",
+      l.school_link ? el("span", "note", `↔ ${l.school_link.subject}: ${l.school_link.title}`) : "",
+      !l.in_path ? el("span", "note", "(قبل مستواه)") : "");
+  }))];
+  cards.append(card("الدروس", ...lParts));
+
+  // Badges and XP
+  const a = c.achievements;
+  cards.append(card("البادجات والـ XP",
+    a.badges.length ? list(a.badges.map(b => li(null, "🏅", b.name, el("span", "note", fmtDate(b.earned_utc))))) : none("مفيش بادجات لسه"),
+    a.recent_xp.length ? el("div", "note", "آخر XP:") : "",
+    a.recent_xp.length ? list(a.recent_xp.slice(0, 6).map(x => li(null, num(`+${x.points}`), XP_REASON[x.reason] || x.reason, el("span", "note", fmtDate(x.created_utc))))) : ""));
+
+  // Squad
+  const q = c.squad;
+  if (!q) cards.append(card("الفريق", none("مش في فريق")));
+  else {
+    const sp = q.sprint;
+    cards.append(card("الفريق",
+      kv([["الفريق", q.name], ["المشروع", q.project_title || "—"], ["دوره", q.my_role || "—"],
+          ["السبرنت", sp ? `${sp.name}: ${sp.tasks_done}/${sp.tasks_total} tasks، ${fmtDate(sp.start_date)} ← ${fmtDate(sp.end_date)}` : "مفيش سبرنت شغال"]]),
+      el("div", "note", "زمايله:"),
+      list(q.members.filter(m => !m.is_me).map(m => li(null, m.name || "—", tag(m.role)))),
+      el("div", "note", "التاسكات بتاعته:"),
+      q.my_tasks.length ? list(q.my_tasks.map(t => { const [st, kind] = TASK_STATUS[t.status] || [t.status, ""]; return li(null, t.title, tag(st, kind), num(`${t.story_points} pts`)); })) : none("مفيش")));
+  }
+
+  // Mentor
+  const m = c.mentor;
+  cards.append(card("المنتور", m ? kv([["الاسم", m.full_name], ["الشغل", m.title || "—"], ["التراك", m.track_code || "—"],
+    ["اللغات", m.languages || "—"], ["مواعيده", m.availability || "—"], ["من", fmtDate(m.started_utc)]]) : none("ماعندوش منتور")));
+
+  // Practice jobs
+  const apps = c.recruitment.applications;
+  cards.append(card("الوظايف التجريبية", apps.length ? list(apps.map(x => {
+    const [st, kind] = APP_STATUS[x.status] || [x.status, ""];
+    return li(null, `${x.role} · ${x.company_name}`, tag(st, kind), x.attempts ? num(`${x.attempts} محاولة`) : "",
+      x.best_score_percent != null ? num(`أحسن ${x.best_score_percent}%`) : "", x.certificate_code ? num(x.certificate_code) : "");
+  })) : none("ما قدّمش على حاجة")));
+}
+
+function renderStarters() {
+  const box = $("starters"); box.replaceChildren();
+  for (const q of STARTERS[persona] || []) { const b = el("button", "chip", q); b.type = "button"; b.onclick = () => ask(q); box.append(b); }
+  box.hidden = history.length > 0;
+}
+
+function renderThread() {
+  const t = $("thread"); t.replaceChildren();
+  if (!history.length) {
+    const e = el("div", "empty");
+    e.append(el("div", "spark", "✦"), el("div", null, "اسأل عن الطالب اللي فوق. تحت كل رد هتلاقي الـ tools والـ topic والوقت، والداتا اللي البوت شافها عشان تقارنها بالرد."));
+    t.append(e); return;
+  }
+  for (const m of history) t.append(m.node);
+  t.scrollTop = t.scrollHeight;
+}
+
+async function choose(key) {
+  persona = key; history = [];
+  $("persona").value = key;
+  if (!(key in contexts)) { try { contexts[key] = await api(`/v1/dev/personas/${encodeURIComponent(key)}`); } catch { contexts[key] = null; } }
+  renderStudent(); renderStarters(); renderThread();
+}
+
+function setBusy(v) { busy = v; $("send").disabled = v; $("stop").hidden = !v; $("input").disabled = v; $("persona").disabled = v; }
+function notice(text) { const n = $("notice"); n.textContent = text || ""; n.hidden = !text; }
+
+async function ask(text) {
+  text = String(text || "").trim();
+  if (!text || busy || !persona) return;
+  notice("");
+  const prior = history.filter(h => !h.failed).map(h => ({ role: h.role, text: h.text })).slice(-20);
+  const sNode = el("div", "msg student"); sNode.append(el("div", "bubble", text));
+  const studentEntry = { role: "student", text, node: sNode };
+  const bNode = el("div", "msg bot"); const bubble = el("div", "bubble thinking", "بيفكّر…"); bNode.append(bubble);
+  const botEntry = { role: "assistant", text: "", node: bNode };
+  history.push(studentEntry, botEntry);
+  renderStarters(); renderThread();
+  $("input").value = "";
+  setBusy(true);
+  ctl = new AbortController();
+  const started = performance.now();
+  try {
+    const r = await api("/v1/dev/chat", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ persona, message: text, history: prior }), signal: ctl.signal });
+    botEntry.text = r.reply;
+    bubble.className = "bubble"; bubble.textContent = r.reply;
+    if (r.links && r.links.length) {
+      const lk = el("div", "chips");
+      for (const l of r.links) lk.append(el("span", "chip link", `${l.label || l.kind} · ${l.kind}${l.ref ? ":" + l.ref.slice(0, 8) : ""}`));
+      bNode.append(lk);
+    }
+    if (r.suggestions && r.suggestions.length) {
+      const sg = el("div", "chips");
+      for (const s of r.suggestions) { const c = el("button", "chip", s); c.type = "button"; c.onclick = () => ask(s); sg.append(c); }
+      bNode.append(sg);
+    }
+    const tr = el("div", "trace");
+    tr.append(el("span", "topic", "topic: " + r.topic));
+    const tools = (r.debug && r.debug.tools) || [];
+    if (tools.length) for (const n of tools) tr.append(el("span", "tool", n)); else tr.append(el("span", null, "no tools (snapshot)"));
+    const ms = r.meta && r.meta.latency_ms != null ? r.meta.latency_ms : performance.now() - started;
+    tr.append(el("span", null, (ms / 1000).toFixed(1) + " s"));
+    bNode.append(tr);
+    // The data the bot actually had, to check the reply against it.
+    if (r.debug) {
+      const src = el("details", "sources");
+      src.append(el("summary", null, tools.length ? `الرد مبني على: الملخص + ${tools.length} tool` : "الرد مبني على: ملخص الطالب بس"));
+      const snap = el("div", "source"); snap.append(el("div", "source-title", "ملخص الطالب (بيتبعت مع كل سؤال)"), el("pre", null, r.debug.snapshot || ""));
+      src.append(snap);
+      for (const step of r.debug.steps || []) {
+        const box = el("div", "source");
+        const args = step.args && Object.keys(step.args).length ? JSON.stringify(step.args) : "";
+        box.append(el("div", "source-title", `${step.tool}(${args})`), el("pre", null, typeof step.result === "string" ? step.result : JSON.stringify(step.result, null, 2)));
+        src.append(box);
+      }
+      bNode.append(src);
+    }
+  } catch (e) {
+    studentEntry.failed = botEntry.failed = true;
+    bNode.classList.add("error"); bubble.className = "bubble";
+    if (e && e.name === "AbortError") bubble.textContent = "اتوقف.";
+    else if (e && e.body && e.body.error) bubble.textContent = `${e.body.error.code}: ${e.body.error.message}`;
+    else if (e && e.status === 404) bubble.textContent = "الـ dev endpoints مقفولة. حط ASSISTANT_DEV_ENDPOINTS=true في .env وشغّل السيرفر تاني.";
+    else bubble.textContent = "مش قادر أوصل للسيرفر. اتأكد إن uvicorn شغّال.";
+  } finally {
+    setBusy(false); renderThread(); $("input").focus();
+  }
+}
+
+
+$("composer").addEventListener("submit", e => { e.preventDefault(); ask($("input").value); });
+$("input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask($("input").value); } });
+$("stop").onclick = () => ctl && ctl.abort();
+$("reset").onclick = () => { if (!busy) { history = []; renderStarters(); renderThread(); } };
+$("persona").onchange = e => { if (!busy) choose(e.target.value); };
+$("toggle").onclick = () => {
+  const body = $("student-body"); body.hidden = !body.hidden;
+  $("toggle").textContent = body.hidden ? "إظهار البيانات" : "إخفاء البيانات";
+  $("toggle").setAttribute("aria-expanded", String(!body.hidden));
+};
+
+(async () => {
+  try {
+    const health = await api("/assistant/health");
+    $("model").textContent = health.model;
+    if (health.model === "fake") notice("ASSISTANT_LLM_MODEL=fake: الردود تجريبية مش من موديل حقيقي. غيّر ASSISTANT_LLM_MODEL في .env وشغّل السيرفر تاني.");
+  } catch { notice("مش قادر أوصل للسيرفر."); }
+  try { personas = await api("/v1/dev/personas"); }
+  catch { notice("الـ dev endpoints مقفولة. حط ASSISTANT_DEV_ENDPOINTS=true في .env وشغّل السيرفر تاني."); return; }
+  const order = Object.keys(PERSONA_INFO);
+  personas.sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+  const select = $("persona"); select.replaceChildren();
+  for (const key of personas) {
+    const [name] = PERSONA_INFO[key] || [key];
+    const o = el("option", null, `${name} (${key})`); o.value = key; select.append(o);
+  }
+  await choose(personas.includes("frontend_beginner") ? "frontend_beginner" : personas[0]);
+})();
+</script>
+</body>
+</html>

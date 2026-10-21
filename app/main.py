@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
+import assistant.main as student_assistant
 from app import __version__
 from app.api import health
 from app.api.v1 import discovery
@@ -22,11 +23,16 @@ from app.core.config import PROJECT_ROOT, Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging, log_event, recent_logs
 from app.core.middleware import RequestContextMiddleware
+from assistant.config import Settings as AssistantSettings
 
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    container: Container | None = None,
+    assistant_settings: AssistantSettings | None = None,
+) -> FastAPI:
     settings = settings or get_settings()
     production = settings.app_env == "production"
     configure_logging(settings.log_level, keep_recent=not production)
@@ -55,9 +61,11 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         await active.aclose()
 
     app = FastAPI(
-        title="Junior Hub Discovery AI",
+        title="Junior Hub AI",
         version=__version__,
-        description="Stateless AI service behind the Track Discovery interview.",
+        description=(
+            "Stateless AI service behind the Track Discovery interview and the student assistant (chatbot)."
+        ),
         lifespan=lifespan,
         docs_url=None if production else "/docs",
         redoc_url=None,
@@ -67,6 +75,9 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     install_error_handlers(app)
     app.include_router(health.router)
     app.include_router(discovery.router)
+    student_assistant.install(
+        app, production=production, fake_models=settings.fake_models, settings=assistant_settings
+    )
     web_dir = PROJECT_ROOT / "web"
     if not production and web_dir.is_dir():
         # Call-style interview page for local demos: http://127.0.0.1:<port>/call/
