@@ -1,0 +1,123 @@
+{
+  "today": "2026-10-20",
+  "student": {
+    "grade": 9,
+    "is_independent": false,
+    "total_xp": 65,
+    "streak_days": 1,
+    "last_active_date": "2026-10-20"
+  },
+  "discovery": {
+    "status": "NotStarted",
+    "path": null,
+    "completed_utc": null,
+    "summary": null,
+    "recommendations": []
+  },
+  "tracks": [
+    {
+      "code": "UIUX",
+      "name": "UI/UX",
+      "level": "Beginner",
+      "source": "ManualChoice",
+      "in_focus": true,
+      "selected_utc": "2026-10-15T11:00:00Z",
+      "lessons_done": 0,
+      "lessons_total": 0
+    }
+  ],
+  "exploration": [
+    {
+      "track_code": "UIUX",
+      "videos_completed": 1,
+      "videos_total": 1,
+      "quiz_passed": false,
+      "best_quiz_score": 1,
+      "quiz_total": 3
+    }
+  ],
+  "learning": {
+    "track_code": "UIUX",
+    "next_lesson_id": null,
+    "lessons": []
+  },
+  "achievements": {
+    "badges": [],
+    "recent_xp": [
+      {
+        "reason": "VideoWatched",
+        "points": 5,
+        "created_utc": "2026-10-15T10:40:00Z"
+      },
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-16T12:00:00Z"
+      },
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-17T12:00:00Z"
+      },
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-19T12:00:00Z"
+      }
+    ]
+  },
+  "squad": {
+    "name": "Code Hunters",
+    "project_title": "School Events App",
+    "project_description": "An app where students see school events and sign up for them.",
+    "my_role": "UIUX",
+    "members": [
+      {
+        "role": "Frontend",
+        "is_me": false,
+        "name": "Mohammed"
+      },
+      {
+        "role": "Backend",
+        "is_me": false,
+        "name": "Omar"
+      },
+      {
+        "role": "UIUX",
+        "is_me": true
+      },
+      {
+        "role": "Testing",
+        "is_me": false,
+        "name": "Youssef"
+      }
+    ],
+    "sprint": {
+      "name": "Sprint 04",
+      "start_date": "2026-10-11",
+      "end_date": "2026-10-24",
+      "status": "Active",
+      "tasks_done": 5,
+      "tasks_total": 8
+    },
+    "my_tasks": [
+      {
+        "title": "Design the events list screen",
+        "status": "Done",
+        "story_points": 3
+      }
+    ]
+  },
+  "mentor": {
+    "id": "482b915c-0f6b-50ef-bafa-735e708391d4",
+    "full_name": "Layla Adel",
+    "title": "Product Designer",
+    "track_code": "UIUX",
+    "languages": "English, Arabic",
+    "availability": "Sun and Tue evenings",
+    "started_utc": "2026-10-16T09:00:00Z"
+  },
+  "recruitment": {
+    "applications": []
+  }
+}

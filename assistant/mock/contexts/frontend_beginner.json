@@ -1,0 +1,231 @@
+{
+  "today": "2026-10-20",
+  "student": {
+    "grade": 9,
+    "is_independent": false,
+    "total_xp": 100,
+    "streak_days": 3,
+    "last_active_date": "2026-10-19"
+  },
+  "discovery": {
+    "status": "Completed",
+    "path": "Unsure",
+    "completed_utc": "2026-10-12T09:30:00Z",
+    "summary": "You love building things people can see and use. Frontend looks like a great fit, with UI/UX and Data close behind.",
+    "recommendations": [
+      {
+        "rank": 1,
+        "track_code": "FRONTEND",
+        "match_percent": 86,
+        "reason": "You enjoy seeing your work on screen right away.",
+        "level": "Beginner",
+        "level_reason": "You are new to code, so you will start from the first steps."
+      },
+      {
+        "rank": 2,
+        "track_code": "UIUX",
+        "match_percent": 74,
+        "reason": "You care about how things look and feel.",
+        "level": "Beginner",
+        "level_reason": "You have not designed screens yet."
+      },
+      {
+        "rank": 3,
+        "track_code": "DATA",
+        "match_percent": 61,
+        "reason": "You like finding patterns in numbers.",
+        "level": "Beginner",
+        "level_reason": "You will start from the first steps."
+      }
+    ]
+  },
+  "tracks": [
+    {
+      "code": "FRONTEND",
+      "name": "Frontend",
+      "level": "Beginner",
+      "source": "Recommended",
+      "in_focus": true,
+      "selected_utc": "2026-10-12T09:35:00Z",
+      "lessons_done": 1,
+      "lessons_total": 4
+    }
+  ],
+  "exploration": [
+    {
+      "track_code": "FRONTEND",
+      "videos_completed": 2,
+      "videos_total": 2,
+      "quiz_passed": true,
+      "best_quiz_score": 3,
+      "quiz_total": 3
+    }
+  ],
+  "learning": {
+    "track_code": "FRONTEND",
+    "next_lesson_id": "dab266be-e6a4-5efd-a5f4-503784941482",
+    "lessons": [
+      {
+        "id": "a7e66346-4ec9-5e85-857e-7dd8e455cb6e",
+        "module": "Module 1: Thinking in code",
+        "title": "Variables",
+        "concept": "variables",
+        "level": "Beginner",
+        "status": "Done",
+        "current_step": "Done",
+        "quiz_attempts": 1,
+        "in_path": true,
+        "school_link": {
+          "subject": "Math",
+          "title": "Substituting values in expressions"
+        }
+      },
+      {
+        "id": "dab266be-e6a4-5efd-a5f4-503784941482",
+        "module": "Module 1: Thinking in code",
+        "title": "Functions",
+        "concept": "functions",
+        "level": "Beginner",
+        "status": "InProgress",
+        "current_step": "TryIt",
+        "quiz_attempts": 0,
+        "in_path": true,
+        "school_link": {
+          "subject": "Math",
+          "title": "Linear functions"
+        }
+      },
+      {
+        "id": "1d360a3e-2cf9-5742-a873-c2dc7c841d46",
+        "module": "Module 1: Thinking in code",
+        "title": "Conditions",
+        "concept": "conditions",
+        "level": "Intermediate",
+        "status": "NotStarted",
+        "current_step": null,
+        "quiz_attempts": 0,
+        "in_path": true,
+        "school_link": {
+          "subject": "Math",
+          "title": "Inequalities"
+        }
+      },
+      {
+        "id": "ba7566ab-2368-5e26-9331-4ae0f818d782",
+        "module": "Module 1: Thinking in code",
+        "title": "Functions with two inputs",
+        "concept": "functions",
+        "level": "Advanced",
+        "status": "NotStarted",
+        "current_step": null,
+        "quiz_attempts": 0,
+        "in_path": true,
+        "school_link": {
+          "subject": "Science",
+          "title": "Speed, distance and time"
+        }
+      }
+    ]
+  },
+  "achievements": {
+    "badges": [
+      {
+        "code": "LINK_MATH_VARIABLES",
+        "name": "Linked to Math · Variables",
+        "type": "SubjectLink",
+        "earned_utc": "2026-10-14T16:10:00Z"
+      }
+    ],
+    "recent_xp": [
+      {
+        "reason": "LessonPassed",
+        "points": 40,
+        "created_utc": "2026-10-14T16:10:00Z"
+      },
+      {
+        "reason": "TrackQuizPassed",
+        "points": 10,
+        "created_utc": "2026-10-13T15:00:00Z"
+      },
+      {
+        "reason": "VideoWatched",
+        "points": 5,
+        "created_utc": "2026-10-13T14:40:00Z"
+      },
+      {
+        "reason": "VideoWatched",
+        "points": 5,
+        "created_utc": "2026-10-13T14:30:00Z"
+      },
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-16T12:00:00Z"
+      },
+      {
+        "reason": "TaskDone",
+        "points": 20,
+        "created_utc": "2026-10-18T12:00:00Z"
+      }
+    ]
+  },
+  "squad": {
+    "name": "Code Hunters",
+    "project_title": "School Events App",
+    "project_description": "An app where students see school events and sign up for them.",
+    "my_role": "Backend",
+    "members": [
+      {
+        "role": "Frontend",
+        "is_me": false,
+        "name": "Mohammed"
+      },
+      {
+        "role": "Backend",
+        "is_me": true
+      },
+      {
+        "role": "UIUX",
+        "is_me": false,
+        "name": "Nour"
+      },
+      {
+        "role": "Testing",
+        "is_me": false,
+        "name": "Youssef"
+      }
+    ],
+    "sprint": {
+      "name": "Sprint 04",
+      "start_date": "2026-10-11",
+      "end_date": "2026-10-24",
+      "status": "Active",
+      "tasks_done": 5,
+      "tasks_total": 8
+    },
+    "my_tasks": [
+      {
+        "title": "Create the events database table",
+        "status": "Done",
+        "story_points": 3
+      },
+      {
+        "title": "Create the sign-up API",
+        "status": "InProgress",
+        "story_points": 5
+      }
+    ]
+  },
+  "mentor": {
+    "id": "a02b6812-3aba-5b42-94ea-3784f161d85e",
+    "full_name": "Sara El-Masry",
+    "title": "Senior Frontend Engineer",
+    "track_code": "FRONTEND",
+    "languages": "English, Arabic",
+    "availability": "Tue and Thu evenings",
+    "started_utc": "2026-10-13T10:00:00Z"
+  },
+  "recruitment": {
+    "applications": []
+  }
+}
