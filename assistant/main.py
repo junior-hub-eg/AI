@@ -1,6 +1,11 @@
-"""Junior Hub Student Assistant: HTTP API (contract in docs/API.md).
+"""Junior Hub Student Assistant: the HTTP endpoints (contract in docs/assistant/API.md).
 
-Run: uvicorn app.main:app --port 8010      Interactive docs: http://localhost:8010/docs
+They are part of the AI service app (`app.main.create_app` calls `install`), next to the Discovery endpoints:
+
+    POST /v1/assistant/replies      the backend's call (service token, audience assistant-ai)
+    GET  /assistant/health          the model in use and the catalog version (no token)
+    GET  /assistant/                the test chat page            } ASSISTANT_DEV_ENDPOINTS=true only,
+    /v1/dev/personas, /v1/dev/chat  chat as a mock student        } never in production
 """
 
 from __future__ import annotations
@@ -12,33 +17,25 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.exceptions import RequestValidationError
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
+
+from app.core.errors import ErrorCode, error_body
 
 from .assistant import Assistant, EmptyReply
 from .auth import Unauthenticated, verify
 from .catalog import load_catalog
-from .config import get_settings
+from .config import Settings, get_settings
 from .llm import create_model
 from .schemas import MAX_HISTORY, MAX_MESSAGE, HistoryItem, ReplyRequest, ReplyResponse
 
 logger = logging.getLogger("assistant")
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-PERSONAS = Path(__file__).resolve().parent.parent / "mock" / "contexts"
+PERSONAS = Path(__file__).resolve().parent / "mock" / "contexts"
 STATIC = Path(__file__).resolve().parent / "static"
 
-app = FastAPI(
-    title="Junior Hub Student Assistant",
-    version="1.0",
-    description=(
-        "Answers a student's questions about their own Junior Hub journey. Stateless: the caller (the Junior Hub "
-        "backend) stores the conversation and sends the history and the student's context with every message. "
-        "See docs/API.md and docs/INTEGRATION.md."
-    ),
-)
+router = APIRouter()
 
 
 class ErrorBody(BaseModel):
@@ -59,24 +56,36 @@ ERRORS: dict[int | str, dict[str, Any]] = {
 }
 
 
-def current_settings():
-    """The settings in use, without building the model (so the test page opens even when the model cannot start)."""
-    return app.state.assistant.settings if hasattr(app.state, "assistant") else get_settings()
+def install(app: FastAPI, *, production: bool, fake_models: bool = False, settings: Settings | None = None) -> None:
+    """Adds the assistant to the AI service app. The model is created on the first message, so a missing provider
+    key or package only makes the assistant answer 503 and never stops the Discovery endpoints."""
+    settings = settings or get_settings()
+    updates: dict[str, Any] = {}
+    if fake_models:
+        updates["llm_model"] = "fake"
+    if production and (settings.auth_disabled or settings.dev_endpoints):
+        logger.error("ASSISTANT_AUTH_DISABLED and ASSISTANT_DEV_ENDPOINTS are ignored in production")
+        updates |= {"auth_disabled": False, "dev_endpoints": False}
+    app.state.assistant_settings = settings.model_copy(update=updates) if updates else settings
+    if app.state.assistant_settings.auth_disabled:
+        logger.warning("ASSISTANT_AUTH_DISABLED=true: anyone can call the assistant. For local testing only.")
+    if app.state.assistant_settings.dev_endpoints:
+        logger.warning("ASSISTANT_DEV_ENDPOINTS=true: /v1/dev/* is open. For local testing only.")
+
+    app.add_exception_handler(Unauthenticated, _unauthenticated)
+    app.include_router(router)
 
 
-def get_assistant() -> Assistant:
-    if not hasattr(app.state, "assistant"):
-        settings = get_settings()
-        if settings.auth_disabled:
-            logger.warning("AUTH_DISABLED=true: anyone can call the service. For local testing only.")
-        if settings.dev_endpoints:
-            logger.warning("DEV_ENDPOINTS=true: /v1/dev/* is open. For local testing only.")
-        app.state.assistant = Assistant(create_model(settings), settings)
-    return app.state.assistant
+def current_settings(request: Request) -> Settings:
+    return request.app.state.assistant_settings
 
 
-def request_id_of(request: Request) -> str:
-    return request.headers.get("x-request-id") or uuid.uuid4().hex
+def get_assistant(request: Request) -> Assistant:
+    state = request.app.state
+    if getattr(state, "assistant", None) is None:
+        settings = current_settings(request)
+        state.assistant = Assistant(create_model(settings), settings)
+    return state.assistant
 
 
 def _error_text(exc: Exception) -> str:
@@ -87,78 +96,71 @@ def _error_text(exc: Exception) -> str:
     return str(exc)[:600]
 
 
-def error(status: int, code: str, message: str, request_id: str) -> JSONResponse:
-    return JSONResponse(status_code=status, content={"error": {"code": code, "message": message, "request_id": request_id}})
+def error(status: int, code: ErrorCode, message: str) -> JSONResponse:
+    return JSONResponse(status_code=status, content=error_body(code, message))
 
 
 def service_token(request: Request) -> None:
     """Runs before the body is validated, so a caller without a valid token learns nothing about the schema."""
-    verify(request, current_settings())
+    verify(request, current_settings(request))
 
 
-@app.exception_handler(Unauthenticated)
-async def unauthenticated(request: Request, exc: Unauthenticated) -> JSONResponse:
-    logger.warning("rejected token: %s", exc)
-    return error(401, "UNAUTHENTICATED", "Invalid or missing service token.", request_id_of(request))
+async def _unauthenticated(request: Request, exc: Exception) -> JSONResponse:
+    logger.warning("assistant rejected token: %s", exc)
+    response = error(401, ErrorCode.UNAUTHENTICATED, "Invalid or missing service token.")
+    response.headers["WWW-Authenticate"] = "Bearer"
+    return response
 
 
-@app.exception_handler(RequestValidationError)
-async def invalid_request(request: Request, exc: RequestValidationError) -> JSONResponse:
-    # Field names only: the student's message is never logged or echoed.
-    fields = sorted({".".join(str(p) for p in e["loc"][1:]) or "body" for e in exc.errors()})
-    return error(400, "INVALID_REQUEST", f"Invalid fields: {', '.join(fields)}", request_id_of(request))
-
-
-async def run_reply(body: ReplyRequest, request_id: str, debug: bool = False) -> ReplyResponse | JSONResponse:
+async def run_reply(request: Request, body: ReplyRequest, debug: bool = False) -> ReplyResponse | JSONResponse:
     """The reply, or an error body. With `debug` (dev endpoints only) the tools used and the provider's error are
     included, to see why the bot answered what it did."""
     try:
-        assistant = get_assistant()
+        assistant = get_assistant(request)
     except Exception as exc:  # the model could not be created: a missing key or provider package
-        logger.error("model could not start: %s", type(exc).__name__)
+        logger.error("assistant model could not start: %s", type(exc).__name__)
         detail = f" {type(exc).__name__}: {_error_text(exc)}" if debug else ""
-        return error(503, "PROVIDER_UNAVAILABLE", "The assistant's model could not start." + detail, request_id)
+        return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant's model could not start." + detail)
     try:
-        response, trace = await asyncio.wait_for(assistant.reply_with_trace(body), timeout=assistant.settings.reply_timeout_seconds)
+        response, trace = await asyncio.wait_for(
+            assistant.reply_with_trace(body), timeout=assistant.settings.reply_timeout_seconds
+        )
         tools = [step["tool"] for step in trace["steps"]]
-    except asyncio.TimeoutError:
-        logger.warning("reply timed out request_id=%s", request_id)
-        return error(504, "TIMEOUT", "The assistant took too long.", request_id)
+    except TimeoutError:
+        logger.warning("assistant reply timed out")
+        return error(504, ErrorCode.TIMEOUT, "The assistant took too long.")
     except EmptyReply:
-        logger.warning("empty reply request_id=%s", request_id)
-        return error(503, "PROVIDER_UNAVAILABLE", "The assistant could not answer.", request_id)
+        logger.warning("assistant empty reply")
+        return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant could not answer.")
     except Exception as exc:  # the model provider failed
-        logger.warning("provider error %s request_id=%s", type(exc).__name__, request_id)
+        logger.warning("assistant provider error %s", type(exc).__name__)
         detail = f" {type(exc).__name__}: {_error_text(exc)}" if debug else ""
-        return error(503, "PROVIDER_UNAVAILABLE", "The assistant is not available right now." + detail, request_id)
+        return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant is not available right now." + detail)
 
-    logger.info("reply request_id=%s prompt=%s model=%s latency_ms=%s topic=%s tools=%s",
-                request_id, response.meta.prompt_version, response.meta.model_id, response.meta.latency_ms,
-                response.topic, ",".join(tools) or "-")
+    # Never the message or the reply (privacy): metadata only.
+    logger.info(
+        "assistant reply prompt=%s model=%s latency_ms=%s topic=%s tools=%s",
+        response.meta.prompt_version, response.meta.model_id, response.meta.latency_ms,
+        response.topic, ",".join(tools) or "-",
+    )
     if debug:
         return JSONResponse({**response.model_dump(mode="json"), "debug": {"tools": tools, **trace}})
     return response
 
 
-@app.get("/", include_in_schema=False)
-async def home():
-    """The test chat page with DEV_ENDPOINTS=true; otherwise where to look."""
-    if current_settings().dev_endpoints:
-        return FileResponse(STATIC / "playground.html", media_type="text/html; charset=utf-8")
-    return {"service": "Junior Hub Student Assistant", "docs": "/docs", "health": "/health"}
+@router.get("/assistant/health", tags=["assistant"])
+async def health(request: Request) -> dict:
+    """Liveness, the model in use and the catalog version. No token needed, no model call."""
+    return {"status": "ok", "model": current_settings(request).llm_model, "catalog_version": load_catalog().version}
 
 
-@app.get("/health", tags=["service"])
-async def health() -> dict:
-    """Liveness, the model in use and the catalog version. No token needed."""
-    return {"status": "ok", "model": current_settings().llm_model, "catalog_version": load_catalog().version}
-
-
-@app.post("/v1/assistant/replies", response_model=ReplyResponse, responses=ERRORS, tags=["assistant"],
-          dependencies=[Depends(service_token)])
+@router.post(
+    "/v1/assistant/replies", response_model=ReplyResponse, responses=ERRORS, tags=["assistant"],
+    dependencies=[Depends(service_token)],
+)
 async def replies(body: ReplyRequest, request: Request):
     """Reply to one student message. Send the recent history and the student's context with every call."""
-    return await run_reply(body, request_id_of(request))
+    return await run_reply(request, body)
 
 
 # ----- Development only: try the bot with the mock students, without building a context -------------------------
@@ -169,9 +171,9 @@ class DevChatRequest(BaseModel):
     history: list[HistoryItem] = Field(default_factory=list, max_length=MAX_HISTORY)
 
 
-def dev_only() -> None:
-    if not current_settings().dev_endpoints:
-        raise HTTPException(status_code=404)
+def dev_only(request: Request) -> None:
+    if not current_settings(request).dev_endpoints:
+        raise HTTPException(status_code=404, detail="Not Found")
 
 
 def load_persona(name: str) -> dict:
@@ -185,21 +187,32 @@ def personas() -> list[str]:
     return sorted(p.stem for p in PERSONAS.glob("*.json"))
 
 
-@app.get("/v1/dev/personas", tags=["development"], dependencies=[Depends(dev_only)])
+@router.get("/assistant/", include_in_schema=False, dependencies=[Depends(dev_only)])
+async def test_page():
+    """The test chat page (ASSISTANT_DEV_ENDPOINTS=true only)."""
+    return FileResponse(STATIC / "playground.html", media_type="text/html; charset=utf-8")
+
+
+@router.get("/v1/dev/personas", tags=["development"], dependencies=[Depends(dev_only)])
 async def list_personas() -> list[str]:
-    """The mock students (DEV_ENDPOINTS=true only)."""
+    """The mock students (ASSISTANT_DEV_ENDPOINTS=true only)."""
     return personas()
 
 
-@app.get("/v1/dev/personas/{name}", tags=["development"], dependencies=[Depends(dev_only)])
+@router.get("/v1/dev/personas/{name}", tags=["development"], dependencies=[Depends(dev_only)])
 async def get_persona(name: str) -> dict:
-    """A mock student's context, as the backend would send it (DEV_ENDPOINTS=true only)."""
+    """A mock student's context, as the backend would send it (ASSISTANT_DEV_ENDPOINTS=true only)."""
     return load_persona(name)
 
 
-@app.post("/v1/dev/chat", response_model=ReplyResponse, responses=ERRORS, tags=["development"], dependencies=[Depends(dev_only)])
+@router.post(
+    "/v1/dev/chat", response_model=ReplyResponse, responses=ERRORS, tags=["development"],
+    dependencies=[Depends(dev_only)],
+)
 async def dev_chat(body: DevChatRequest, request: Request):
-    """Chat as a mock student, no token or context needed (DEV_ENDPOINTS=true only)."""
-    reply_request = ReplyRequest(conversation_id=uuid.uuid4(), student_ref=uuid.uuid4(), message=body.message,
-                                 history=body.history, context=load_persona(body.persona))
-    return await run_reply(reply_request, request_id_of(request), debug=True)
+    """Chat as a mock student, no token or context needed (ASSISTANT_DEV_ENDPOINTS=true only)."""
+    reply_request = ReplyRequest(
+        conversation_id=uuid.uuid4(), student_ref=uuid.uuid4(), message=body.message,
+        history=body.history, context=load_persona(body.persona),
+    )
+    return await run_reply(request, reply_request, debug=True)

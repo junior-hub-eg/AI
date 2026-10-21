@@ -1,5 +1,8 @@
 # Junior Hub Student Assistant
 
+> **Inside the AI repo.** This is the chatbot's original README. Here it runs as part of the AI service (`app.main:create_app`, port 8000) next to the Discovery endpoints: the code is in `assistant/`, the data in `assistant/data/` and `assistant/mock/`, the tests in `tests/assistant/`, and every setting starts with `ASSISTANT_` (see `.env.example`). The Windows scripts and Dockerfile below are not part of this repo.
+
+
 A chat assistant that answers students' questions about their own Junior Hub journey: their tracks and level, the
 Track Discovery result, lessons and where they stopped, XP, streak and badges, their squad, teammates and tasks,
 their mentor, and practice jobs. It also explains lesson concepts and how the platform works.
@@ -29,7 +32,7 @@ Student ──► Frontend ──► Junior Hub backend (.NET) ─────�
 | [docs/backend-reference/](docs/backend-reference/) | A C# implementation of the backend side in the Junior Hub style. **Never compiled**: a starting point |
 | [docs/CAPABILITIES.md](docs/CAPABILITIES.md) | What the bot knows and answers, its limits, the mock students (Arabic) |
 | [docs/examples/](docs/examples/) | A complete request and response |
-| http://localhost:8010/docs | Interactive OpenAPI docs while the service runs |
+| http://localhost:8000/docs | Interactive OpenAPI docs while the service runs |
 
 ---
 
@@ -40,13 +43,13 @@ Windows, from this folder:
 ```powershell
 python -m venv .venv                       # or: & "C:\path\to\python.exe" -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-copy .env.example .env                     # then set LLM_MODEL and the key, see Configuration
+copy .env.example .env                     # then set ASSISTANT_LLM_MODEL and the key, see Configuration
 start.bat                                  # opens http://localhost:8010 and reloads on code changes
 ```
 
-(Linux/macOS: `source .venv/bin/activate`, then `uvicorn app.main:app --port 8010 --reload`.)
+(Linux/macOS: `source .venv/bin/activate`, then `uvicorn app.main:create_app --factory --port 8000 --reload`.)
 
-With `DEV_ENDPOINTS=true`, http://localhost:8010 is a **test chat page**: pick one of 8 mock students, see all their
+With `ASSISTANT_DEV_ENDPOINTS=true`, http://localhost:8000/assistant/ is a **test chat page**: pick one of 8 mock students, see all their
 data at the top, ask questions, and under every reply see the topic, the tools used, the time, and the exact data the
 bot had, to check it did not make anything up. `python chat_cli.py` is the same in the terminal.
 
@@ -60,7 +63,7 @@ Tests, no API key needed: `.venv\Scripts\python.exe -m pytest`
 system prompt + student snapshot + recent history + the new message
         │
         ▼
-      LLM ──(needs details)──► tool (reads the request's data) ──► LLM ...   at most MAX_STEPS lookups
+      LLM ──(needs details)──► tool (reads the request's data) ──► LLM ...   at most ASSISTANT_MAX_STEPS lookups
         │
         └──(respond tool)──► reply, suggestions, links, topic ──► cleaned ──► response
 ```
@@ -70,7 +73,7 @@ system prompt + student snapshot + recent history + the new message
 2. **Tools.** For details the LLM calls a tool. Every tool reads only the data in this request and the bundled
    catalog; the student is never a tool parameter, so one student can never reach another's data.
 3. **Respond.** The LLM must finish by calling `respond` with the reply, a topic, up to 3 follow-up suggestions and up
-   to 3 links. After `MAX_STEPS` lookups only `respond` is offered, so a reply always comes.
+   to 3 links. After `ASSISTANT_MAX_STEPS` lookups only `respond` is offered, so a reply always comes.
 4. **Clean.** Before returning: the reply is cut to 2000 characters, model markup (like Cohere's `<co>` citations) is
    removed, suggestions over 80 characters are dropped, and links to lessons, tracks or mentors that do not exist are
    dropped.
@@ -149,10 +152,10 @@ Errors always have the body `{ "error": { "code", "message", "request_id" } }`:
 | 400 | `INVALID_REQUEST` | A field is missing or out of range; the message names the fields | Fix the request |
 | 401 | `UNAUTHENTICATED` | Bad, expired or missing service token (checked before the body) | Check keys and server clock |
 | 503 | `PROVIDER_UNAVAILABLE` | The LLM failed or could not start | Show and store the fallback reply |
-| 504 | `TIMEOUT` | No reply within `REPLY_TIMEOUT_SECONDS` (18 s) | Show and store the fallback reply |
+| 504 | `TIMEOUT` | No reply within `ASSISTANT_REPLY_TIMEOUT_SECONDS` (18 s) | Show and store the fallback reply |
 
-Other endpoints: `GET /health` (no token: status, model, catalog version), `GET /docs` and `GET /openapi.json`.
-Development only, with `DEV_ENDPOINTS=true`: `GET /` (test page), `GET /v1/dev/personas`,
+Other endpoints: `GET /assistant/health` (no token: status, model, catalog version), `GET /docs` and `GET /openapi.json`.
+Development only, with `ASSISTANT_DEV_ENDPOINTS=true`: `GET /assistant/` (test page), `GET /v1/dev/personas`,
 `GET /v1/dev/personas/{name}`, `POST /v1/dev/chat` (`{ persona, message, history }`, answers with an extra `debug`
 block showing what the bot saw). They answer 404 otherwise.
 
@@ -264,7 +267,7 @@ Checklist once connected:
 - **Privacy.** The student is only `student_ref`. Teammates come by first name and role (a product decision beyond
   BR-15 as written in JH-SRS v0.1: confirm it). Messages and replies are never logged; logs hold the request id,
   prompt version, model, latency, topic and tool names only.
-- `AUTH_DISABLED` and `DEV_ENDPOINTS` are for a developer's machine only. Never set them in production.
+- `ASSISTANT_AUTH_DISABLED` and `ASSISTANT_DEV_ENDPOINTS` are for a developer's machine only. Never set them in production.
 
 ---
 
@@ -274,16 +277,16 @@ Environment variables, or a `.env` file in the folder the service runs from (see
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `LLM_MODEL` | `fake` | `provider:model`: `cohere:command-a-03-2025`, `openai:gpt-4.1-mini`, `google_genai:gemini-2.5-flash`, `anthropic:claude-haiku-4-5`, `groq:llama-3.3-70b-versatile`. `fake` gives canned answers without a key (wiring checks only) |
+| `ASSISTANT_LLM_MODEL` | `fake` | `provider:model`: `cohere:command-a-03-2025`, `openai:gpt-4.1-mini`, `google_genai:gemini-2.5-flash`, `anthropic:claude-haiku-4-5`, `groq:llama-3.3-70b-versatile`. `fake` gives canned answers without a key (wiring checks only) |
 | `COHERE_API_KEY` (or the provider's key) | | The LLM provider's API key |
-| `LLM_TEMPERATURE` | `0.3` | |
-| `LLM_TOOL_CHOICE` | `any` | `any` forces a tool call each step; `auto` for providers that cannot force tools |
-| `MAX_STEPS` | `4` | Data lookups per reply before the bot must answer |
-| `REPLY_TIMEOUT_SECONDS` | `18` | After this the service answers 504 |
-| `AUTH_PUBLIC_KEY_PEM` or `AUTH_PUBLIC_KEY_FILE` | | Public key that checks the service token |
-| `AUTH_AUDIENCE`, `AUTH_ISSUER` | `assistant-ai`, `JuniorHub.Api` | |
-| `AUTH_DISABLED` | `false` | Skip the token check (local testing only) |
-| `DEV_ENDPOINTS` | `false` | Test page and `/v1/dev/*` (local testing only) |
+| `ASSISTANT_LLM_TEMPERATURE` | `0.3` | |
+| `ASSISTANT_LLM_TOOL_CHOICE` | `any` | `any` forces a tool call each step; `auto` for providers that cannot force tools |
+| `ASSISTANT_MAX_STEPS` | `4` | Data lookups per reply before the bot must answer |
+| `ASSISTANT_REPLY_TIMEOUT_SECONDS` | `18` | After this the service answers 504 |
+| `ASSISTANT_AUTH_PUBLIC_KEY_PEM` or `ASSISTANT_AUTH_PUBLIC_KEY_FILE` | | Public key that checks the service token |
+| `ASSISTANT_AUTH_AUDIENCE`, `ASSISTANT_AUTH_ISSUER` | `assistant-ai`, `JuniorHub.Api` | |
+| `ASSISTANT_AUTH_DISABLED` | `false` | Skip the token check (local testing only) |
+| `ASSISTANT_DEV_ENDPOINTS` | `false` | Test page and `/v1/dev/*` (local testing only) |
 
 Each provider needs its LangChain package: `langchain-cohere` (in `requirements-dev.txt`), `langchain-openai`,
 `langchain-google-genai`, `langchain-anthropic` or `langchain-groq`. Cohere gets the tools with their full JSON
@@ -294,11 +297,11 @@ schema and citations turned off (`app/providers.py`).
 ```bash
 docker build -t junior-hub-assistant .            # Cohere by default; --build-arg PROVIDER_PACKAGE=langchain-openai for OpenAI
 docker run -p 8010:8010 \
-  -e LLM_MODEL=cohere:command-a-03-2025 -e COHERE_API_KEY=... \
-  -e AUTH_PUBLIC_KEY_PEM="$(cat assistant-ai-public.pem)" junior-hub-assistant
+  -e ASSISTANT_LLM_MODEL=cohere:command-a-03-2025 -e COHERE_API_KEY=... \
+  -e ASSISTANT_AUTH_PUBLIC_KEY_PEM="$(cat assistant-ai-public.pem)" junior-hub-assistant
 ```
 
-Health check: `GET /health`. One process handles many conversations; each reply is one to five LLM calls, usually
+Health check: `GET /assistant/health`. One process handles many conversations; each reply is one to five LLM calls, usually
 2 to 8 seconds.
 
 ## Project layout
@@ -313,7 +316,7 @@ app/
   schemas.py       Request, response and context models (the contract in code)
   catalog.py       Platform content and rules
   providers.py     Binding tools per LLM provider (Cohere)
-  llm.py           Creating the LLM from LLM_MODEL; fake_llm.py: the no-key stand-in
+  llm.py           Creating the LLM from ASSISTANT_LLM_MODEL; fake_llm.py: the no-key stand-in
   auth.py, config.py
   static/playground.html   The test chat page
 data/              catalog.json, platform_rules.md

@@ -372,7 +372,7 @@ async function ask(text) {
     bNode.classList.add("error"); bubble.className = "bubble";
     if (e && e.name === "AbortError") bubble.textContent = "اتوقف.";
     else if (e && e.body && e.body.error) bubble.textContent = `${e.body.error.code}: ${e.body.error.message}`;
-    else if (e && e.status === 404) bubble.textContent = "الـ dev endpoints مقفولة. حط DEV_ENDPOINTS=true في .env وشغّل السيرفر تاني.";
+    else if (e && e.status === 404) bubble.textContent = "الـ dev endpoints مقفولة. حط ASSISTANT_DEV_ENDPOINTS=true في .env وشغّل السيرفر تاني.";
     else bubble.textContent = "مش قادر أوصل للسيرفر. اتأكد إن uvicorn شغّال.";
   } finally {
     setBusy(false); renderThread(); $("input").focus();
@@ -393,12 +393,12 @@ $("toggle").onclick = () => {
 
 (async () => {
   try {
-    const health = await api("/health");
+    const health = await api("/assistant/health");
     $("model").textContent = health.model;
-    if (health.model === "fake") notice("LLM_MODEL=fake: الردود تجريبية مش من موديل حقيقي. غيّر LLM_MODEL في .env وشغّل السيرفر تاني.");
+    if (health.model === "fake") notice("ASSISTANT_LLM_MODEL=fake: الردود تجريبية مش من موديل حقيقي. غيّر ASSISTANT_LLM_MODEL في .env وشغّل السيرفر تاني.");
   } catch { notice("مش قادر أوصل للسيرفر."); }
   try { personas = await api("/v1/dev/personas"); }
-  catch { notice("الـ dev endpoints مقفولة. حط DEV_ENDPOINTS=true في .env وشغّل السيرفر تاني."); return; }
+  catch { notice("الـ dev endpoints مقفولة. حط ASSISTANT_DEV_ENDPOINTS=true في .env وشغّل السيرفر تاني."); return; }
   const order = Object.keys(PERSONA_INFO);
   personas.sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
   const select = $("persona"); select.replaceChildren();

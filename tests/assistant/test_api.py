@@ -8,11 +8,12 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 
-from app import main
-from app.assistant import Assistant
-from app.config import Settings
-from app.fake_llm import FakeChatModel
-from tests.conftest import load_context
+from app.main import create_app
+from assistant.assistant import Assistant
+from assistant.config import Settings
+from assistant.fake_llm import FakeChatModel
+from tests.conftest import make_settings
+from tests.assistant.conftest import load_context
 
 KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 PRIVATE = KEY.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
@@ -30,12 +31,19 @@ def body(message="الدرس الجاي إيه؟"):
             "history": [], "context": load_context("frontend_beginner")}
 
 
+def make_client(**assistant):
+    """The whole AI service app (Discovery and assistant) with the given assistant settings."""
+    settings = Settings(_env_file=None, **{"llm_model": "fake", "auth_public_key_pem": PUBLIC, **assistant})
+    service = create_app(make_settings(), assistant_settings=settings)
+    if settings.llm_model == "fake":
+        service.state.assistant = Assistant(FakeChatModel(), settings)
+    return TestClient(service)
+
+
 @pytest.fixture
-def client(monkeypatch):
-    settings = Settings(llm_model="fake", auth_public_key_pem=PUBLIC)
-    main.app.state.assistant = Assistant(FakeChatModel(), settings)
-    yield TestClient(main.app)
-    del main.app.state.assistant
+def client():
+    with make_client() as c:
+        yield c
 
 
 def post(client, payload, bearer=None):
@@ -73,22 +81,20 @@ def test_a_provider_failure_is_503(client, monkeypatch):
     async def boom(request):
         raise ConnectionError("provider down")
 
-    monkeypatch.setattr(main.app.state.assistant, "reply_with_trace", boom)
+    monkeypatch.setattr(client.app.state.assistant, "reply_with_trace", boom)
     response = post(client, body(), token())
     assert response.status_code == 503 and response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
 
 
 def test_health(client):
-    data = client.get("/health").json()
+    data = client.get("/assistant/health").json()
     assert data["status"] == "ok" and data["catalog_version"]
 
 
 @pytest.fixture
 def dev_client():
-    settings = Settings(llm_model="fake", auth_public_key_pem=PUBLIC, dev_endpoints=True)
-    main.app.state.assistant = Assistant(FakeChatModel(), settings)
-    yield TestClient(main.app)
-    del main.app.state.assistant
+    with make_client(dev_endpoints=True) as c:
+        yield c
 
 
 def test_dev_endpoints_are_off_by_default(client):
@@ -104,8 +110,8 @@ def test_dev_chat_as_a_mock_student(dev_client):
 
 
 def test_dev_personas_cannot_read_other_files(dev_client):
-    assert dev_client.get("/v1/dev/personas/..%2F..%2Fapp%2Fconfig").status_code == 404
-    assert dev_client.post("/v1/dev/chat", json={"persona": "../../data/catalog", "message": "hi"}).status_code == 404
+    assert dev_client.get("/v1/dev/personas/..%2F..%2Fconfig").status_code == 404
+    assert dev_client.post("/v1/dev/chat", json={"persona": "../data/catalog", "message": "hi"}).status_code == 404
 
 
 def test_the_openapi_schema_documents_the_request_body(client):
@@ -114,12 +120,12 @@ def test_the_openapi_schema_documents_the_request_body(client):
     assert "ReplyRequest" in json.dumps(body)
 
 
-def test_the_home_page_is_the_test_chat_only_with_dev_endpoints(client):
-    assert client.get("/").json()["docs"] == "/docs"
+def test_the_test_chat_page_is_only_served_with_dev_endpoints(client):
+    assert client.get("/assistant/").status_code == 404
 
 
 def test_the_test_chat_page_is_served_in_dev(dev_client):
-    page = dev_client.get("/")
+    page = dev_client.get("/assistant/")
     assert page.status_code == 200 and "/v1/dev/chat" in page.text
 
 
@@ -133,8 +139,8 @@ def test_dev_chat_shows_the_tools_used(dev_client):
 
 
 def test_provider_keys_in_dotenv_reach_the_environment(tmp_path, monkeypatch):
-    from app import config
-    (tmp_path / ".env").write_text("LLM_MODEL=cohere:command-a-03-2025\nJH_TEST_PROVIDER_KEY=abc\n", encoding="utf-8")
+    from assistant import config
+    (tmp_path / ".env").write_text("ASSISTANT_LLM_MODEL=cohere:command-a-03-2025\nJH_TEST_PROVIDER_KEY=abc\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("JH_TEST_PROVIDER_KEY", raising=False)
     config.get_settings.cache_clear()
@@ -148,13 +154,29 @@ def test_provider_keys_in_dotenv_reach_the_environment(tmp_path, monkeypatch):
 
 
 def test_a_model_that_cannot_start_is_a_503_not_a_crash(monkeypatch):
-    settings = Settings(llm_model="cohere:command-a-03-2025", dev_endpoints=True, auth_disabled=True)
-    monkeypatch.delenv("COHERE_API_KEY", raising=False)
-    monkeypatch.delenv("CO_API_KEY", raising=False)
-    monkeypatch.setattr(main, "get_settings", lambda: settings)
-    if hasattr(main.app.state, "assistant"):
-        del main.app.state.assistant
-    client = TestClient(main.app)
-    assert client.get("/").status_code == 200
+    # The real default model with no Groq key: the assistant answers 503, the Discovery endpoints keep working.
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    discovery = make_settings(fake_models=False, groq_api_key="k")
+    assistant = Settings(_env_file=None, dev_endpoints=True, auth_disabled=True)
+    # No `with`: the startup that would call Groq does not run.
+    client = TestClient(create_app(discovery, assistant_settings=assistant))
+    assert client.get("/assistant/").status_code == 200
     response = client.post("/v1/dev/chat", json={"persona": "new_student", "message": "hi"})
-    assert response.status_code == 503 and "ApiError" in response.json()["error"]["message"]
+    assert response.status_code == 503 and "could not start" in response.json()["error"]["message"]
+    assert client.get("/healthz").status_code == 200
+
+
+def test_fake_models_switches_the_assistant_to_fake():
+    service = create_app(make_settings(), assistant_settings=Settings(_env_file=None, llm_model="groq:x"))
+    assert service.state.assistant_settings.llm_model == "fake"
+
+
+def test_production_ignores_the_local_testing_switches():
+    from app.core.config import Settings as DiscoverySettings
+
+    discovery = DiscoverySettings(_env_file=None, app_env="production", groq_api_key="k", jwt_public_key=PUBLIC)
+    assistant = Settings(_env_file=None, auth_public_key_pem=PUBLIC, auth_disabled=True, dev_endpoints=True)
+    # No `with`: the startup that would call Groq does not run.
+    client = TestClient(create_app(discovery, assistant_settings=assistant))
+    assert client.get("/v1/dev/personas").status_code == 404
+    assert post(client, body()).status_code == 401

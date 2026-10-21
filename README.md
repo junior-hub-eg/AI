@@ -1,13 +1,17 @@
-# Junior Hub - Discovery AI service
+# Junior Hub - AI service
 
-Stateless service behind the **Track Discovery interview**. The backend (.NET) owns the
-interview, the data and the fallback. This service only does the AI work:
+Stateless service behind the **Track Discovery interview** and the **student assistant** (chatbot). The backend
+(.NET) owns the interview, the chats, the data and the fallbacks. This service only does the AI work:
 
 | Endpoint | Does | Models (Groq) |
 |---|---|---|
 | `POST /v1/discovery/turns` | answer (audio or text) in -> transcript + next spoken question out | Whisper (STT), gpt-oss-20b (question), Orpheus (TTS) |
 | `POST /v1/discovery/results` | whole interview in -> exactly 3 ranked tracks with match % | gpt-oss-120b |
-| `GET /healthz`, `/readyz` | probes (never call Groq) | - |
+| `POST /v1/assistant/replies` | a student's question + their data in -> reply, suggestions, links | llama-3.3-70b (tool calling) |
+| `GET /healthz`, `/readyz`, `/assistant/health` | probes (never call Groq) | - |
+
+The student assistant lives in [`assistant/`](assistant/) (from kareem1099/Junior-Hub-Chatbot). See
+[Student assistant](#student-assistant-chatbot) below.
 
 ## Run it in 3 steps
 
@@ -237,3 +241,30 @@ tweaks (e.g. `reasoning_effort` values, Orpheus voice names / terms). Run `pytho
 ## Tests
 
 `pip install -r requirements-dev.txt && pytest`
+
+
+## Student assistant (chatbot)
+
+A chat that answers a student's questions about their own Junior Hub journey (next lesson, XP, badges, squad,
+mentor, practice jobs, Track Discovery result) and explains lesson concepts. Python + LangGraph with any LLM that
+supports tool calling; Groq `llama-3.3-70b-versatile` by default, so it uses the same `GROQ_API_KEY` and has its own
+quota apart from the interview's gpt-oss models.
+
+```
+Frontend --POST /api/v1/assistant/messages--> Backend (.NET): stores the chat, reads the student's data
+                                                 --POST /v1/assistant/replies--> this service (stateless)
+```
+
+- Code: `assistant/` (`main.py` endpoints, `assistant.py` one reply, `tools.py` data tools, `prompt.py` rules).
+  Platform content in `assistant/data/` (sync it after the backend seed changes:
+  `python scripts/sync_assistant_catalog.py <Backend>/src/JuniorHub.Infrastructure/Seeding/Content`).
+- Settings: the `ASSISTANT_*` lines of `.env.example`.
+- Try it locally: set `ASSISTANT_DEV_ENDPOINTS=true` and open http://127.0.0.1:8000/assistant/ (8 mock students,
+  shows the tools used and the data the bot saw), or `python scripts/assistant_chat_cli.py` in the terminal.
+- Tests: `pytest tests/assistant` (no key needed).
+- Docs: [contract](docs/assistant/API.md), [what it knows](docs/assistant/CAPABILITIES.md),
+  [connecting the backend](docs/assistant/INTEGRATION.md).
+
+**Security.** The backend signs each call with RS256, audience `assistant-ai`, with a key pair of its own (not the
+Discovery one). Production needs `ASSISTANT_AUTH_PUBLIC_KEY_PEM`; `ASSISTANT_AUTH_DISABLED` and
+`ASSISTANT_DEV_ENDPOINTS` are ignored when `APP_ENV=production`. Messages and replies are never logged.

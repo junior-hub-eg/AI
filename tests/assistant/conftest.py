@@ -10,9 +10,9 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 
-from app.schemas import AssistantContext, ReplyRequest
+from assistant.schemas import AssistantContext, ReplyRequest
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2] / "assistant"
 PERSONAS = ROOT / "mock" / "contexts"
 
 

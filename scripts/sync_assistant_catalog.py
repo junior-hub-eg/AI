@@ -1,9 +1,9 @@
-"""Build data/catalog.json from the backend seed content, without any quiz questions or answers.
+"""Build assistant/data/catalog.json from the backend seed content, without any quiz questions or answers.
 
 Usage:
-    python scripts/sync_catalog.py [path/to/Seeding/Content]
+    python scripts/sync_assistant_catalog.py [path/to/Backend/src/JuniorHub.Infrastructure/Seeding/Content]
 
-The default path is the backend repo's content folder next to this service. Ids are the same name-based UUIDs the
+The default path is a Backend checkout next to this repo (../Backend). Ids are the same name-based UUIDs the
 backend seed gives its rows (SeedIds.For in the backend), so a lesson id in the context matches a lesson id here.
 """
 
@@ -19,9 +19,9 @@ from pathlib import Path
 SEED_NAMESPACE = uuid.UUID("6f1c3c9e-2b1a-4f7e-9a51-4a1d2c7b9e10")
 
 ROOT = Path(__file__).resolve().parent.parent
-# Default: the service sits inside the backend repo. Pass the path when it lives in its own repo.
-DEFAULT_CONTENT = ROOT.parent / "src" / "JuniorHub.Infrastructure" / "Seeding" / "Content"
-OUTPUT = ROOT / "data" / "catalog.json"
+# Default: a Backend checkout next to this repo. Pass the path otherwise.
+DEFAULT_CONTENT = ROOT.parent / "Backend" / "src" / "JuniorHub.Infrastructure" / "Seeding" / "Content"
+OUTPUT = ROOT / "assistant" / "data" / "catalog.json"
 
 
 def seed_id(kind: str, key: str) -> str:

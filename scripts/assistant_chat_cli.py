@@ -1,10 +1,10 @@
 """Chat with the assistant in the terminal, as one of the mock students, before it is connected to the backend.
 
-    python chat_cli.py                          # pick a persona
-    python chat_cli.py --persona frontend_beginner
-    python chat_cli.py --persona new_student --message "أبدأ منين؟"
+    python scripts/assistant_chat_cli.py                          # pick a persona
+    python scripts/assistant_chat_cli.py --persona frontend_beginner
+    python scripts/assistant_chat_cli.py --persona new_student --message "أبدأ منين؟"
 
-Uses LLM_MODEL from .env ("fake" needs no key but only shows the wiring). Type /reset to clear the history,
+Uses ASSISTANT_LLM_MODEL from .env ("fake" needs no key but only shows the wiring). Type /reset to clear the history,
 /persona to switch student, /quit to leave.
 """
 
@@ -20,13 +20,15 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
-from app.assistant import Assistant  # noqa: E402
-from app.config import get_settings  # noqa: E402
-from app.llm import create_model  # noqa: E402
-from app.schemas import HistoryItem, ReplyRequest  # noqa: E402
+from assistant.assistant import Assistant  # noqa: E402
+from assistant.config import get_settings  # noqa: E402
+from assistant.llm import create_model  # noqa: E402
+from assistant.schemas import HistoryItem, ReplyRequest  # noqa: E402
 
-PERSONAS = Path(__file__).parent / "mock" / "contexts"
+PERSONAS = ROOT / "assistant" / "mock" / "contexts"
 
 if hasattr(sys.stdout, "reconfigure"):  # Arabic on Windows terminals
     sys.stdout.reconfigure(encoding="utf-8")

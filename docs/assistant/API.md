@@ -10,9 +10,9 @@ backend repo). How to connect it step by step: [INTEGRATION.md](INTEGRATION.md).
 | Method and path | Auth | Purpose |
 |---|---|---|
 | `POST /v1/assistant/replies` | Service token | Reply to one student message (below) |
-| `GET /health` | None | `{ "status": "ok", "model", "catalog_version" }` |
+| `GET /assistant/health` | None | `{ "status": "ok", "model", "catalog_version" }` |
 | `GET /docs`, `GET /openapi.json` | None | Interactive docs and the OpenAPI schema |
-| `GET /v1/dev/personas`, `GET /v1/dev/personas/{name}`, `POST /v1/dev/chat` | None | Development only (`DEV_ENDPOINTS=true`): chat as a mock student; 404 otherwise |
+| `GET /v1/dev/personas`, `GET /v1/dev/personas/{name}`, `POST /v1/dev/chat` | None | Development only (`ASSISTANT_DEV_ENDPOINTS=true`): chat as a mock student; 404 otherwise |
 
 Full examples: [examples/reply-request.json](examples/reply-request.json) and
 [examples/reply-response.json](examples/reply-response.json).
@@ -185,7 +185,7 @@ header when sent.
 | 400 | `INVALID_REQUEST` | A field is missing or out of range; `message` names the fields, never their values | Fix the request |
 | 401 | `UNAUTHENTICATED` | Token missing, expired, wrong audience or issuer, or signed with another key. Checked before the body | Check the key pair and the clock |
 | 503 | `PROVIDER_UNAVAILABLE` | The model provider failed | Store and show the fallback reply |
-| 504 | `TIMEOUT` | No reply within `REPLY_TIMEOUT_SECONDS` (18 s by default) | Store and show the fallback reply |
+| 504 | `TIMEOUT` | No reply within `ASSISTANT_REPLY_TIMEOUT_SECONDS` (18 s by default) | Store and show the fallback reply |
 
 Call with a client timeout of 20 s and no automatic retry. Messages and replies are never logged by the service: only
 request id, prompt version, model, latency, topic and tool names.

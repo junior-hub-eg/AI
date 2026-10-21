@@ -1,8 +1,8 @@
 import json
 import uuid
 
-from app.catalog import load_catalog, load_rules
-from tests.conftest import ROOT, load_context
+from assistant.catalog import load_catalog, load_rules
+from tests.assistant.conftest import ROOT, load_context
 
 FORBIDDEN_KEYS = {"correctOptionIndex", "correct_option_index", "options", "helpIfWrong", "help_if_wrong",
                   "explanation", "feedback", "questions", "quiz", "commonQuestions"}

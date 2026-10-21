@@ -1,7 +1,7 @@
 import json
 
-from app.catalog import load_catalog
-from app.tools import (
+from assistant.catalog import load_catalog
+from assistant.tools import (
     find_mentors, find_practice_jobs, get_lesson_help, get_my_achievements, get_my_learning, get_my_squad,
     get_platform_rules, get_track_info,
 )

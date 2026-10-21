@@ -11,9 +11,9 @@ pytest.importorskip("langchain_cohere")
 from cohere import AssistantMessageResponse, ToolCallV2, ToolCallV2Function, V2ChatResponse  # noqa: E402
 from langchain_cohere import ChatCohere  # noqa: E402
 
-from app.assistant import Assistant  # noqa: E402
-from app.config import Settings  # noqa: E402
-from tests.conftest import make_request  # noqa: E402
+from assistant.assistant import Assistant  # noqa: E402
+from assistant.config import Settings  # noqa: E402
+from tests.assistant.conftest import make_request  # noqa: E402
 
 
 def cohere_reply(tool: str, args: dict) -> V2ChatResponse:

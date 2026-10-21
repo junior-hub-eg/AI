@@ -3,11 +3,11 @@ import asyncio
 import pytest
 from langchain_core.messages import AIMessage, ToolMessage
 
-from app.assistant import Assistant, EmptyReply
-from app.config import Settings
-from app.fake_llm import FakeChatModel
-from app.tools import RESPOND
-from tests.conftest import ScriptedModel, make_request, tool_call
+from assistant.assistant import Assistant, EmptyReply
+from assistant.config import Settings
+from assistant.fake_llm import FakeChatModel
+from assistant.tools import RESPOND
+from tests.assistant.conftest import ScriptedModel, make_request, tool_call
 
 SETTINGS = Settings(llm_model="scripted", max_steps=3, auth_disabled=True)
 

@@ -30,31 +30,31 @@ Locally:
 cd assistant-ai
 python -m venv .venv && .venv\Scripts\activate        # source .venv/bin/activate on Linux/macOS
 pip install -r requirements.txt langchain-cohere       # or the package of your provider
-copy .env.example .env                                 # set LLM_MODEL and the provider key
-uvicorn app.main:app --port 8010
+copy .env.example .env                                 # set ASSISTANT_LLM_MODEL and the provider key
+uvicorn app.main:create_app --factory --port 8000
 ```
 
 On Windows `powershell -ExecutionPolicy Bypass -File .\run.ps1 -Api` does all of that. Interactive docs:
-http://localhost:8010/docs.
+http://localhost:8000/docs.
 
 With Docker:
 
 ```bash
 docker build -t junior-hub-assistant .                     # Cohere by default; --build-arg PROVIDER_PACKAGE=langchain-openai for OpenAI
-docker run -p 8010:8010 -e LLM_MODEL=cohere:command-a-03-2025 -e COHERE_API_KEY=... \
-  -e AUTH_PUBLIC_KEY_PEM="$(cat assistant-ai-public.pem)" junior-hub-assistant
+docker run -p 8010:8010 -e ASSISTANT_LLM_MODEL=cohere:command-a-03-2025 -e COHERE_API_KEY=... \
+  -e ASSISTANT_AUTH_PUBLIC_KEY_PEM="$(cat assistant-ai-public.pem)" junior-hub-assistant
 ```
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `LLM_MODEL` | `fake` | `provider:model`, for example `cohere:command-a-03-2025`, `openai:gpt-4.1-mini`, `google_genai:gemini-2.5-flash`. `fake` answers without a model (wiring checks only) |
+| `ASSISTANT_LLM_MODEL` | `fake` | `provider:model`, for example `cohere:command-a-03-2025`, `openai:gpt-4.1-mini`, `google_genai:gemini-2.5-flash`. `fake` answers without a model (wiring checks only) |
 | `<PROVIDER>_API_KEY` | | The provider's key, for example `COHERE_API_KEY`, `OPENAI_API_KEY` or `GOOGLE_API_KEY` |
-| `AUTH_PUBLIC_KEY_PEM` or `AUTH_PUBLIC_KEY_FILE` | | Public key that checks the backend's service token |
-| `AUTH_AUDIENCE`, `AUTH_ISSUER` | `assistant-ai`, `JuniorHub.Api` | Expected token audience and issuer |
-| `REPLY_TIMEOUT_SECONDS` | `18` | The service answers 504 after this; the backend's own timeout should be 20 s |
-| `MAX_STEPS` | `4` | Data lookups per reply before the model must answer |
-| `LLM_TOOL_CHOICE` | `any` | `auto` for a provider that cannot force tool calls |
-| `AUTH_DISABLED`, `DEV_ENDPOINTS` | `false` | Local testing only. Never in production |
+| `ASSISTANT_AUTH_PUBLIC_KEY_PEM` or `ASSISTANT_AUTH_PUBLIC_KEY_FILE` | | Public key that checks the backend's service token |
+| `ASSISTANT_AUTH_AUDIENCE`, `ASSISTANT_AUTH_ISSUER` | `assistant-ai`, `JuniorHub.Api` | Expected token audience and issuer |
+| `ASSISTANT_REPLY_TIMEOUT_SECONDS` | `18` | The service answers 504 after this; the backend's own timeout should be 20 s |
+| `ASSISTANT_MAX_STEPS` | `4` | Data lookups per reply before the model must answer |
+| `ASSISTANT_LLM_TOOL_CHOICE` | `any` | `auto` for a provider that cannot force tool calls |
+| `ASSISTANT_AUTH_DISABLED`, `ASSISTANT_DEV_ENDPOINTS` | `false` | Local testing only. Never in production |
 
 ## 2. Keys
 
@@ -66,7 +66,7 @@ openssl rsa -in assistant-ai-private.pem -pubout -out assistant-ai-public.pem
 ```
 
 The private key goes to the backend's secret store (for example `AssistantAi__SigningKeyPem`), the public key to the
-service (`AUTH_PUBLIC_KEY_PEM`). The token is the same as Discovery's with another audience: RS256, `iss`
+service (`ASSISTANT_AUTH_PUBLIC_KEY_PEM`). The token is the same as Discovery's with another audience: RS256, `iss`
 `JuniorHub.Api`, `aud` `assistant-ai`, `iat`, `nbf`, `exp` 5 minutes later, a `jti`. `ServiceTokenSigner` can sign it
 if it takes the key, issuer and audience as parameters (see the diff in CHANGES-TO-EXISTING-FILES.md).
 
@@ -161,18 +161,18 @@ Content-Type: application/json
 
 ## 7. Test
 
-Without the backend, with the service's mock students (`DEV_ENDPOINTS=true`):
+Without the backend, with the service's mock students (`ASSISTANT_DEV_ENDPOINTS=true`):
 
 ```bash
-curl http://localhost:8010/v1/dev/personas
-curl -X POST http://localhost:8010/v1/dev/chat -H "Content-Type: application/json" \
+curl http://localhost:8000/v1/dev/personas
+curl -X POST http://localhost:8000/v1/dev/chat -H "Content-Type: application/json" \
   -d '{"persona": "frontend_beginner", "message": "الدرس الجاي إيه؟"}'
 ```
 
-With a full request (`AUTH_DISABLED=true` locally, or a real token):
+With a full request (`ASSISTANT_AUTH_DISABLED=true` locally, or a real token):
 
 ```bash
-curl -X POST http://localhost:8010/v1/assistant/replies -H "Content-Type: application/json" \
+curl -X POST http://localhost:8000/v1/assistant/replies -H "Content-Type: application/json" \
   -d @docs/examples/reply-request.json
 ```
 
