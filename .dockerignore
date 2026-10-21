@@ -1,9 +1,0 @@
-.venv
-.env
-*.pem
-tests
-mock
-docs
-scripts
-__pycache__
-.pytest_cache
