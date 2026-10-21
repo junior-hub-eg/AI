@@ -1,0 +1,211 @@
+{
+  "today": "2026-10-20",
+  "student": {
+    "grade": null,
+    "is_independent": true,
+    "total_xp": 105,
+    "streak_days": 6,
+    "last_active_date": "2026-10-20"
+  },
+  "discovery": {
+    "status": "Completed",
+    "path": "KnowsTrack",
+    "completed_utc": "2026-10-05T18:00:00Z",
+    "summary": "You already build small web pages on your own. Frontend fits you best, and Data is a good second track.",
+    "recommendations": [
+      {
+        "rank": 1,
+        "track_code": "FRONTEND",
+        "match_percent": 91,
+        "reason": "You already make web pages for fun.",
+        "level": "Intermediate",
+        "level_reason": "You followed tutorials and built a small page yourself."
+      },
+      {
+        "rank": 2,
+        "track_code": "DATA",
+        "match_percent": 70,
+        "reason": "You like charts and scores.",
+        "level": "Beginner",
+        "level_reason": "You have not worked with data yet."
+      },
+      {
+        "rank": 3,
+        "track_code": "TESTING",
+        "match_percent": 58,
+        "reason": "You notice small mistakes quickly.",
+        "level": "Beginner",
+        "level_reason": "You will start from the first steps."
+      }
+    ]
+  },
+  "tracks": [
+    {
+      "code": "FRONTEND",
+      "name": "Frontend",
+      "level": "Intermediate",
+      "source": "Recommended",
+      "in_focus": true,
+      "selected_utc": "2026-10-05T18:05:00Z",
+      "lessons_done": 2,
+      "lessons_total": 4
+    },
+    {
+      "code": "DATA",
+      "name": "Data",
+      "level": "Beginner",
+      "source": "Recommended",
+      "in_focus": false,
+      "selected_utc": "2026-10-09T17:00:00Z",
+      "lessons_done": 0,
+      "lessons_total": 0
+    }
+  ],
+  "exploration": [
+    {
+      "track_code": "FRONTEND",
+      "videos_completed": 2,
+      "videos_total": 2,
+      "quiz_passed": true,
+      "best_quiz_score": 3,
+      "quiz_total": 3
+    },
+    {
+      "track_code": "DATA",
+      "videos_completed": 1,
+      "videos_total": 1,
+      "quiz_passed": true,
+      "best_quiz_score": 2,
+      "quiz_total": 3
+    }
+  ],
+  "learning": {
+    "track_code": "FRONTEND",
+    "next_lesson_id": "ba7566ab-2368-5e26-9331-4ae0f818d782",
+    "lessons": [
+      {
+        "id": "a7e66346-4ec9-5e85-857e-7dd8e455cb6e",
+        "module": "Module 1: Thinking in code",
+        "title": "Variables",
+        "concept": "variables",
+        "level": "Beginner",
+        "status": "NotStarted",
+        "current_step": null,
+        "quiz_attempts": 0,
+        "in_path": false,
+        "school_link": {
+          "subject": "Math",
+          "title": "Substituting values in expressions"
+        }
+      },
+      {
+        "id": "dab266be-e6a4-5efd-a5f4-503784941482",
+        "module": "Module 1: Thinking in code",
+        "title": "Functions",
+        "concept": "functions",
+        "level": "Beginner",
+        "status": "NotStarted",
+        "current_step": null,
+        "quiz_attempts": 0,
+        "in_path": false,
+        "school_link": {
+          "subject": "Math",
+          "title": "Linear functions"
+        }
+      },
+      {
+        "id": "1d360a3e-2cf9-5742-a873-c2dc7c841d46",
+        "module": "Module 1: Thinking in code",
+        "title": "Conditions",
+        "concept": "conditions",
+        "level": "Intermediate",
+        "status": "Done",
+        "current_step": "Done",
+        "quiz_attempts": 2,
+        "in_path": true,
+        "school_link": {
+          "subject": "Math",
+          "title": "Inequalities"
+        }
+      },
+      {
+        "id": "ba7566ab-2368-5e26-9331-4ae0f818d782",
+        "module": "Module 1: Thinking in code",
+        "title": "Functions with two inputs",
+        "concept": "functions",
+        "level": "Advanced",
+        "status": "InProgress",
+        "current_step": "Quiz",
+        "quiz_attempts": 1,
+        "in_path": true,
+        "school_link": {
+          "subject": "Science",
+          "title": "Speed, distance and time"
+        }
+      }
+    ]
+  },
+  "achievements": {
+    "badges": [
+      {
+        "code": "LINK_MATH_INEQUALITIES",
+        "name": "Linked to Math · Inequalities",
+        "type": "SubjectLink",
+        "earned_utc": "2026-10-08T19:00:00Z"
+      }
+    ],
+    "recent_xp": [
+      {
+        "reason": "SimulationCompleted",
+        "points": 30,
+        "created_utc": "2026-10-18T20:00:00Z"
+      },
+      {
+        "reason": "TrackQuizPassed",
+        "points": 10,
+        "created_utc": "2026-10-09T17:30:00Z"
+      },
+      {
+        "reason": "VideoWatched",
+        "points": 5,
+        "created_utc": "2026-10-09T17:10:00Z"
+      },
+      {
+        "reason": "LessonPassed",
+        "points": 40,
+        "created_utc": "2026-10-08T19:00:00Z"
+      },
+      {
+        "reason": "TrackQuizPassed",
+        "points": 10,
+        "created_utc": "2026-10-06T18:00:00Z"
+      },
+      {
+        "reason": "VideoWatched",
+        "points": 5,
+        "created_utc": "2026-10-06T17:40:00Z"
+      },
+      {
+        "reason": "VideoWatched",
+        "points": 5,
+        "created_utc": "2026-10-06T17:30:00Z"
+      }
+    ]
+  },
+  "squad": null,
+  "mentor": null,
+  "recruitment": {
+    "applications": [
+      {
+        "role": "Junior Frontend Developer",
+        "company_name": "Pixel Lane Studio",
+        "track_code": "FRONTEND",
+        "level": "Beginner",
+        "status": "InterviewPassed",
+        "attempts": 2,
+        "best_score_percent": 80,
+        "certificate_code": "JH-SIM-4F7K2Q"
+      }
+    ]
+  }
+}
