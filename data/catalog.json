@@ -1,0 +1,344 @@
+{
+  "tracks": [
+    {
+      "code": "MOBILE",
+      "name": "Mobile",
+      "short_description": "Build apps people carry in their pocket.",
+      "profile": "Mobile developers build apps for phones and tablets. They enjoy making something friends and family can install and use every day, care about how an app feels to touch, and like testing ideas on a real device right away.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "A day as a mobile developer",
+          "duration_seconds": 95
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "FRONTEND",
+      "name": "Frontend",
+      "short_description": "Build the screens people see and click.",
+      "profile": "Frontend developers build the part of websites and apps that people see and click. They enjoy seeing their work on screen right away, like both how things look and how they work, and turn designs into real pages with code.",
+      "has_lessons": true,
+      "videos": [
+        {
+          "title": "What a frontend developer does",
+          "duration_seconds": 90
+        },
+        {
+          "title": "From design to a real web page",
+          "duration_seconds": 110
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "BACKEND",
+      "name": "Backend",
+      "short_description": "Build the engine behind apps: data, logic and servers.",
+      "profile": "Backend developers build the hidden engine of apps: servers, databases and the rules that decide what happens when a user presses a button. They enjoy solving logic puzzles, organising information and making things work reliably.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "What happens after you press Send",
+          "duration_seconds": 100
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "UIUX",
+      "name": "UI/UX",
+      "short_description": "Design apps that are clear, beautiful and easy to use.",
+      "profile": "UI/UX designers decide how an app looks and how easy it is to use. They enjoy drawing, choosing colours and layouts, watching how people use things and making confusing things simple.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "Designing an app people love",
+          "duration_seconds": 85
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "AI",
+      "name": "AI",
+      "short_description": "Teach computers to learn from examples.",
+      "profile": "AI engineers build programs that learn from examples, such as recognising pictures or understanding speech. They enjoy maths, patterns, asking why things happen and experimenting until a model gets better.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "How a computer learns from examples",
+          "duration_seconds": 105
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "TESTING",
+      "name": "Testing",
+      "short_description": "Find bugs before users do.",
+      "profile": "Software testers find problems before users do. They enjoy noticing small details, trying unusual things to see what breaks, explaining problems clearly and making sure a product is safe to release.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "The detective work of software testing",
+          "duration_seconds": 80
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "DATA",
+      "name": "Data",
+      "short_description": "Turn numbers into answers and charts.",
+      "profile": "Data analysts turn numbers into answers. They enjoy finding patterns, making charts, asking questions like which is the most popular and using facts to help people decide.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "Finding stories in numbers",
+          "duration_seconds": 95
+        }
+      ],
+      "quiz_question_count": 3
+    },
+    {
+      "code": "GAMING",
+      "name": "Gaming",
+      "short_description": "Create the games you want to play.",
+      "profile": "Game developers create games: the rules, the characters, the levels and the code that makes them move. They enjoy playing and imagining games, telling stories, and tuning things until they are fun.",
+      "has_lessons": false,
+      "videos": [
+        {
+          "title": "How a game is made",
+          "duration_seconds": 115
+        }
+      ],
+      "quiz_question_count": 3
+    }
+  ],
+  "modules": [
+    {
+      "track_code": "FRONTEND",
+      "title": "Module 1: Thinking in code",
+      "lessons": [
+        {
+          "id": "a7e66346-4ec9-5e85-857e-7dd8e455cb6e",
+          "title": "Variables",
+          "concept": "variables",
+          "level": "Beginner",
+          "duration_seconds": 240,
+          "try_it_starter_code": "let x = 4;\nconsole.log(3 * x + 2);",
+          "try_it_expected_output": "14",
+          "quiz_question_count": 3,
+          "school_link": {
+            "subject": "Math",
+            "grade": 9,
+            "unit": "Algebra",
+            "title": "Substituting values in expressions",
+            "school_example": "If x = 4, then 3x + 2 = 3 × 4 + 2 = 14",
+            "bridge_text": "In code, a variable is the same as x in algebra: a name that holds a value you can use in a calculation.",
+            "badge": {
+              "code": "LINK_MATH_VARIABLES",
+              "name": "Linked to Math · Variables"
+            }
+          }
+        },
+        {
+          "id": "dab266be-e6a4-5efd-a5f4-503784941482",
+          "title": "Functions",
+          "concept": "functions",
+          "level": "Beginner",
+          "duration_seconds": 270,
+          "try_it_starter_code": "function f(x) {\n  return 2 * x + 3;\n}\n\nconsole.log(f(5));",
+          "try_it_expected_output": "13",
+          "quiz_question_count": 3,
+          "school_link": {
+            "subject": "Math",
+            "grade": 9,
+            "unit": "Algebra",
+            "title": "Linear functions",
+            "school_example": "f(x) = 2x + 3, so f(5) = 13",
+            "bridge_text": "A function in code works like f(x) in maths: you give it an input and it returns an output.",
+            "badge": {
+              "code": "LINK_MATH_FUNCTIONS",
+              "name": "Linked to Math · Functions"
+            }
+          }
+        },
+        {
+          "id": "1d360a3e-2cf9-5742-a873-c2dc7c841d46",
+          "title": "Conditions",
+          "concept": "conditions",
+          "level": "Intermediate",
+          "duration_seconds": 255,
+          "try_it_starter_code": "let x = 4;\n\nif (2 * x + 3 > 10) {\n  console.log(\"yes\");\n} else {\n  console.log(\"no\");\n}",
+          "try_it_expected_output": "yes",
+          "quiz_question_count": 3,
+          "school_link": {
+            "subject": "Math",
+            "grade": 9,
+            "unit": "Algebra",
+            "title": "Inequalities",
+            "school_example": "Is 2x + 3 > 10 when x = 4? 2 × 4 + 3 = 11, and 11 > 10, so yes",
+            "bridge_text": "An if in code checks an inequality, just like at school, and then chooses what to do.",
+            "badge": {
+              "code": "LINK_MATH_INEQUALITIES",
+              "name": "Linked to Math · Inequalities"
+            }
+          }
+        },
+        {
+          "id": "ba7566ab-2368-5e26-9331-4ae0f818d782",
+          "title": "Functions with two inputs",
+          "concept": "functions",
+          "level": "Advanced",
+          "duration_seconds": 260,
+          "try_it_starter_code": "function speed(distance, time) {\n  return distance / time;\n}\n\nconsole.log(speed(120, 2));",
+          "try_it_expected_output": "60",
+          "quiz_question_count": 3,
+          "school_link": {
+            "subject": "Science",
+            "grade": 9,
+            "unit": "Motion",
+            "title": "Speed, distance and time",
+            "school_example": "speed = distance ÷ time, so 120 km in 2 h = 60 km/h",
+            "bridge_text": "A function can take two inputs, like distance and time, and return one answer: the speed.",
+            "badge": {
+              "code": "LINK_SCIENCE_SPEED",
+              "name": "Linked to Science · Speed"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mentors": [
+    {
+      "id": "a02b6812-3aba-5b42-94ea-3784f161d85e",
+      "full_name": "Sara El-Masry",
+      "title": "Senior Frontend Engineer",
+      "track_code": "FRONTEND",
+      "years_of_experience": 8,
+      "rating": 4.9,
+      "languages": "English, Arabic",
+      "availability": "Tue and Thu evenings",
+      "skills": "JavaScript, React, CSS, Accessibility",
+      "bio": "Sara builds web apps used by millions of people. She loves helping beginners turn their first idea into a real page and believes every good developer starts by being curious."
+    },
+    {
+      "id": "634de376-6902-5345-840c-59c580cdb44b",
+      "full_name": "Omar Fawzy",
+      "title": "Frontend Developer",
+      "track_code": "FRONTEND",
+      "years_of_experience": 4,
+      "rating": 4.7,
+      "languages": "Arabic, English",
+      "availability": "Sat and Mon afternoons",
+      "skills": "HTML, CSS, JavaScript, Animations",
+      "bio": "Omar started coding at school by making small games in the browser. Today he builds websites for startups and enjoys explaining code with simple, everyday examples."
+    },
+    {
+      "id": "7be1ec0a-c915-5313-9e59-eb9d5c501383",
+      "full_name": "Nadia Hassan",
+      "title": "Backend Engineer",
+      "track_code": "BACKEND",
+      "years_of_experience": 7,
+      "rating": 4.8,
+      "languages": "English, Arabic",
+      "availability": "Wed evenings",
+      "skills": "C#, .NET, SQL, APIs",
+      "bio": "Nadia designs the systems that keep apps running behind the scenes. She enjoys logic puzzles and teaching students how data moves through an app."
+    },
+    {
+      "id": "482b915c-0f6b-50ef-bafa-735e708391d4",
+      "full_name": "Layla Adel",
+      "title": "Product Designer",
+      "track_code": "UIUX",
+      "years_of_experience": 6,
+      "rating": 4.9,
+      "languages": "English, Arabic",
+      "availability": "Sun and Tue evenings",
+      "skills": "Figma, User research, Prototyping",
+      "bio": "Layla designs apps that are simple and friendly. She teaches students to watch how people use things and to sketch many ideas before choosing one."
+    },
+    {
+      "id": "20474278-6c80-51d7-92f4-66b7ca2cb791",
+      "full_name": "Karim Nabil",
+      "title": "Machine Learning Engineer",
+      "track_code": "AI",
+      "years_of_experience": 5,
+      "rating": 4.6,
+      "languages": "English",
+      "availability": "Thu evenings",
+      "skills": "Python, Machine learning, Data",
+      "bio": "Karim teaches computers to recognise images and speech. He likes showing students that the maths they learn at school is what makes AI work."
+    },
+    {
+      "id": "671bce05-2101-5e1f-adf3-fc40779948e4",
+      "full_name": "Hana Youssef",
+      "title": "Data Analyst",
+      "track_code": "DATA",
+      "years_of_experience": 4,
+      "rating": 4.7,
+      "languages": "Arabic, English",
+      "availability": "Mon and Wed afternoons",
+      "skills": "SQL, Spreadsheets, Charts, Python",
+      "bio": "Hana finds stories hidden in numbers. She helps students ask good questions and answer them with clear charts."
+    },
+    {
+      "id": "7de8d2cd-3767-5b23-9020-3144306d344b",
+      "full_name": "Tarek Mansour",
+      "title": "Mobile Developer",
+      "track_code": "MOBILE",
+      "years_of_experience": 6,
+      "rating": 4.8,
+      "languages": "English, Arabic",
+      "availability": "Sat mornings",
+      "skills": "Flutter, Kotlin, Swift",
+      "bio": "Tarek has built apps for shops, schools and clinics. He loves seeing students install their first app on their own phone."
+    }
+  ],
+  "jobs": {
+    "disclaimer": "Practice only. These are not real jobs.",
+    "items": [
+      {
+        "company_name": "Pixel Lane Studio",
+        "role": "Junior Frontend Developer",
+        "track_code": "FRONTEND",
+        "level": "Beginner",
+        "skills": "HTML, CSS, JavaScript",
+        "description": "Pixel Lane Studio builds websites for local shops. In this practice role you would turn designs into web pages and fix small layout problems.",
+        "question_count": 2
+      },
+      {
+        "company_name": "Bright Canvas Design",
+        "role": "Junior UI/UX Designer",
+        "track_code": "UIUX",
+        "level": "Beginner",
+        "skills": "Sketching, Figma, Colour and layout",
+        "description": "Bright Canvas Design creates apps for schools. In this practice role you would sketch screens and test them with students.",
+        "question_count": 2
+      },
+      {
+        "company_name": "Nile Numbers",
+        "role": "Junior Data Analyst",
+        "track_code": "DATA",
+        "level": "Beginner",
+        "skills": "Spreadsheets, Charts, Basic statistics",
+        "description": "Nile Numbers helps small businesses understand their sales. In this practice role you would clean data and make simple charts.",
+        "question_count": 2
+      },
+      {
+        "company_name": "Careful Code Lab",
+        "role": "Junior Software Tester",
+        "track_code": "TESTING",
+        "level": "Intermediate",
+        "skills": "Attention to detail, Writing test cases, Bug reports",
+        "description": "Careful Code Lab tests apps before they are released. In this practice role you would find bugs and write clear reports.",
+        "question_count": 2
+      }
+    ]
+  },
+  "version": "c1628ecdd610"
+}
