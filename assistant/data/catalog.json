@@ -120,7 +120,85 @@
   "modules": [
     {
       "track_code": "FRONTEND",
-      "title": "Module 1: Thinking in code",
+      "title": "HTML",
+      "lessons": [
+        {
+          "id": "d1a0ad3c-a128-539b-9c28-e42881ec31df",
+          "title": "Elements and tags",
+          "concept": "A page is built from elements like <h1>, <p> and <a>, each opened and closed with tags.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "1f3f5e62-0d66-5789-baf2-5ee7a5984703",
+          "title": "Links, images and lists",
+          "concept": "Attributes like href, src and alt give elements their address and meaning.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "a7d4776b-a146-5f20-a135-6ce081aed892",
+          "title": "Forms and semantic HTML",
+          "concept": "Forms collect input, and semantic tags like <header>, <nav> and <main> explain the page's parts.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "CSS",
+      "lessons": [
+        {
+          "id": "7ece0b33-6994-5cc2-be76-08164d476eef",
+          "title": "Selectors and colours",
+          "concept": "CSS rules pick elements with selectors and set properties like color and font-size.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "28db5587-baca-5579-ba6d-54e94f0de045",
+          "title": "The box model",
+          "concept": "Every element is a box of content, padding, border and margin.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "6e81cfe5-0144-5529-86c7-96be1bfe1fc3",
+          "title": "Flexbox and responsive design",
+          "concept": "Flexbox lines up items in a row or column, and media queries change styles for small screens.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "JavaScript",
       "lessons": [
         {
           "id": "a7e66346-4ec9-5e85-857e-7dd8e455cb6e",
@@ -211,6 +289,1371 @@
           }
         }
       ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "Bootstrap",
+      "lessons": [
+        {
+          "id": "46016ed7-b028-5455-b793-6d80a3ac649d",
+          "title": "Classes and components",
+          "concept": "Bootstrap gives ready classes like btn and card, so you style by adding class names.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "39614865-ffb8-5b80-b69c-80091a488d89",
+          "title": "The grid system",
+          "concept": "Rows hold 12 columns; col-md-6 takes half the row on medium screens and up.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "d73b5c3b-6002-53fe-a1a5-560f232ead2f",
+          "title": "Utilities and customising",
+          "concept": "Utility classes like mt-3 and d-flex style quickly, and Sass variables change Bootstrap's theme.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "Tailwind CSS",
+      "lessons": [
+        {
+          "id": "3d7ef7f6-a43b-5bdf-a39c-898f1a5cd0d2",
+          "title": "Utility classes",
+          "concept": "Each Tailwind class does one thing, like p-4 for padding or text-lg for font size.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "642562f3-566e-500b-aa39-281d45b1689d",
+          "title": "Responsive and states",
+          "concept": "Prefixes like md: and hover: apply a class only on bigger screens or on hover.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e6ec19f7-11ab-52b1-b401-61f4a762c213",
+          "title": "Theme and components",
+          "concept": "The Tailwind config adds your own colours, and you reuse class sets as components.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "React",
+      "lessons": [
+        {
+          "id": "cd95e846-8f39-54be-b65f-45e0c574f699",
+          "title": "Components and JSX",
+          "concept": "A component is a function that returns JSX, which looks like HTML inside JavaScript.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const names = ['Aya', 'Omar', 'Mona'];\nconst items = names.map(n => '<li>' + n + '</li>');\nconsole.log(items.length);",
+          "try_it_expected_output": "3",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "b81ca79c-e50e-545e-942d-0ef56ccffb6c",
+          "title": "Props and state",
+          "concept": "Props pass data into a component; state is data a component remembers and changes.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": "let count = 0;\nfunction setCount(next) { count = next; }\nsetCount(count + 1);\nsetCount(count + 1);\nconsole.log(count);",
+          "try_it_expected_output": "2",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "7b4128d4-d3d4-58b6-a066-9d199ab80835",
+          "title": "Effects and fetching data",
+          "concept": "useEffect runs code after rendering, for example to load data from an API.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": "const users = [{ name: 'Aya', active: true }, { name: 'Omar', active: false }, { name: 'Mona', active: true }];\nconst active = users.filter(u => u.active).map(u => u.name);\nconsole.log(active.join(', '));",
+          "try_it_expected_output": "Aya, Mona",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "Angular",
+      "lessons": [
+        {
+          "id": "df9b168d-a67d-5be5-95c4-f3834099e2c7",
+          "title": "Components and templates",
+          "concept": "An Angular component has a TypeScript class and an HTML template that shows its data.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "fa3fc9cb-89b2-5fb3-9842-383b38752e1a",
+          "title": "Binding and directives",
+          "concept": "Bindings connect the class and the template; directives like *ngFor repeat elements.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "a82453ec-0ac8-57a3-b2b4-cbecf2db9d58",
+          "title": "Services and routing",
+          "concept": "Services hold shared logic like API calls, and the router shows a component for each URL.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "FRONTEND",
+      "title": "Next.js",
+      "lessons": [
+        {
+          "id": "05f2b6ca-8d76-529c-af3f-ba017edc501b",
+          "title": "Pages and routing",
+          "concept": "In the Next.js app folder, each folder with a page file becomes a URL.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "cc77b849-76f0-5005-ab00-5dbd4af6ac26",
+          "title": "Server and client components",
+          "concept": "Server components render on the server; add \"use client\" for state and clicks in the browser.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "46200202-1435-5103-ad0b-d6f5d170ca62",
+          "title": "Data, images and deployment",
+          "concept": "Next.js caches data, optimises images with next/image and deploys easily, for example on Vercel.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "BACKEND",
+      "title": "Programming with C#",
+      "lessons": [
+        {
+          "id": "175540b8-67f5-5482-a1a9-f467be454ae0",
+          "title": "Variables and types",
+          "concept": "C# variables have a type, like int for whole numbers and string for text.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "39b2ced6-ab79-5e13-9cf5-a808b5a018f2",
+          "title": "Methods and classes",
+          "concept": "A class groups data and methods; an object is one thing made from a class.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "d3c67e90-4c8c-5110-be01-3d9887199293",
+          "title": "Lists, LINQ and async",
+          "concept": "LINQ filters and sorts lists, and async/await waits for slow work like a database without blocking.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "BACKEND",
+      "title": "Databases and SQL",
+      "lessons": [
+        {
+          "id": "4da3af08-2482-5781-9fb0-53ca4c1da96b",
+          "title": "Tables and SELECT",
+          "concept": "A database keeps data in tables of rows and columns, and SELECT reads it.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "88c7403b-b405-5ede-b133-828caaf791dd",
+          "title": "Keys and JOIN",
+          "concept": "A primary key identifies each row, and a JOIN combines rows from two tables by their keys.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "69a0fbb1-c43d-57c1-a020-d0fe4289e75e",
+          "title": "Indexes and transactions",
+          "concept": "Indexes make searches fast, and transactions make several changes happen all together or not at all.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "BACKEND",
+      "title": "Web APIs",
+      "lessons": [
+        {
+          "id": "1fb286d1-b5f0-52b1-9731-209c7deedb71",
+          "title": "HTTP and JSON",
+          "concept": "Apps send HTTP requests like GET and POST, and APIs answer with JSON and a status code.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "376e42b3-2c77-5d71-9186-c173c247bdb6",
+          "title": "Endpoints and controllers",
+          "concept": "In ASP.NET Core a controller method answers one route, like GET /api/v1/tracks.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "cabaab4e-1e2a-5344-b6c1-fff4752a2035",
+          "title": "Validation and errors",
+          "concept": "Good APIs check input and answer with clear errors, like 400 with the field that is wrong.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "BACKEND",
+      "title": "Authentication and security",
+      "lessons": [
+        {
+          "id": "e02130e2-5663-5844-840b-5b323855f9e1",
+          "title": "Passwords and hashing",
+          "concept": "Servers store a hash of each password, never the password itself.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "ad4742ef-ede1-5266-84d2-e4d559feaf58",
+          "title": "Tokens and sessions",
+          "concept": "After sign-in the server gives a token (like a JWT) that the app sends with each request.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "fc15e7b1-66d2-51c6-922d-08dccbe041f6",
+          "title": "Common attacks",
+          "concept": "Know attacks like SQL injection and XSS, and stop them with parameters, encoding and checks.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "BACKEND",
+      "title": "Testing and deployment",
+      "lessons": [
+        {
+          "id": "a2d3a498-6725-5305-aeeb-461d06a13490",
+          "title": "Automated tests",
+          "concept": "Tests run your code with known inputs and check the result, every time you change something.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "a2c07db5-7a85-56d7-a142-0ea56c9dfcb2",
+          "title": "Configuration and environments",
+          "concept": "The same app runs in Development and Production with different settings, kept out of the code.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "1780ab15-47a1-5bc8-b080-32184e3e116c",
+          "title": "CI/CD and monitoring",
+          "concept": "A pipeline builds, tests and deploys automatically, and health checks and logs show if the app is well.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "MOBILE",
+      "title": "Mobile UI basics",
+      "lessons": [
+        {
+          "id": "1c141d35-bbdf-5f5e-84bf-5c192cf0c230",
+          "title": "Screens and touch",
+          "concept": "Mobile screens are small and touched with fingers, so buttons are big and layouts simple.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "300cedc6-ad14-5262-a92b-8f87a0befdff",
+          "title": "Navigation patterns",
+          "concept": "Apps move between screens with stacks, tabs and drawers, and the back gesture returns.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "c8910675-e738-5c4a-a4ec-ad8e7af873a7",
+          "title": "Accessibility and dark mode",
+          "concept": "Good apps support screen readers, larger text and dark mode.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "MOBILE",
+      "title": "Flutter",
+      "lessons": [
+        {
+          "id": "ccfe7c67-73b1-5949-b5a7-b0a7ccf3173a",
+          "title": "Widgets",
+          "concept": "In Flutter everything on screen is a widget, like Text, Row and Button.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "44f54680-7fc2-545a-9119-9ae80874edc2",
+          "title": "Stateful widgets",
+          "concept": "A StatefulWidget keeps data that changes; setState redraws it.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "c3773598-5869-5e29-befe-96b122b67986",
+          "title": "Navigation and APIs",
+          "concept": "Navigator moves between screens, and the http package loads data from APIs with async code.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "MOBILE",
+      "title": "React Native",
+      "lessons": [
+        {
+          "id": "e72ff6ec-0f17-5226-88f5-8391eb838091",
+          "title": "Core components",
+          "concept": "React Native uses View, Text and Pressable instead of div, p and button.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const screens = ['Home', 'Search', 'Profile'];\nconsole.log(screens.indexOf('Profile') + 1);",
+          "try_it_expected_output": "3",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "33f2a4a5-ded5-5fdc-807a-1c06c5af33f5",
+          "title": "Lists and state",
+          "concept": "FlatList shows long lists fast, and useState keeps what the user types or chooses.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const cart = [{ item: 'Pen', price: 5 }, { item: 'Book', price: 20 }];\nconst total = cart.reduce((sum, c) => sum + c.price, 0);\nconsole.log(total);",
+          "try_it_expected_output": "25",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "8a50ffce-5c94-5189-bcc2-13712f2f6262",
+          "title": "Device features",
+          "concept": "Apps ask permission to use the camera or location, and save data on the phone for offline use.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": "const saved = JSON.stringify({ theme: 'dark', lang: 'en' });\nconst back = JSON.parse(saved);\nconsole.log(back.theme);",
+          "try_it_expected_output": "dark",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "MOBILE",
+      "title": "Publishing apps",
+      "lessons": [
+        {
+          "id": "696df695-af43-544b-ae5c-be323b79f19d",
+          "title": "Testing on devices",
+          "concept": "Test on real phones of different sizes, not only on the simulator.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e1539259-eb71-538f-95d5-5762a3ab1614",
+          "title": "App stores",
+          "concept": "Google Play and the App Store review apps and need icons, screenshots and a privacy policy.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "75254ff3-c90f-5929-ab7e-3b39de501483",
+          "title": "Updates and feedback",
+          "concept": "After launch, crash reports, ratings and analytics show what to fix next.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "UIUX",
+      "title": "Design basics",
+      "lessons": [
+        {
+          "id": "83c657fc-01ee-5903-a966-02b2a6e65cfd",
+          "title": "Visual hierarchy",
+          "concept": "Size, colour and position show what matters most on a screen.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "b9e62716-3a46-5385-a570-cd2a8f0e9044",
+          "title": "Colour and typography",
+          "concept": "Pick a small palette and readable fonts, and keep enough contrast.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "c895f87d-d513-590d-93eb-2369d09ba206",
+          "title": "Consistency and design systems",
+          "concept": "Reusable components and rules keep every screen consistent.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "UIUX",
+      "title": "User research",
+      "lessons": [
+        {
+          "id": "8caf43e1-8337-5bb5-90a0-350910c68b00",
+          "title": "Knowing your users",
+          "concept": "Talk to real users to learn their goals and problems before designing.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "57726033-f423-50d3-872b-3d41f327da0a",
+          "title": "User journeys",
+          "concept": "A journey map shows each step a user takes and how they feel along the way.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "b52cdd19-e382-5a39-ba37-533a959c3a57",
+          "title": "Usability testing",
+          "concept": "Watch users try tasks with your design and note where they hesitate.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "UIUX",
+      "title": "Wireframing",
+      "lessons": [
+        {
+          "id": "f5574881-5a2e-527f-a636-c948bfb694ae",
+          "title": "Sketching layouts",
+          "concept": "Quick sketches let you try many layouts before choosing one.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "c784e5fd-cd5b-57b7-9ba1-1ab6f8eb9ed6",
+          "title": "User flows",
+          "concept": "A flow connects screens in the order a user moves through a task.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "c391d64f-c60a-59da-b562-34ed420cc882",
+          "title": "Information architecture",
+          "concept": "Organise and name content so users find what they need.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "UIUX",
+      "title": "Figma",
+      "lessons": [
+        {
+          "id": "f5b4c58f-a705-5bd4-9e89-7ab799363f19",
+          "title": "Frames and shapes",
+          "concept": "Frames are screens; you draw shapes and text inside them.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e4563cc8-83f6-59b4-917a-5d97345370d7",
+          "title": "Auto layout",
+          "concept": "Auto layout makes frames grow and space items automatically, like flexbox.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "80447c93-92b9-5db0-b395-ad704c4ca451",
+          "title": "Components and variants",
+          "concept": "Components are reusable; variants hold states like default, hover and disabled.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "UIUX",
+      "title": "Prototyping",
+      "lessons": [
+        {
+          "id": "e4cc2e8b-af54-582e-a2ae-9a9a3688ab5b",
+          "title": "Clickable prototypes",
+          "concept": "Link screens with interactions so people can click through like a real app.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "eeb9e907-fb4e-586b-a982-06e91a7557ce",
+          "title": "Transitions and feedback",
+          "concept": "Small animations show what changed and where things came from.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "3716efdd-4f44-57da-b521-4dfa0f49e8ff",
+          "title": "Testing and handoff",
+          "concept": "Test the prototype with users, then hand off clear specs to developers.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "AI",
+      "title": "Python for AI",
+      "lessons": [
+        {
+          "id": "733d4c30-f645-5583-b9f3-c1eb229ed3df",
+          "title": "Variables and lists",
+          "concept": "Python keeps values in variables and many values in lists.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e58245fe-582b-53bd-bd70-0f1878883695",
+          "title": "Functions and loops",
+          "concept": "def makes a function, and for loops repeat work for each item.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "2bd0af3e-6f1d-54c3-9952-e74f0e1b2ed6",
+          "title": "Libraries for AI",
+          "concept": "Libraries like NumPy, pandas and scikit-learn do the heavy work for data and models.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "AI",
+      "title": "Data for AI",
+      "lessons": [
+        {
+          "id": "b6f93992-f22b-544d-bcb8-4de1fbbdd895",
+          "title": "Examples and labels",
+          "concept": "A model learns from examples; labels are the right answers attached to them.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": "const photos = [{ label: 'cat' }, { label: 'dog' }, { label: 'cat' }];\nconst cats = photos.filter(p => p.label === 'cat').length;\nconsole.log(cats);",
+          "try_it_expected_output": "2",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "46290999-4d39-5be3-8468-cf0aca259f18",
+          "title": "Cleaning data",
+          "concept": "Remove duplicates, fix mistakes and handle missing values before training.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const ages = [14, 15, null, 14, 16];\nconst clean = ages.filter(a => a !== null);\nconsole.log(clean.length);",
+          "try_it_expected_output": "4",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e1b0016f-8fbb-5549-a602-dd54ebbe131c",
+          "title": "Training and test sets",
+          "concept": "Keep some data aside to test the model on examples it never saw.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const data = Array.from({ length: 10 }, (_, i) => i);\nconst train = data.slice(0, 8);\nconst test = data.slice(8);\nconsole.log(train.length + ' ' + test.length);",
+          "try_it_expected_output": "8 2",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "AI",
+      "title": "Machine learning",
+      "lessons": [
+        {
+          "id": "9286f1c5-1ba3-55a5-aa55-12a16c8ea583",
+          "title": "What is machine learning?",
+          "concept": "Instead of writing rules, we show examples and the computer finds the pattern.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": "const scores = [55, 70, 85, 40];\nconst passed = scores.map(s => (s >= 60 ? 'pass' : 'fail'));\nconsole.log(passed.join(','));",
+          "try_it_expected_output": "fail,pass,pass,fail",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "285ea532-1c09-5caf-8519-64cbd00a388a",
+          "title": "Training a model",
+          "concept": "Training adjusts the model step by step to make fewer mistakes on the examples.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const guesses = ['cat', 'dog', 'cat', 'cat'];\nconst truth = ['cat', 'dog', 'dog', 'cat'];\nconst right = guesses.filter((g, i) => g === truth[i]).length;\nconsole.log(right / truth.length);",
+          "try_it_expected_output": "0.75",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "a6e8a188-be02-5083-ab45-5d52fe9ddcd2",
+          "title": "Neural networks",
+          "concept": "Neural networks stack layers of simple units to learn complex patterns like images and speech.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const weights = [0.5, 0.25];\nconst inputs = [4, 8];\nconst output = weights[0] * inputs[0] + weights[1] * inputs[1];\nconsole.log(output);",
+          "try_it_expected_output": "4",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "AI",
+      "title": "Responsible AI",
+      "lessons": [
+        {
+          "id": "70cdfc35-fe81-52d1-a726-bd53dcdc62b2",
+          "title": "Bias",
+          "concept": "If training data is unfair, the model can be unfair too.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "fe9aa61d-e996-5f12-b263-e98b87dc49db",
+          "title": "Privacy",
+          "concept": "Collect only the data you need, and protect it, especially for children.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "f58d2365-353f-5fc0-b870-dbe9315fab0b",
+          "title": "Safety and honesty",
+          "concept": "AI can be wrong; show uncertainty, let humans check, and never hide that it is AI.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "DATA",
+      "title": "Spreadsheets",
+      "lessons": [
+        {
+          "id": "34405478-b59d-57a1-b123-e070edd3fc39",
+          "title": "Cells and formulas",
+          "concept": "Each cell holds a value; formulas like =SUM(A1:A5) calculate from other cells.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": "const marks = [7, 9, 8];\nconst sum = marks.reduce((a, b) => a + b, 0);\nconsole.log(sum);",
+          "try_it_expected_output": "24",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "9deb6fe0-03eb-56a4-aae0-26d6f1e85ac7",
+          "title": "Sorting, filters and IF",
+          "concept": "Sort and filter to find answers, and IF to label rows by a rule.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const score = 72;\nconst grade = score >= 90 ? 'A' : score >= 70 ? 'B' : 'C';\nconsole.log(grade);",
+          "try_it_expected_output": "B",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "5af23e08-dd24-5421-8e55-ce626782e82a",
+          "title": "Pivot tables",
+          "concept": "Pivot tables summarise many rows, like average score per class, in a few clicks.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const rows = [{ c: '9A', s: 8 }, { c: '9B', s: 6 }, { c: '9A', s: 10 }];\nconst a = rows.filter(r => r.c === '9A').map(r => r.s);\nconsole.log(a.reduce((x, y) => x + y, 0) / a.length);",
+          "try_it_expected_output": "9",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "DATA",
+      "title": "Python for data",
+      "lessons": [
+        {
+          "id": "2ba73e80-4a2a-51f0-ae38-4854df3ae266",
+          "title": "Data in Python",
+          "concept": "Python lists and dictionaries hold data you can count, sum and sort.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": "const temps = [21, 25, 19, 23];\nconsole.log(Math.max(...temps));",
+          "try_it_expected_output": "25",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "19343955-0e66-5cbc-8f31-4f035ce2b8fc",
+          "title": "pandas DataFrames",
+          "concept": "A DataFrame is a table; pandas reads CSV files and filters rows easily.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const students = [{ n: 'Aya', g: 9 }, { n: 'Omar', g: 10 }, { n: 'Mona', g: 9 }];\nconsole.log(students.filter(s => s.g === 9).length);",
+          "try_it_expected_output": "2",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "a941dc7d-6103-5b66-ab85-f1413d7c4cf0",
+          "title": "Grouping and merging",
+          "concept": "groupby summarises by category, and merge joins two tables on a shared column.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const sales = [{ m: 'Jan', v: 10 }, { m: 'Feb', v: 15 }, { m: 'Jan', v: 5 }];\nconst jan = sales.filter(s => s.m === 'Jan').reduce((t, s) => t + s.v, 0);\nconsole.log(jan);",
+          "try_it_expected_output": "15",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "DATA",
+      "title": "SQL for analysis",
+      "lessons": [
+        {
+          "id": "c331750a-9435-5b18-a57e-db361d3692a4",
+          "title": "SELECT and WHERE",
+          "concept": "SELECT picks columns, WHERE picks rows.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e7cbadb6-d941-59ef-9659-a47cf6a332e3",
+          "title": "Aggregates and GROUP BY",
+          "concept": "COUNT, SUM and AVG summarise; GROUP BY makes one row per group.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "1541c2fe-83b6-5750-806e-f63eedf853fc",
+          "title": "Joins for analysis",
+          "concept": "Joins combine tables, like students with their scores, to answer bigger questions.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "DATA",
+      "title": "Data visualisation",
+      "lessons": [
+        {
+          "id": "232fec94-bafa-5625-9b91-86833587cdfb",
+          "title": "Choosing a chart",
+          "concept": "Bar charts compare, line charts show change over time, and pie charts show parts of a whole.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "16781f08-8283-5af6-94d9-ffbbb8bfe774",
+          "title": "Clear and honest charts",
+          "concept": "Start bar axes at zero, use few colours, and highlight the key point.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e592f673-9b1b-5c38-929a-abe85e9cb175",
+          "title": "Dashboards and stories",
+          "concept": "A dashboard shows the few numbers that matter, in an order that tells a story.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "TESTING",
+      "title": "Testing basics",
+      "lessons": [
+        {
+          "id": "714db8ab-3ba8-55b2-85c8-1b0560d968e0",
+          "title": "What is a bug?",
+          "concept": "A bug is when software does not do what it should; testers find them before users do.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "9bff8136-d5b3-5465-9271-6acba0980042",
+          "title": "Types of testing",
+          "concept": "Functional tests check features; others check speed, security and usability.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "db18ddc6-c38b-5b41-994f-ca508084e46c",
+          "title": "Testing by risk",
+          "concept": "Test the most important and most risky parts first and most often.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "TESTING",
+      "title": "Test cases and bug reports",
+      "lessons": [
+        {
+          "id": "5c5e7242-800b-5617-affa-ca7033d11508",
+          "title": "Writing test cases",
+          "concept": "A test case lists steps, input data and the expected result.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "07f60c0b-0378-5daf-abf4-cb1ec78a15ca",
+          "title": "Boundaries and partitions",
+          "concept": "Test just inside and outside the limits, and one value from each group.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const valid = age => age >= 13 && age <= 18;\nconsole.log([12, 13, 18, 19].map(valid).join(','));",
+          "try_it_expected_output": "false,true,true,false",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "306d15ab-57b3-561d-b41e-baa3a324ca50",
+          "title": "Great bug reports",
+          "concept": "A good report has steps, expected vs actual, environment, severity and evidence.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "TESTING",
+      "title": "Test automation",
+      "lessons": [
+        {
+          "id": "b761d89a-43fe-5a22-aace-d4645ef0273a",
+          "title": "Assertions",
+          "concept": "An assertion checks that a value is what you expect and fails loudly if not.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": "function add(a, b) { return a + b; }\nconst result = add(2, 3) === 5 ? 'pass' : 'fail';\nconsole.log(result);",
+          "try_it_expected_output": "pass",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "588eb6bb-96d2-5db3-8a40-023484357739",
+          "title": "UI automation",
+          "concept": "Tools like Playwright click buttons and type text in a real browser to test pages.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const steps = ['open login', 'type email', 'type password', 'click sign in'];\nconsole.log(steps.length);",
+          "try_it_expected_output": "4",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "75a37b4c-cab0-5847-8e56-07d0f1bded6e",
+          "title": "Tests in CI",
+          "concept": "Continuous integration runs every test on each change and blocks merges that break them.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const results = ['pass', 'pass', 'fail', 'pass'];\nconst ok = results.every(r => r === 'pass');\nconsole.log(ok ? 'merge' : 'blocked');",
+          "try_it_expected_output": "blocked",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "TESTING",
+      "title": "API testing",
+      "lessons": [
+        {
+          "id": "f53c7f68-43a4-599e-aaf9-619b717244e8",
+          "title": "Requests and responses",
+          "concept": "Send a request to an API and check the status code and the data that comes back.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "39a0a8ad-d27f-5268-98b6-73ee2ce61fd9",
+          "title": "Testing errors",
+          "concept": "Send bad input on purpose and check the API answers with clear, safe errors.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": "const response = { status: 400, body: { code: 'VALIDATION_FAILED' } };\nconsole.log(response.status === 400 && response.body.code ? 'ok' : 'bug');",
+          "try_it_expected_output": "ok",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "e974b295-8ead-509f-b9b8-d7f8379bf80b",
+          "title": "Contracts and load",
+          "concept": "Contract tests make sure the API keeps its promised shape, and load tests check it under many users.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": "const times = [120, 95, 300, 110];\nconst slow = times.filter(t => t > 200).length;\nconsole.log(slow);",
+          "try_it_expected_output": "1",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "GAMING",
+      "title": "Game design",
+      "lessons": [
+        {
+          "id": "2928ab3a-a078-55d9-ac00-fcd1d5a0f4a1",
+          "title": "Goals and rules",
+          "concept": "Every game has a goal, rules and a challenge that makes reaching the goal fun.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "cd3ee433-6d9b-586f-a6c0-0d8c4d746138",
+          "title": "Difficulty and flow",
+          "concept": "Good games get harder slowly, keeping players between bored and frustrated.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "5732172f-2812-5053-82a2-3083e2224cbf",
+          "title": "Playtesting",
+          "concept": "Watch people play your game and change what confuses or bores them.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "GAMING",
+      "title": "Game logic with JavaScript",
+      "lessons": [
+        {
+          "id": "ab264eab-d8df-5fb8-a220-e71dc6c56433",
+          "title": "Score and lives",
+          "concept": "Variables track the score and lives, and change when things happen.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": "let score = 0;\nlet coins = 3;\nscore = score + coins * 10;\nconsole.log(score);",
+          "try_it_expected_output": "30",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "67eba778-89fd-5cde-b67b-812c161fd3a8",
+          "title": "Movement and the game loop",
+          "concept": "Each frame the game reads input, moves things and draws them again.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": "let x = 0;\nconst speed = 5;\nfor (let frame = 0; frame < 4; frame++) { x = x + speed; }\nconsole.log(x);",
+          "try_it_expected_output": "20",
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "1fda1e0d-2485-5cb4-94fe-472d81d760af",
+          "title": "Collisions",
+          "concept": "Two boxes collide when they overlap on both the x and y axes.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": "const a = { x: 0, y: 0, w: 10, h: 10 };\nconst b = { x: 5, y: 5, w: 10, h: 10 };\nconst hit = a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;\nconsole.log(hit);",
+          "try_it_expected_output": "true",
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "GAMING",
+      "title": "Unity basics",
+      "lessons": [
+        {
+          "id": "071a656a-3ede-5bb7-8bd2-6c89ef53d92c",
+          "title": "Scenes and GameObjects",
+          "concept": "A Unity scene holds GameObjects; components like Transform and Sprite give them position and look.",
+          "level": "Beginner",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "a3e66803-27bc-5239-aef1-161288dd3cd1",
+          "title": "Scripts and input",
+          "concept": "MonoBehaviour scripts use Start once and Update every frame to read input and move.",
+          "level": "Intermediate",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "c6b46c5c-fe9b-5f84-88cc-93fdc1f764c9",
+          "title": "Physics and UI",
+          "concept": "Rigidbodies and colliders handle physics, and the UI system shows score and menus.",
+          "level": "Advanced",
+          "duration_seconds": 480,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
+    },
+    {
+      "track_code": "GAMING",
+      "title": "Publishing games",
+      "lessons": [
+        {
+          "id": "79458dbb-8cf9-5730-af70-e161c20b919e",
+          "title": "Polish",
+          "concept": "Sound, small effects and smooth menus make a game feel finished.",
+          "level": "Beginner",
+          "duration_seconds": 300,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "b28d8ddc-ada3-583d-bdb2-1aca21e5a3b9",
+          "title": "Platforms and builds",
+          "concept": "Build your game for web, PC or mobile, and test each build.",
+          "level": "Intermediate",
+          "duration_seconds": 360,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        },
+        {
+          "id": "b0201ad4-c5a7-595d-bdba-64062828bcdb",
+          "title": "Feedback and updates",
+          "concept": "Listen to players, fix bugs and update the game over time.",
+          "level": "Advanced",
+          "duration_seconds": 420,
+          "try_it_starter_code": null,
+          "try_it_expected_output": null,
+          "quiz_question_count": 2,
+          "school_link": null
+        }
+      ]
     }
   ],
   "mentors": [
@@ -297,6 +1740,30 @@
       "availability": "Sat mornings",
       "skills": "Flutter, Kotlin, Swift",
       "bio": "Tarek has built apps for shops, schools and clinics. He loves seeing students install their first app on their own phone."
+    },
+    {
+      "id": "10ecae82-6865-57d8-86f7-d9950256131d",
+      "full_name": "Mariam Said",
+      "title": "QA Engineer",
+      "track_code": "TESTING",
+      "years_of_experience": 6,
+      "rating": 4.8,
+      "languages": "English, Arabic",
+      "availability": "Sun and Wed evenings",
+      "skills": "Test cases, Bug reports, Automation",
+      "bio": "Mariam finds the bugs before users do. She teaches students to think like detectives: try the edge cases, write clear steps, and never trust that it just works."
+    },
+    {
+      "id": "e6f46739-ce91-54f4-b6b1-261d6812f657",
+      "full_name": "Youssef Amin",
+      "title": "Game Developer",
+      "track_code": "GAMING",
+      "years_of_experience": 7,
+      "rating": 4.7,
+      "languages": "English, Arabic",
+      "availability": "Fri and Sat afternoons",
+      "skills": "Unity, C#, Game design",
+      "bio": "Youssef has shipped mobile games played by thousands of people. He helps students turn a fun idea into a small playable game, one level at a time."
     }
   ],
   "jobs": {
@@ -337,8 +1804,44 @@
         "skills": "Attention to detail, Writing test cases, Bug reports",
         "description": "Careful Code Lab tests apps before they are released. In this practice role you would find bugs and write clear reports.",
         "question_count": 2
+      },
+      {
+        "company_name": "Cairo Cloud Works",
+        "role": "Junior Backend Developer",
+        "track_code": "BACKEND",
+        "level": "Beginner",
+        "skills": "APIs, Databases, C# or Python",
+        "description": "Cairo Cloud Works builds the servers behind delivery apps. In this practice role you would add simple API endpoints and save data in a database.",
+        "question_count": 2
+      },
+      {
+        "company_name": "Pocket Apps Co.",
+        "role": "Junior Mobile Developer",
+        "track_code": "MOBILE",
+        "level": "Beginner",
+        "skills": "Flutter or React Native, Screen layouts, Testing on phones",
+        "description": "Pocket Apps Co. makes mobile apps for sports clubs. In this practice role you would build simple screens and test them on different phones.",
+        "question_count": 2
+      },
+      {
+        "company_name": "Smart Nile Labs",
+        "role": "Junior AI Engineer",
+        "track_code": "AI",
+        "level": "Beginner",
+        "skills": "Python, Data preparation, Training simple models",
+        "description": "Smart Nile Labs builds models that sort photos of plants. In this practice role you would prepare data and check how well a model works.",
+        "question_count": 2
+      },
+      {
+        "company_name": "Pyramid Play Games",
+        "role": "Junior Game Developer",
+        "track_code": "GAMING",
+        "level": "Beginner",
+        "skills": "Unity or Godot, Game logic, Playtesting",
+        "description": "Pyramid Play Games makes small puzzle games. In this practice role you would code simple game rules and fix bugs that players report.",
+        "question_count": 2
       }
     ]
   },
-  "version": "c1628ecdd610"
+  "version": "3fa5731ad241"
 }
