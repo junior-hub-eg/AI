@@ -96,6 +96,16 @@ def _error_text(exc: Exception) -> str:
     return str(exc)[:600]
 
 
+def _error_code(exc: Exception) -> str:
+    """The provider's short error code, like Groq's "tool_use_failed" or "rate_limit_exceeded"."""
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        inner = body.get("error", body)
+        if isinstance(inner, dict) and isinstance(inner.get("code"), str):
+            return inner["code"][:40]
+    return "-"
+
+
 def error(status: int, code: ErrorCode, message: str) -> JSONResponse:
     return JSONResponse(status_code=status, content=error_body(code, message))
 
@@ -138,7 +148,7 @@ async def run_reply(request: Request, body: ReplyRequest, debug: bool = False) -
         # The error's type and status only (never the provider's text, which may quote the request): enough to
         # tell a retired model (404), a bad key (401), a quota limit (413/429) or a bad tool call (400).
         detail = (f" {type(exc).__name__}: {_error_text(exc)}" if debug
-                  else f" ({type(exc).__name__}, status {getattr(exc, 'status_code', '-')})")
+                  else f" ({type(exc).__name__}, status {getattr(exc, 'status_code', '-')}, code {_error_code(exc)})")
         return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant is not available right now." + detail)
 
     # Never the message or the reply (privacy): metadata only.
