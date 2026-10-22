@@ -55,7 +55,7 @@ def test_a_signed_request_gets_a_reply(client):
     response = post(client, body(), token())
     assert response.status_code == 200
     data = response.json()
-    assert data["reply"].startswith("(تجربة)") and data["meta"]["prompt_version"] == "assistant@v1"
+    assert data["reply"].startswith("(تجربة)") and data["meta"]["prompt_version"] == "assistant@v2"
 
 
 @pytest.mark.parametrize("bad", [None, "not-a-jwt", "WRONG_AUD", "WRONG_ISS", "EXPIRED", "OTHER_KEY"])
@@ -193,3 +193,22 @@ def test_the_default_model_is_groq_gpt_oss_with_low_reasoning(monkeypatch):
     model = create_model(settings)
     assert settings.llm_model == "groq:openai/gpt-oss-120b"
     assert (model.model_name, model.reasoning_effort) == ("openai/gpt-oss-120b", "low")
+
+
+def test_a_request_without_profile_fields_still_works(client):
+    payload = body()
+    for field in ("first_name", "gender", "member_since"):
+        payload["context"]["student"].pop(field)
+    assert post(client, payload, token()).status_code == 200
+
+
+def test_an_english_question_gets_an_english_demo_reply(dev_client):
+    response = dev_client.post("/v1/dev/chat", json={"persona": "frontend_beginner", "message": "how much XP do I have?"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["reply"].startswith("(demo)") and data["suggestions"] == ["What's my next lesson?"]
+
+
+def test_dev_chat_profile_question_uses_the_profile_tool(dev_client):
+    response = dev_client.post("/v1/dev/chat", json={"persona": "new_student", "message": "اسمي إيه؟"})
+    assert response.json()["debug"]["tools"] == ["get_my_profile"]

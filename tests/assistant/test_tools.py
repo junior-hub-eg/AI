@@ -2,7 +2,7 @@ import json
 
 from assistant.catalog import load_catalog
 from assistant.tools import (
-    find_mentors, find_practice_jobs, get_lesson_help, get_my_achievements, get_my_learning, get_my_squad,
+    find_mentors, find_practice_jobs, get_lesson_help, get_my_achievements, get_my_learning, get_my_profile, get_my_squad,
     get_platform_rules, get_track_info,
 )
 
@@ -97,3 +97,19 @@ def test_track_info_combines_catalog_and_my_progress(context):
 
 def test_rules_tool_returns_the_section():
     assert "40 XP" in get_platform_rules.invoke({"topic": "xp"})
+
+
+def test_profile_has_the_first_name_and_gender_but_no_contact_data(context):
+    result = run(get_my_profile, context("frontend_beginner"))
+    assert result["first_name"] == "Omar" and result["gender"] == "Male"
+    assert result["school_student"] is True and result["grade"] == 9
+    assert result["days_on_junior_hub"] == 10 and result["track_in_focus"] == "Frontend"
+    for private in ("email", "phone", "photo_url", "full_name", "school_name"):
+        assert private not in result
+
+
+def test_profile_of_an_older_backend_without_profile_fields(context):
+    ctx = context("frontend_beginner")
+    ctx.student.first_name = ctx.student.gender = ctx.student.member_since = None
+    result = run(get_my_profile, ctx)
+    assert result["first_name"] is None and result["days_on_junior_hub"] is None

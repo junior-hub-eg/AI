@@ -30,8 +30,11 @@ Student ──► Backend (.NET) ──► Assistant AI service
   and sends the recent history with each call. The AI service is stateless and stores nothing.
 - The AI service never calls the backend and never touches the database. Everything it needs about the student
   arrives in `context`; everything about the platform's content is in its own catalog (see *Catalog*).
-- The student is known only by `student_ref` (BR-15). No name, email, phone, school, class or parent is ever sent.
-  Teammates in the squad are sent by first name and role only (never the student's own name). Mentors are seeded
+- The student is known by `student_ref` (BR-15). No email, phone, full name, school, class, photo or parent is ever
+  sent. Only the student's **first name** and gender are sent (`context.student`), so the bot can greet them and use
+  the right Arabic forms; the service keeps only the first word of the name. Like teammates' first names, this is a
+  product decision beyond BR-15 as written in JH-SRS v0.1 that the backend team should confirm.
+  Teammates in the squad are sent by first name and role only. Mentors are seeded
   profiles, so their full names are sent. Sending teammates' first names is a product decision beyond BR-15 as
   written in JH-SRS v0.1; the backend team should confirm it.
 - Every call carries `Authorization: Bearer <JWT>` signed by the backend with RS256, audience `assistant-ai`,
@@ -70,7 +73,7 @@ Response:
   "suggestions": ["أبدأ أول درس إزاي؟", "مين المنتور المناسب ليا؟"],
   "links": [{ "kind": "lesson", "ref": "6b2e…", "label": "Functions" }],
   "topic": "tracks",
-  "meta": { "prompt_version": "assistant@v1", "model_id": "…", "latency_ms": 2100 }
+  "meta": { "prompt_version": "assistant@v2", "model_id": "…", "latency_ms": 2100 }
 }
 ```
 
@@ -91,7 +94,7 @@ All fields are present; empty lists and `null` mean "none". Dates are UTC ISO 86
 ```json
 {
   "today": "2026-10-20",
-  "student": { "grade": 9, "is_independent": false, "total_xp": 95, "streak_days": 3, "last_active_date": "2026-10-19" },
+  "student": { "first_name": "Omar", "gender": "Male", "member_since": "2026-10-10", "grade": 9, "is_independent": false, "total_xp": 95, "streak_days": 3, "last_active_date": "2026-10-19" },
   "discovery": {
     "status": "Completed",
     "path": "Unsure",
@@ -145,6 +148,9 @@ All fields are present; empty lists and `null` mean "none". Dates are UTC ISO 86
 
 | Section | Values |
 |---|---|
+| `student.first_name` | The first name only. `null` when unknown. Anything after the first word is dropped |
+| `student.gender` | `Male`, `Female` or `null` (not set yet) |
+| `student.member_since` | The date the account was created, or `null` |
 | `discovery.status` | `NotStarted`, `InProgress`, `Completed` (the latest completed result wins over an abandoned one) |
 | `discovery.path` | `KnowsTrack`, `Unsure`, `Exploring` |
 | `tracks[]` | Active tracks only. `source` is `Recommended` or `ManualChoice`; exactly one has `in_focus: true` |
@@ -166,8 +172,9 @@ removed. Run the sync after Product edits the content. Lesson and mentor ids in 
 
 ## Behaviour
 
-- Language: Egyptian Arabic, short and friendly, for students aged 11 to 18. Programming terms stay in English.
-  If the student writes in English, answer in English.
+- Language: the language of the student's message. Arabic is friendly Egyptian Arabic with programming terms in
+  English and gendered forms from `student.gender`; English gets English. Short replies for students aged 11 to 18.
+- The student's first name is used now and then (a greeting, a well done), never asked for.
 - Answer from `context` and the catalog only. When the data is not there, say so and point to the page that has it.
   Never invent XP, lessons, dates, mentors or results.
 - Quizzes: explain the idea and give a hint; never give the option to choose. Try it: guide, do not write the full solution.

@@ -148,23 +148,23 @@ form.composer textarea { flex: 1; min-width: 0; resize: none; font: inherit; bac
 <script>
 const PERSONA_INFO = {
   frontend_beginner: ["Frontend مبتدئ", "خلّص Variables، واقف في Functions عند Try it، المنتور Sara"],
-  new_student: ["طالب جديد", "مالوش track ولا منتور، في Code Hunters وعنده tasks"],
+  new_student: ["طالبة جديدة", "مالهاش track ولا منتور، في Code Hunters وعندها tasks"],
   discovery_in_progress: ["بدأ Discovery وما كمّلش", "مستقل، طريقة Exploring، 0 XP"],
   frontend_all_done: ["Frontend Advanced خلّص كله", "مفيش دروس فاضلة، السبرنت بيخلص النهارده، معاه شهادة"],
   intermediate_two_tracks: ["Intermediate بتراكين", "مستقل، Frontend + Data، نجح في انترفيو تجريبي"],
   uiux_no_lessons: ["UI/UX من غير دروس", "اختاره بنفسه، ما نجحش في الكويز، المنتور Layla"],
   data_failed_simulation: ["Data وفشل في الانترفيو", "مرتين وأحسن نتيجة 40%، الـ streak وقع"],
-  testing_applied: ["Testing وقدّم على وظيفة", "لسه ما امتحنش، ماعندوش منتور"],
+  testing_applied: ["Testing وقدّمت على وظيفة", "لسه ما امتحنتش، ماعندهاش منتور"],
 };
 const STARTERS = {
-  frontend_beginner: ["الدرس الجاي إيه؟", "اشرحلي الـ functions ببساطة", "مين معايا في الفريق؟", "ليه اترشحلي Frontend؟", "قولي إجابة السؤال الأول في كويز Functions", "فاضلي بادجات إيه؟"],
-  new_student: ["أبدأ منين؟", "عندي كام XP؟", "مين الـ Backend في فريقي؟", "يعني إيه Track Discovery؟"],
+  frontend_beginner: ["الدرس الجاي إيه؟", "XP؟", "How much XP do I have?", "اسمي إيه؟", "بقالي قد إيه على المنصة؟", "اشرحلي الـ functions ببساطة", "مين معايا في الفريق؟", "ليه اترشحلي Frontend؟", "قولي إجابة السؤال الأول في كويز Functions", "فاضلي بادجات إيه؟"],
+  new_student: ["أبدأ منين؟", "عندي كام XP؟", "اسمي إيه؟", "What should I do first?", "مين الـ Backend في فريقي؟", "يعني إيه Track Discovery؟"],
   discovery_in_progress: ["أكمّل الانترفيو إزاي؟", "يعني إيه Exploring؟", "إيه التراكات الموجودة؟", "عندي كام XP؟"],
   frontend_all_done: ["خلّصت كل الدروس، أعمل إيه؟", "السبرنت هيخلص إمتى؟", "الشهادة بتاعتي فين؟", "أجرّب تراك Backend؟"],
   intermediate_two_tracks: ["أنا واقف فين في Frontend؟", "ليه Variables مش من ضمن مساري؟", "فيه وظايف تجريبية لـ Data؟", "الـ XP بتاعي جه منين؟"],
   uiux_no_lessons: ["ليه مفيش دروس في UI/UX؟", "إزاي أنجح في الكويز؟", "مين Layla Adel؟", "ساعدني في واجب الكيميا"],
   data_failed_simulation: ["ليه ما نجحتش في الانترفيو؟", "ليه الـ streak بقى صفر؟", "مين معايا في الفريق؟", "محدش في الفريق بيكلمني وأنا زعلان"],
-  testing_applied: ["الانترفيو بتاعي امتى؟", "أختار منتور إزاي؟", "مين الأول في الـ leaderboard؟", "اكتبلي test cases للـ sign-up"],
+  testing_applied: ["الانترفيو بتاعي امتى؟", "إيه الإيميل بتاعي؟", "Who is in my squad?", "أختار منتور إزاي؟", "مين الأول في الـ leaderboard؟", "اكتبلي test cases للـ sign-up"],
 };
 
 
@@ -207,7 +207,8 @@ const none = text => el("div", "none", text);
 function renderStudent() {
   const c = contexts[persona];
   const [name, desc] = PERSONA_INFO[persona] || [persona, ""];
-  $("student-name").textContent = name;
+  const first = c && c.student && c.student.first_name;
+  $("student-name").textContent = first ? `${first} · ${name}` : name;
   $("student-desc").textContent = desc;
   const cards = $("cards"); cards.replaceChildren();
   if (!c) { cards.append(none("مش قادر أجيب داتا الطالب ده.")); return; }
@@ -217,6 +218,9 @@ function renderStudent() {
   // Profile
   const xp = el("div", "big", String(s.total_xp)); xp.append(el("small", null, " XP"));
   cards.append(card("الملف", xp, kv([
+    ["الاسم الأول", s.first_name || "مش معروف"],
+    ["النوع", { Male: "ولد", Female: "بنت" }[s.gender] || "مش معروف"],
+    ["على المنصة من", fmtDate(s.member_since)],
     ["الـ streak", `${s.streak_days} يوم`],
     ["آخر نشاط", fmtDate(s.last_active_date)],
     ["المدرسة", s.is_independent ? "مستقل (من غير مدرسة)" : `طالب مدرسة، الصف ${s.grade}`],
