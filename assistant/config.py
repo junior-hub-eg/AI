@@ -30,7 +30,8 @@ class Settings(BaseSettings):
     llm_reasoning_effort: str = "low"
     # "any" makes the model call a tool every turn (it must end with `respond`). Use "auto" for a provider
     # that does not support forcing tools; plain-text answers are then accepted too.
-    llm_tool_choice: str = "any"
+    # "auto" by default: Groq's gpt-oss often fails forced tool calls (400 tool_use_failed).
+    llm_tool_choice: str = "auto"
 
     max_steps: int = 4
     reply_timeout_seconds: float = 18
