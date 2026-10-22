@@ -11,4 +11,7 @@ def create_model(settings: Settings) -> BaseChatModel:
         return FakeChatModel()
     from langchain.chat_models import init_chat_model
 
-    return init_chat_model(settings.llm_model, temperature=settings.llm_temperature, max_retries=1)
+    extra = {}
+    if "gpt-oss" in settings.llm_model and settings.llm_reasoning_effort:
+        extra["reasoning_effort"] = settings.llm_reasoning_effort
+    return init_chat_model(settings.llm_model, temperature=settings.llm_temperature, max_retries=1, **extra)

@@ -16,14 +16,18 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="ASSISTANT_", env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # "provider:model" for langchain's init_chat_model, for example "groq:llama-3.3-70b-versatile",
+    # "provider:model" for langchain's init_chat_model, for example "groq:openai/gpt-oss-120b",
     # "cohere:command-a-03-2025", "openai:gpt-4.1-mini", "google_genai:gemini-2.5-flash".
     # "fake" runs a keyword-based stand-in with no API key (tests and wiring checks only); FAKE_MODELS=true of the
     # Discovery service also switches the assistant to "fake".
-    # Groq by default: the service already has a Groq key, and llama-3.3-70b has its own quota, apart from the
-    # gpt-oss models of the interview.
-    llm_model: str = "groq:llama-3.3-70b-versatile"
+    # Groq by default: the service already has a Groq key. gpt-oss-120b is Groq's replacement for
+    # llama-3.3-70b-versatile (shut down 16 Aug 2026) and supports tool calling. It shares its quota with the
+    # interview's result call. Check https://console.groq.com/docs/deprecations before changing it.
+    llm_model: str = "groq:openai/gpt-oss-120b"
     llm_temperature: float = 0.3
+    # gpt-oss models think before answering: low keeps a reply (up to MAX_STEPS model calls) inside the timeout.
+    # Sent only to gpt-oss models; empty = the provider's default.
+    llm_reasoning_effort: str = "low"
     # "any" makes the model call a tool every turn (it must end with `respond`). Use "auto" for a provider
     # that does not support forcing tools; plain-text answers are then accepted too.
     llm_tool_choice: str = "any"

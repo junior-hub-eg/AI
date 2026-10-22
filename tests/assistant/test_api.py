@@ -151,6 +151,7 @@ def test_provider_keys_in_dotenv_reach_the_environment(tmp_path, monkeypatch):
     finally:
         config.get_settings.cache_clear()
         os.environ.pop("JH_TEST_PROVIDER_KEY", None)
+        os.environ.pop("ASSISTANT_LLM_MODEL", None)  # load_dotenv put it in the environment too
 
 
 def test_a_model_that_cannot_start_is_a_503_not_a_crash(monkeypatch):
@@ -180,3 +181,15 @@ def test_production_ignores_the_local_testing_switches():
     client = TestClient(create_app(discovery, assistant_settings=assistant))
     assert client.get("/v1/dev/personas").status_code == 404
     assert post(client, body()).status_code == 401
+
+
+def test_the_default_model_is_groq_gpt_oss_with_low_reasoning(monkeypatch):
+    # llama-3.3-70b-versatile was shut down by Groq on 16 Aug 2026.
+    monkeypatch.setenv("GROQ_API_KEY", "test")
+    monkeypatch.delenv("ASSISTANT_LLM_MODEL", raising=False)
+    from assistant.llm import create_model
+
+    settings = Settings(_env_file=None)
+    model = create_model(settings)
+    assert settings.llm_model == "groq:openai/gpt-oss-120b"
+    assert (model.model_name, model.reasoning_effort) == ("openai/gpt-oss-120b", "low")

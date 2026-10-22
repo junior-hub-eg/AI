@@ -133,7 +133,8 @@ async def run_reply(request: Request, body: ReplyRequest, debug: bool = False) -
         logger.warning("assistant empty reply")
         return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant could not answer.")
     except Exception as exc:  # the model provider failed
-        logger.warning("assistant provider error %s", type(exc).__name__)
+        # The provider's status helps tell a retired model (404) from a bad key (401) or a quota limit (429).
+        logger.warning("assistant provider error %s status=%s", type(exc).__name__, getattr(exc, "status_code", "-"))
         detail = f" {type(exc).__name__}: {_error_text(exc)}" if debug else ""
         return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant is not available right now." + detail)
 
