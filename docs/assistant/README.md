@@ -277,7 +277,7 @@ Environment variables, or a `.env` file in the folder the service runs from (see
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `ASSISTANT_LLM_MODEL` | `fake` | `provider:model`: `cohere:command-a-03-2025`, `openai:gpt-4.1-mini`, `google_genai:gemini-2.5-flash`, `anthropic:claude-haiku-4-5`, `groq:llama-3.3-70b-versatile`. `fake` gives canned answers without a key (wiring checks only) |
+| `ASSISTANT_LLM_MODEL` | `groq:openai/gpt-oss-120b` | `provider:model`: `cohere:command-a-03-2025`, `openai:gpt-4.1-mini`, `google_genai:gemini-2.5-flash`, `anthropic:claude-haiku-4-5`, `groq:openai/gpt-oss-120b`. `fake` gives canned answers without a key (wiring checks only) |
 | `COHERE_API_KEY` (or the provider's key) | | The LLM provider's API key |
 | `ASSISTANT_LLM_TEMPERATURE` | `0.3` | |
 | `ASSISTANT_LLM_TOOL_CHOICE` | `any` | `any` forces a tool call each step; `auto` for providers that cannot force tools |

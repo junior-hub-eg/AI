@@ -7,7 +7,7 @@ Stateless service behind the **Track Discovery interview** and the **student ass
 |---|---|---|
 | `POST /v1/discovery/turns` | answer (audio or text) in -> transcript + next spoken question out | Whisper (STT), gpt-oss-20b (question), Orpheus (TTS) |
 | `POST /v1/discovery/results` | whole interview in -> exactly 3 ranked tracks with match % | gpt-oss-120b |
-| `POST /v1/assistant/replies` | a student's question + their data in -> reply, suggestions, links | llama-3.3-70b (tool calling) |
+| `POST /v1/assistant/replies` | a student's question + their data in -> reply, suggestions, links | gpt-oss-120b (tool calling) |
 | `GET /healthz`, `/readyz`, `/assistant/health` | probes (never call Groq) | - |
 
 The student assistant lives in [`assistant/`](assistant/) (from kareem1099/Junior-Hub-Chatbot). See
@@ -247,8 +247,8 @@ tweaks (e.g. `reasoning_effort` values, Orpheus voice names / terms). Run `pytho
 
 A chat that answers a student's questions about their own Junior Hub journey (next lesson, XP, badges, squad,
 mentor, practice jobs, Track Discovery result) and explains lesson concepts. Python + LangGraph with any LLM that
-supports tool calling; Groq `llama-3.3-70b-versatile` by default, so it uses the same `GROQ_API_KEY` and has its own
-quota apart from the interview's gpt-oss models.
+supports tool calling; Groq `openai/gpt-oss-120b` by default, so it uses the same `GROQ_API_KEY` (it shares that
+model's quota with the interview's result call).
 
 ```
 Frontend --POST /api/v1/assistant/messages--> Backend (.NET): stores the chat, reads the student's data
