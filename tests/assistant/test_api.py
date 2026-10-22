@@ -55,7 +55,7 @@ def test_a_signed_request_gets_a_reply(client):
     response = post(client, body(), token())
     assert response.status_code == 200
     data = response.json()
-    assert data["reply"].startswith("(تجربة)") and data["meta"]["prompt_version"] == "assistant@v2"
+    assert data["reply"].startswith("(تجربة)") and data["meta"]["prompt_version"] == "assistant@v3"
 
 
 @pytest.mark.parametrize("bad", [None, "not-a-jwt", "WRONG_AUD", "WRONG_ISS", "EXPIRED", "OTHER_KEY"])

@@ -18,7 +18,7 @@
   ],
   "topic": "discovery",
   "meta": {
-    "prompt_version": "assistant@v2",
+    "prompt_version": "assistant@v3",
     "model_id": "openai:gpt-4.1-mini",
     "latency_ms": 2140
   }

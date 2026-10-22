@@ -29,7 +29,7 @@ def test_a_lookup_then_respond():
     assert response.reply == "معاك 100 XP 👏"
     assert tools == ["get_my_achievements"]
     assert [link.kind for link in response.links] == ["achievements"]
-    assert response.meta.prompt_version == "assistant@v2"
+    assert response.meta.prompt_version == "assistant@v3"
 
 
 def test_the_snapshot_answers_simple_questions_without_tools():
@@ -216,6 +216,12 @@ def test_the_snapshot_has_the_first_name_and_gender():
     text = system_text()
     assert "Student first name: Omar; boy or girl: boy; on Junior Hub since 2026-10-10" in text
     assert "Do not use the student's name" not in text
+
+
+def test_the_bot_may_tell_the_student_their_own_name():
+    text = system_text()
+    assert "If they ask what their name is, tell them their first name from the snapshot" in text
+    assert "own first name, gender and join date from the snapshot are not secret" in text
 
 
 def test_a_missing_name_is_said_to_be_unknown():
