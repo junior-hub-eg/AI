@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Annotated, Any, TypedDict
 
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import AIMessage, AnyMessage
+from langchain_core.messages import AIMessage, AnyMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
@@ -28,7 +28,20 @@ def build_graph(model: BaseChatModel, tool_choice: str = "any", max_steps: int =
 
     async def agent(state: State, config: RunnableConfig) -> dict:
         runnable = respond_only if state["steps"] >= max_steps else with_tools
-        message = await runnable.ainvoke(state["messages"], config)
+        try:
+            message = await runnable.ainvoke(state["messages"], config)
+        except Exception as exc:
+            if not tool_use_failed(exc):
+                raise
+            # The model wrote a tool call the provider rejected (Groq's tool_use_failed, frequent with gpt-oss):
+            # try once more, then ask for a plain-text answer, which `finish` accepts as the reply.
+            try:
+                message = await runnable.ainvoke(state["messages"], config)
+            except Exception as again:
+                if not tool_use_failed(again):
+                    raise
+                message = await model.ainvoke([*state["messages"], SystemMessage(PLAIN_ANSWER)], config)
+                message = AIMessage(content=_text(message))  # no tool calls: the loop finishes with this text
         return {"messages": [message], "steps": state["steps"] + 1}
 
     def route(state: State) -> str:
@@ -54,6 +67,20 @@ def build_graph(model: BaseChatModel, tool_choice: str = "any", max_steps: int =
     graph.add_edge("tools", "agent")
     graph.add_edge("finish", END)
     return graph.compile()
+
+
+PLAIN_ANSWER = (
+    "Answer the student now in plain text, without calling any tool, using only the data you already have. "
+    "Follow all the rules above."
+)
+
+
+def tool_use_failed(exc: Exception) -> bool:
+    """The provider refused the model's own tool call (Groq: status 400, code tool_use_failed)."""
+    body = getattr(exc, "body", None)
+    inner = body.get("error", body) if isinstance(body, dict) else None
+    code = inner.get("code") if isinstance(inner, dict) else None
+    return code == "tool_use_failed" or "tool_use_failed" in str(exc)
 
 
 def _text(message: AIMessage) -> str:

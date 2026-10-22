@@ -100,3 +100,50 @@ def test_citation_tags_are_removed_from_the_reply():
         RESPOND, reply=tagged, topic="learning", suggestions=["<co>الدرس الجاي</co: 0:[0]>؟"])))
     assert response.reply == "خلصت المتغيرات وفاضلك تلات دروس."
     assert response.suggestions == ["الدرس الجاي؟"]
+
+
+class ToolUseFailed(Exception):
+    """What Groq's SDK raises when it rejects the model's tool call (status 400)."""
+
+    status_code = 400
+    body = {"error": {"code": "tool_use_failed", "message": "Failed to call a function."}}
+
+
+def test_a_rejected_tool_call_is_tried_again():
+    calls = []
+
+    def script(messages, bound):
+        calls.append(bound)
+        if len(calls) == 1:
+            raise ToolUseFailed()
+        return tool_call(RESPOND, reply="إنت في Frontend", topic="tracks")
+
+    response, _ = reply(ScriptedModel(script=script))
+    assert response.reply == "إنت في Frontend" and len(calls) == 2
+
+
+def test_twice_rejected_tool_calls_end_with_a_plain_text_answer():
+    calls = []
+
+    def script(messages, bound):
+        calls.append(bound)
+        if bound:  # with tools offered, the provider keeps refusing the call
+            raise ToolUseFailed()
+        assert "plain text" in messages[-1].content
+        return AIMessage(content="إنت في track الـ Frontend 👍")
+
+    response, tools = reply(ScriptedModel(script=script))
+    assert response.reply == "إنت في track الـ Frontend 👍"
+    assert tools == [] and len(calls) == 3
+
+
+def test_other_provider_errors_are_not_retried():
+    calls = []
+
+    def script(messages, bound):
+        calls.append(1)
+        raise ConnectionError("provider down")
+
+    with pytest.raises(ConnectionError):
+        reply(ScriptedModel(script=script))
+    assert len(calls) == 1
