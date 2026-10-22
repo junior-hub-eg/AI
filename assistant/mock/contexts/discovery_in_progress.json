@@ -1,6 +1,9 @@
 {
   "today": "2026-10-20",
   "student": {
+    "first_name": "Seif",
+    "gender": "Male",
+    "member_since": "2026-10-18",
     "grade": null,
     "is_independent": true,
     "total_xp": 0,

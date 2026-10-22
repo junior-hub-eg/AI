@@ -33,6 +33,31 @@ def _json(value) -> str:
 
 
 @tool
+def get_my_profile(config: RunnableConfig) -> str:
+    """The student's own profile: first name, boy or girl, school grade or independent, when they joined, XP, streak,
+    and their tracks. Email, phone, password, school name and photo are not available here: they are on the
+    profile page, and only the student can change them."""
+    ctx = _ctx(config)
+    s = ctx.student
+    focus = ctx.focus_track
+    return _json({
+        "first_name": s.first_name,
+        "gender": s.gender,
+        "school_student": not s.is_independent,
+        "grade": s.grade,
+        "member_since": s.member_since,
+        "days_on_junior_hub": (ctx.today - s.member_since).days if s.member_since else None,
+        "total_xp": s.total_xp,
+        "streak_days": s.streak_days,
+        "last_active_date": s.last_active_date,
+        "tracks": [t.name for t in ctx.tracks],
+        "track_in_focus": focus.name if focus else None,
+        "track_discovery": ctx.discovery.status,
+        "not_available": "email, phone, password, school name, class and photo: the student sees them on the profile page",
+    })
+
+
+@tool
 def get_my_learning(config: RunnableConfig) -> str:
     """The lessons of the student's track in focus: each lesson's status and current step, and the next lesson to do."""
     ctx, catalog = _ctx(config), _catalog(config)
@@ -194,7 +219,7 @@ def respond(
 
 
 DATA_TOOLS = [
-    get_my_learning, get_lesson_help, get_discovery_result, get_track_info, get_my_achievements,
+    get_my_profile, get_my_learning, get_lesson_help, get_discovery_result, get_track_info, get_my_achievements,
     get_my_squad, find_mentors, find_practice_jobs, get_platform_rules,
 ]
 ALL_TOOLS = [*DATA_TOOLS, respond]

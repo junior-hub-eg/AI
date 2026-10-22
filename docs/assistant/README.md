@@ -80,6 +80,7 @@ system prompt + student snapshot + recent history + the new message
 
 | Tool | Answers questions like |
 |---|---|
+| `get_my_profile` | "What's my name?", "Since when am I on Junior Hub?", "Which grade am I in?" |
 | `get_my_learning` | "What's my next lesson?", "Where did I stop?" |
 | `get_lesson_help` | "Explain functions", "My Try it doesn't work" (concept, starter code, school link; never quiz answers) |
 | `get_discovery_result` | "Why was Frontend recommended to me?" |
@@ -90,8 +91,8 @@ system prompt + student snapshot + recent history + the new message
 | `find_practice_jobs` | "Are there practice jobs for my track?", "Where is my certificate?" |
 | `get_platform_rules` | "How is XP counted?", "Why did my streak reset?" |
 
-Rules the bot keeps (in `app/prompt.py`): Egyptian Arabic with programming terms in English (English if the student
-writes English); short; only facts from its data, never invented; hints for quizzes, never the answer; no full Try it
+Rules the bot keeps (in `assistant/prompt.py`): the language of the student's message (Egyptian Arabic with programming
+terms in English and gendered forms from `student.gender`, or English for an English message); the student's first name now and then; short; only facts from its data, never invented; hints for quizzes, never the answer; no full Try it
 solutions; kind redirect for homework of other subjects or anything off-platform; gentle `wellbeing` reply that points
 to a trusted adult when a student sounds sad or unsafe; never asks for personal data.
 
@@ -133,7 +134,7 @@ Response `200`:
   "suggestions": ["اشرحلي الـ functions", "مين المنتور بتاعي؟"],
   "links": [{ "kind": "lesson", "ref": "dab266be-e6a4-5efd-a5f4-503784941482", "label": "Functions" }],
   "topic": "discovery",
-  "meta": { "prompt_version": "assistant@v1", "model_id": "cohere:command-a-03-2025", "latency_ms": 2140 }
+  "meta": { "prompt_version": "assistant@v2", "model_id": "cohere:command-a-03-2025", "latency_ms": 2140 }
 }
 ```
 
@@ -171,6 +172,9 @@ the signed-in student). Names are snake_case, enums are sent as their text (`Beg
 | Field | What | Source in the Junior Hub database |
 |---|---|---|
 | `today` | The school's date | `SchoolCalendar.Today` (Cairo) |
+| `student.first_name` | The first name only (never the full name) | `Names.FirstName(Users.FullName)` |
+| `student.gender` | `Male`, `Female` or `null` | `Students.Gender` |
+| `student.member_since` | The day the account was created | `Users.CreatedUtc` (date only) |
 | `student.grade`, `.is_independent` | School grade, or a student without a school | `Students.Grade`, `Students.SchoolId IS NULL` |
 | `student.total_xp`, `.streak_days`, `.last_active_date` | XP and streak | `Students.TotalXp`, `Student.CurrentStreak(today)`, `Students.LastActiveDate` |
 | `discovery.status` | `NotStarted`, `InProgress` or `Completed` | `DiscoveryInterviews.Status` (latest completed wins) |
@@ -189,7 +193,7 @@ the signed-in student). Names are snake_case, enums are sent as their text (`Beg
 | `mentor` | `id`, `full_name`, `title`, `track_code`, `languages`, `availability`, `started_utc` | `MentorAssignments` with `EndedUtc IS NULL` + `Mentors`; `null` without one |
 | `recruitment.applications[]` | `role`, `company_name`, `track_code`, `level`, `status`, `attempts`, `best_score_percent`, `certificate_code` | `JobApplications` + `JobPostings` + `SimulationAttempts` + `SimulationCertificates` (empty while the app has no recruitment feature) |
 
-**Never send:** the student's own name, email, phone, school or class; parents; full names of other students; any
+**Never send:** the student's full name, email, phone, school or class, photo; parents; full names of other students; any
 quiz question, option or `CorrectOptionIndex` (DR-11). Unknown extra fields are ignored, so the backend can add
 fields before the bot uses them.
 
@@ -247,7 +251,7 @@ Checklist once connected:
 
 - [ ] A question without `conversationId` creates a conversation; the next one with its id continues it.
 - [ ] The service receives the previous messages as `history`, oldest first.
-- [ ] The serialized `context` of a seeded student has no student's own name, email, school, or `correct`.
+- [ ] The serialized `context` of a seeded student has only the first name: no full name, email, school, or `correct`.
 - [ ] Stopping the service gives the fallback reply with `isFallback: true`, stored as `Source = Fallback`.
 - [ ] A token signed with another key, or with audience `discovery-ai`, gets 401.
 - [ ] Another student's conversation id gives 404.
@@ -264,7 +268,7 @@ Checklist once connected:
   openssl rsa -in assistant-ai-private.pem -pubout -out assistant-ai-public.pem
   ```
 
-- **Privacy.** The student is only `student_ref`. Teammates come by first name and role (a product decision beyond
+- **Privacy.** The student is `student_ref` plus their first name and gender. Teammates come by first name and role (a product decision beyond
   BR-15 as written in JH-SRS v0.1: confirm it). Messages and replies are never logged; logs hold the request id,
   prompt version, model, latency, topic and tool names only.
 - `ASSISTANT_AUTH_DISABLED` and `ASSISTANT_DEV_ENDPOINTS` are for a developer's machine only. Never set them in production.

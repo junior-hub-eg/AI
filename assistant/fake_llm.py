@@ -16,6 +16,7 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 
 # (keywords, tool, args) — first match wins.
 ROUTES: list[tuple[tuple[str, ...], str, dict]] = [
+    (("اسمي", "بروفايل", "my name", "profile", "who am i", "انا مين"), "get_my_profile", {}),
     (("xp", "نقط", "نقاط", "badge", "بادج", "شار", "streak", "ستريك"), "get_my_achievements", {}),
     (("درس", "lesson", "الجاي", "next", "وقفت"), "get_my_learning", {}),
     (("فريق", "squad", "سبرنت", "sprint", "تاسك", "task"), "get_my_squad", {}),
@@ -37,13 +38,18 @@ class FakeChatModel(BaseChatModel):
         return self
 
     def _generate(self, messages: list[BaseMessage], stop=None, run_manager=None, **kwargs: Any) -> ChatResult:
+        # The demo replies follow the student's last message, like the real bot.
+        asked = next((m for m in reversed(messages) if isinstance(m, HumanMessage)), None)
+        english = asked is not None and not any("\u0600" <= ch <= "\u06ff" for ch in str(asked.content))
         last = messages[-1]
         if isinstance(last, HumanMessage):
             text = str(last.content).lower()
             for keywords, tool_name, args in ROUTES:
                 if any(k in text for k in keywords):
                     return _result(_call(tool_name, args))
-            return _result(_respond("(تجربة) أنا مساعد Junior Hub. اسألني عن دروسك أو الـ XP أو فريقك.", "small_talk"))
+            return _result(_respond(
+                "(demo) I'm the Junior Hub assistant. Ask me about your lessons, XP or squad." if english
+                else "(تجربة) أنا مساعد Junior Hub. اسألني عن دروسك أو الـ XP أو فريقك.", "small_talk", english))
 
         if isinstance(last, ToolMessage):
             try:
@@ -51,17 +57,20 @@ class FakeChatModel(BaseChatModel):
                 keys = ", ".join(list(data)[:6]) if isinstance(data, dict) else str(data)[:120]
             except (json.JSONDecodeError, TypeError):
                 keys = str(last.content)[:120]
-            return _result(_respond(f"(تجربة) جبت البيانات من {last.name}: {keys}", "my_progress"))
+            return _result(_respond(
+                f"(demo) I got the data from {last.name}: {keys}" if english
+                else f"(تجربة) جبت البيانات من {last.name}: {keys}", "my_progress", english))
 
-        return _result(_respond("(تجربة) تمام.", "small_talk"))
+        return _result(_respond("(demo) OK." if english else "(تجربة) تمام.", "small_talk", english))
 
 
 def _call(name: str, args: dict) -> AIMessage:
     return AIMessage(content="", tool_calls=[{"name": name, "args": args, "id": f"call_{uuid.uuid4().hex[:8]}"}])
 
 
-def _respond(reply: str, topic: str) -> AIMessage:
-    return _call("respond", {"reply": reply, "topic": topic, "suggestions": ["الدرس الجاي إيه؟"], "links": []})
+def _respond(reply: str, topic: str, english: bool = False) -> AIMessage:
+    suggestion = "What's my next lesson?" if english else "الدرس الجاي إيه؟"
+    return _call("respond", {"reply": reply, "topic": topic, "suggestions": [suggestion], "links": []})
 
 
 def _result(message: AIMessage) -> ChatResult:

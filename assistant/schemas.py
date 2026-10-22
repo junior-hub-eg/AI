@@ -14,11 +14,13 @@ Topic = Literal[
     "platform", "concept_help", "small_talk", "out_of_scope", "wellbeing",
 ]
 LinkKind = Literal["lesson", "track", "mentor", "squad", "discovery", "achievements", "jobs"]
+Gender = Literal["Male", "Female"]
 
 MAX_MESSAGE = 1000
 MAX_HISTORY = 20
 MAX_REPLY = 2000
 MAX_SUGGESTION = 80
+MAX_FIRST_NAME = 30
 
 
 class Model(BaseModel):
@@ -29,11 +31,25 @@ class Model(BaseModel):
 # ----- context ---------------------------------------------------------------------------------------------------
 
 class StudentFacts(Model):
+    # Profile: the first name only (never the full name), to greet the student, and boy or girl, so Arabic replies
+    # address them correctly. Both may be missing (an older backend, or a student who has not set the gender yet).
+    first_name: str | None = None
+    gender: Gender | None = None
+    member_since: date | None = None
     grade: int | None = None
     is_independent: bool = False
     total_xp: int = 0
     streak_days: int = 0
     last_active_date: date | None = None
+
+    @field_validator("first_name", mode="before")
+    @classmethod
+    def first_word(cls, value):
+        # The name goes into the prompt: keep one short word, so a full name or a long text cannot get in.
+        if not isinstance(value, str):
+            return None
+        word = next(iter(value.split()), "")[:MAX_FIRST_NAME]
+        return word or None
 
 
 class Recommendation(Model):
