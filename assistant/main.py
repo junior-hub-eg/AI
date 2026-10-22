@@ -135,7 +135,10 @@ async def run_reply(request: Request, body: ReplyRequest, debug: bool = False) -
     except Exception as exc:  # the model provider failed
         # The provider's status helps tell a retired model (404) from a bad key (401) or a quota limit (429).
         logger.warning("assistant provider error %s status=%s", type(exc).__name__, getattr(exc, "status_code", "-"))
-        detail = f" {type(exc).__name__}: {_error_text(exc)}" if debug else ""
+        # The error's type and status only (never the provider's text, which may quote the request): enough to
+        # tell a retired model (404), a bad key (401), a quota limit (413/429) or a bad tool call (400).
+        detail = (f" {type(exc).__name__}: {_error_text(exc)}" if debug
+                  else f" ({type(exc).__name__}, status {getattr(exc, 'status_code', '-')})")
         return error(503, ErrorCode.PROVIDER_UNAVAILABLE, "The assistant is not available right now." + detail)
 
     # Never the message or the reply (privacy): metadata only.
