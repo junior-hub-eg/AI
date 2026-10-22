@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT))
 
 from assistant.assistant import Assistant  # noqa: E402
 from assistant.config import get_settings  # noqa: E402
-from assistant.llm import create_model  # noqa: E402
+from assistant.llm import create_fallback_model, create_model  # noqa: E402
 from assistant.schemas import HistoryItem, ReplyRequest  # noqa: E402
 
 PERSONAS = ROOT / "assistant" / "mock" / "contexts"
@@ -71,7 +71,7 @@ async def main() -> None:
     args = parser.parse_args()
 
     settings = get_settings()
-    assistant = Assistant(create_model(settings), settings)
+    assistant = Assistant(create_model(settings), settings, fallback_model=create_fallback_model(settings))
     persona = args.persona or choose()
     debug = not args.quiet
     history: list[HistoryItem] = []

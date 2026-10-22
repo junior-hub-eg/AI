@@ -24,9 +24,13 @@ TOPICS = set(ReplyResponse.model_fields["topic"].annotation.__args__)
 CITATION_TAGS = re.compile(r"</?co(?:\s*:[^>]*)?>")
 
 
+# Markdown bold (**word** or __word__): the chat shows plain text, so the marks would show as they are.
+BOLD = re.compile(r"(\*\*|__)(?=\S)(.+?)(?<=\S)\1")
+
+
 def strip_markup(text: str) -> str:
-    # Only the tags go; spacing is kept as written (code in a reply keeps its indentation).
-    return CITATION_TAGS.sub("", text).strip()
+    # Only the tags and bold marks go; spacing is kept as written (code in a reply keeps its indentation).
+    return BOLD.sub(r"\2", CITATION_TAGS.sub("", text)).strip()
 
 
 def _parsed(content):
@@ -45,9 +49,13 @@ class Assistant:
     model: BaseChatModel
     settings: Settings
     catalog: Catalog = field(default_factory=load_catalog)
+    # Takes a step when the main model is rate limited.
+    fallback_model: BaseChatModel | None = None
 
     def __post_init__(self) -> None:
-        self.graph = build_graph(self.model, self.settings.llm_tool_choice, self.settings.max_steps)
+        self.graph = build_graph(
+            self.model, self.settings.llm_tool_choice, self.settings.max_steps, fallback=self.fallback_model
+        )
 
     async def reply(self, request: ReplyRequest) -> tuple[ReplyResponse, list[str]]:
         """The reply, and the names of the tools used (for logs and the CLI)."""

@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # llama-3.3-70b-versatile (shut down 16 Aug 2026) and supports tool calling. It shares its quota with the
     # interview's result call. Check https://console.groq.com/docs/deprecations before changing it.
     llm_model: str = "groq:openai/gpt-oss-120b"
+    # Used when the main model hits its rate limit (429): on Groq's free plan each model has its own quota.
+    # Empty = no fallback.
+    llm_fallback_model: str = "groq:openai/gpt-oss-20b"
     llm_temperature: float = 0.3
     # gpt-oss models think before answering: low keeps a reply (up to MAX_STEPS model calls) inside the timeout.
     # Sent only to gpt-oss models; empty = the provider's default.

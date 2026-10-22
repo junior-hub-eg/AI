@@ -147,3 +147,44 @@ def test_other_provider_errors_are_not_retried():
     with pytest.raises(ConnectionError):
         reply(ScriptedModel(script=script))
     assert len(calls) == 1
+
+
+class RateLimited(Exception):
+    """What Groq's SDK raises when a model's quota is used up."""
+
+    status_code = 429
+
+
+def test_a_rate_limited_step_goes_to_the_fallback_model():
+    def main_model(messages, bound):
+        raise RateLimited()
+
+    def fallback(messages, bound):
+        return tool_call(RESPOND, reply="معاك 100 XP", topic="my_progress")
+
+    assistant = Assistant(ScriptedModel(script=main_model), SETTINGS, fallback_model=ScriptedModel(script=fallback))
+    response, _ = asyncio.run(assistant.reply(make_request()))
+    assert response.reply == "معاك 100 XP"
+
+
+def test_without_a_fallback_a_rate_limit_is_an_error():
+    def main_model(messages, bound):
+        raise RateLimited()
+
+    with pytest.raises(RateLimited):
+        reply(ScriptedModel(script=main_model))
+
+
+def test_a_plain_answer_loses_the_fields_it_copied_and_keeps_its_suggestions():
+    text = ("أنت في مسار **Frontend** (مستوى Beginner).\n\n**اقتراحات للمتابعة:**\n- اشرحلي الـ functions\n"
+            "- الدرس الجاي إيه؟\n\n**الموضوع:** learning\n**روابط:** [{\"kind\": \"lesson\"}]")
+    response, _ = reply(ScriptedModel(script=lambda messages, bound: AIMessage(content=text)))
+    assert response.reply == "أنت في مسار Frontend (مستوى Beginner)."
+    assert response.suggestions == ["اشرحلي الـ functions", "الدرس الجاي إيه؟"]
+    assert response.topic == "learning"
+
+
+def test_bold_marks_are_removed_but_code_is_kept():
+    from assistant.assistant import strip_markup
+
+    assert strip_markup("في **Frontend** والكود x = a ** 2") == "في Frontend والكود x = a ** 2"

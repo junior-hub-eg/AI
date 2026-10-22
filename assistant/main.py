@@ -27,7 +27,7 @@ from .assistant import Assistant, EmptyReply
 from .auth import Unauthenticated, verify
 from .catalog import load_catalog
 from .config import Settings, get_settings
-from .llm import create_model
+from .llm import create_fallback_model, create_model
 from .schemas import MAX_HISTORY, MAX_MESSAGE, HistoryItem, ReplyRequest, ReplyResponse
 
 logger = logging.getLogger("assistant")
@@ -84,7 +84,7 @@ def get_assistant(request: Request) -> Assistant:
     state = request.app.state
     if getattr(state, "assistant", None) is None:
         settings = current_settings(request)
-        state.assistant = Assistant(create_model(settings), settings)
+        state.assistant = Assistant(create_model(settings), settings, fallback_model=create_fallback_model(settings))
     return state.assistant
 
 
