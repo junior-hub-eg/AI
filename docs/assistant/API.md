@@ -73,7 +73,7 @@ Response:
   "suggestions": ["أبدأ أول درس إزاي؟", "مين المنتور المناسب ليا؟"],
   "links": [{ "kind": "lesson", "ref": "6b2e…", "label": "Functions" }],
   "topic": "tracks",
-  "meta": { "prompt_version": "assistant@v2", "model_id": "…", "latency_ms": 2100 }
+  "meta": { "prompt_version": "assistant@v3", "model_id": "…", "latency_ms": 2100 }
 }
 ```
 

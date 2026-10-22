@@ -134,7 +134,7 @@ Response `200`:
   "suggestions": ["اشرحلي الـ functions", "مين المنتور بتاعي؟"],
   "links": [{ "kind": "lesson", "ref": "dab266be-e6a4-5efd-a5f4-503784941482", "label": "Functions" }],
   "topic": "discovery",
-  "meta": { "prompt_version": "assistant@v2", "model_id": "cohere:command-a-03-2025", "latency_ms": 2140 }
+  "meta": { "prompt_version": "assistant@v3", "model_id": "cohere:command-a-03-2025", "latency_ms": 2140 }
 }
 ```
 
