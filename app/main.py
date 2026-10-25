@@ -15,6 +15,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 import assistant.main as student_assistant
+import teaching.main as teaching_ai
 from app import __version__
 from app.api import health
 from app.api.v1 import discovery
@@ -24,6 +25,7 @@ from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging, log_event, recent_logs
 from app.core.middleware import RequestContextMiddleware
 from assistant.config import Settings as AssistantSettings
+from teaching.config import Settings as TeachingSettings
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,7 @@ def create_app(
     settings: Settings | None = None,
     container: Container | None = None,
     assistant_settings: AssistantSettings | None = None,
+    teaching_settings: TeachingSettings | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     production = settings.app_env == "production"
@@ -78,6 +81,7 @@ def create_app(
     student_assistant.install(
         app, production=production, fake_models=settings.fake_models, settings=assistant_settings
     )
+    teaching_ai.install(app, production=production, fake_models=settings.fake_models, settings=teaching_settings)
     web_dir = PROJECT_ROOT / "web"
     if not production and web_dir.is_dir():
         # Call-style interview page for local demos: http://127.0.0.1:<port>/call/
