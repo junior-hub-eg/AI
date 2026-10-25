@@ -15,6 +15,8 @@ from pydantic import BaseModel, ValidationError
 from . import prompts
 from .config import Settings
 from .schemas import (
+    AskRequest,
+    AskResponse,
     FeedbackRequest,
     FeedbackResponse,
     LessonRequest,
@@ -45,6 +47,7 @@ class TeachingAi(Protocol):
     async def parse(self, body: ParseRequest) -> ParseResponse: ...
     async def lesson(self, body: LessonRequest) -> LessonResponse: ...
     async def feedback(self, body: FeedbackRequest) -> FeedbackResponse: ...
+    async def ask(self, body: AskRequest) -> AskResponse: ...
 
 
 def create_model(model_id: str, settings: Settings) -> BaseChatModel:
@@ -153,5 +156,12 @@ class LlmTeachingAi:
         started = time.perf_counter()
         system = prompts.FEEDBACK.format(sentence=body.sentence, topic=body.topic_title)
         result = await self._structured(system, body.model_dump(), FeedbackResponse)
+        result.meta = self._meta(started)
+        return result
+
+    async def ask(self, body: AskRequest) -> AskResponse:
+        started = time.perf_counter()
+        system = prompts.ASK.format(topic=body.topic_title)
+        result = await self._structured(system, body.model_dump(), AskResponse)
         result.meta = self._meta(started)
         return result

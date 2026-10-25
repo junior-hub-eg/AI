@@ -149,3 +149,24 @@ class FeedbackResponse(BaseModel):
     items: list[FeedbackItem] = Field(min_length=1, max_length=20)
     similar_sentence: ParsedSentence
     meta: Meta | None = None
+
+
+# ----- Ask the grammar coach -------------------------------------------------------------------------------------
+
+class AskTurn(BaseModel):
+    role: Literal["student", "coach"]
+    text: str = Field(min_length=1, max_length=600)
+
+
+class AskRequest(BaseModel):
+    """A student's question about a topic; context is the sentence or note they are looking at, if any."""
+
+    topic_title: str = Field(min_length=1, max_length=80, examples=["كان وأخواتها"])
+    question: str = Field(min_length=1, max_length=600, examples=["ليه الكلمة دي اسم كان؟"])
+    context: str = Field(default="", max_length=600)
+    history: list[AskTurn] = Field(default_factory=list, max_length=10)
+
+
+class AskResponse(BaseModel):
+    answer: str = Field(min_length=1, max_length=1200)
+    meta: Meta | None = None

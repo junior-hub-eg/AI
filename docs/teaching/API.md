@@ -36,6 +36,7 @@ one of `blue` (مرفوع), `green` (منصوب), `orange` (مجرور), `purple
 | `POST /v1/teaching/grammar/parse` | `{ "text" }` | `{ "sentences": [parsed sentence] }` |
 | `POST /v1/teaching/grammar/lesson` | `{ "topic_title", "roles": [..], "difficulty": 1–5 }` | `{ "points": [3–4 × { "title", "text", "color" }], "examples": [2 parsed], "practice": parsed }` |
 | `POST /v1/teaching/grammar/feedback` | `{ "topic_title", "sentence", "mistakes": [{ "word", "expected", "given" }] }` | `{ "items": [{ "word", "what", "why", "guiding_questions": [{ "question", "answer" }] }], "similar_sentence": parsed }` |
+| `POST /v1/teaching/grammar/ask` | `{ "topic_title", "question", "context"?, "history"?: [{ "role": "student"\|"coach", "text" }] }` | `{ "answer" }` (2-3 simple Arabic sentences) |
 
 The backend keeps the right answers (the practice sentence's roles, the quiz's `answer_index`) and checks the student's
 answers itself; the AI only writes content and explains mistakes.

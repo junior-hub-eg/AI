@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from .prompts import PROMPT_VERSION
 from .schemas import (
+    AskRequest,
+    AskResponse,
     FeedbackItem,
     FeedbackRequest,
     FeedbackResponse,
@@ -77,3 +79,6 @@ class FakeTeachingAi:
                                             GuidingQuestion(question="إيه الحرف ده؟", answer="إنّ، من الحروف الناسخة")])
             for m in body.mistakes
         ], similar_sentence=inna_sentence("الجوَّ", "جميلٌ"), meta=META)
+
+    async def ask(self, body: AskRequest) -> AskResponse:
+        return AskResponse(answer=f"(تجربة) في {body.topic_title}: {body.question} — الاسم بعد الفعل الناسخ اسمه ومرفوع.", meta=META)

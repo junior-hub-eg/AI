@@ -74,6 +74,14 @@ def test_grammar_ocr_parse_lesson_and_feedback(client):
     assert feedback["similar_sentence"]["words"]
 
 
+def test_grammar_ask_answers_the_question(client):
+    data = client.post("/v1/teaching/grammar/ask", json={
+        "topic_title": "كان وأخواتها", "question": "ليه الكلمة دي اسم كان؟", "context": "كان الطالبُ مجتهدًا",
+        "history": [{"role": "student", "text": "يعني إيه ناسخ؟"}, {"role": "coach", "text": "بيغيّر إعراب الجملة."}]}).json()
+    assert data["answer"]
+    assert client.post("/v1/teaching/grammar/ask", json={"topic_title": "x", "question": ""}).status_code == 400
+
+
 def test_invalid_requests_are_400(client):
     assert client.post("/v1/teaching/quick-check", json={"title": "x", "count": 50}).status_code == 400
     assert client.post("/v1/teaching/grammar/ocr", json={"image_base64": "abc", "mime_type": "image/gif"}).status_code == 400

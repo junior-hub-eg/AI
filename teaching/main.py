@@ -7,6 +7,7 @@ assistant. Every call needs the backend's service token (RS256, audience teachin
     POST /v1/teaching/grammar/parse      إعراب of every sentence of a text, word by word
     POST /v1/teaching/grammar/lesson     a grammar topic in 3-4 points, 2 solved sentences, a new one to try
     POST /v1/teaching/grammar/feedback   what each mistake is, why, and questions that lead to the answer
+    POST /v1/teaching/grammar/ask        a short answer to a student's question about a topic
     GET  /teaching/health                the models in use (no token)
 """
 
@@ -26,6 +27,8 @@ from assistant.auth import Unauthenticated, verify
 from .config import Settings, get_settings
 from .fake import FakeTeachingAi
 from .schemas import (
+    AskRequest,
+    AskResponse,
     FeedbackRequest,
     FeedbackResponse,
     LessonRequest,
@@ -157,3 +160,8 @@ async def lesson(body: LessonRequest, request: Request):
 @router.post("/grammar/feedback", response_model=FeedbackResponse)
 async def feedback(body: FeedbackRequest, request: Request):
     return _token(request) or await _run(request, lambda ai: ai.feedback(body))
+
+
+@router.post("/grammar/ask", response_model=AskResponse)
+async def ask(body: AskRequest, request: Request):
+    return _token(request) or await _run(request, lambda ai: ai.ask(body))
