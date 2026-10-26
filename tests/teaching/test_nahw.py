@@ -17,13 +17,28 @@ def run(coro):
     return asyncio.run(coro)
 
 
-def test_parse_uses_the_bank_then_the_rules():
-    result = run(coach().parse(ParseRequest(text="العلمُ نورٌ. إنَّ العلمَ نافعٌ.")))
-    first, second = result.sentences
+class BrokenBase(FakeTeachingAi):
+    async def parse(self, body):
+        raise RuntimeError("down")
+
+
+def test_bank_sentences_keep_their_verified_parsing():
+    result = run(coach().parse(ParseRequest(text="العلمُ نورٌ. الشمسُ مشرقةٌ.")))
+    first, _ = result.sentences
     assert [w.role for w in first.words] == ["مبتدأ", "خبر"]
     assert first.words[0].color == "blue" and first.words[0].sign == "الضمة"
+
+
+def test_a_book_passage_goes_to_the_general_parser():
+    result = run(coach().parse(ParseRequest(text="فعلى الأبناءِ أنْ يتسلّحوا بالعلمِ.")))
+    assert result.sentences[0].words[0].role == "حرف توكيد ونصب"  # the fake general parser's canned answer
+
+
+def test_when_the_general_parser_fails_nahw_parses_with_particles_built():
+    c = NahwTeachingAi(BrokenBase(), MockProvider())
+    second = run(c.parse(ParseRequest(text="إنَّ العلمَ نافعٌ."))).sentences[0]
     assert [w.role for w in second.words] == ["حرف ناسخ", "اسم إنّ", "خبر إنّ"]
-    assert second.words[1].color == "green" and second.words[0].case == "مبني"
+    assert second.words[1].color == "green" and second.words[0].case == "مبني" and second.words[0].sign == "مبني"
     assert all(w.explanation for w in second.words)
 
 
@@ -77,7 +92,7 @@ class FlakyGroq(MockProvider):
 
 
 def test_when_groq_fails_the_coach_still_answers_from_the_bank_and_the_rules():
-    c = coach(FlakyGroq())
+    c = NahwTeachingAi(BrokenBase(), FlakyGroq())
     assert run(c.lesson(LessonRequest(topic_title="المفعول به"))).practice.words
     parsed = run(c.parse(ParseRequest(text="ذهبَ الطالبُ إلى المدرسةِ")))
     assert any(w.role == "حرف جر" for w in parsed.sentences[0].words)
