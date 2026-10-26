@@ -84,6 +84,30 @@ def _color(word: dict) -> str:
     return "gray" if word.get("sign") == "مبني" else CASE_COLOR.get(word.get("case") or "", "gray")
 
 
+CASE_SIGN = {"مرفوع": "الضمة", "منصوب": "الفتحة", "مجرور": "الكسرة"}
+SHORT_SIGNS = {"الضمة", "الفتحة", "الكسرة"}
+PUNCT = ".,،؛;:!?؟\"'«»()[]{}-–—…"
+
+
+def consistent(word: ParsedWord) -> ParsedWord:
+    """The general parser's answer checked against the role catalog: a role that has one case always gets it (اسم إنّ is
+    منصوب, مضاف إليه مجرور …) with the matching color and short sign, and punctuation leaves the word."""
+    text = word.word.strip(PUNCT) or word.word
+    main = word.role.split("،")[-1].strip()
+    role = max((r for r in ROLES if main.endswith(r)), key=len, default=None)
+    case, sign, color = word.case, word.sign, word.color
+    fixed = ROLES[role]["case"] if role else None
+    if fixed and case != fixed:
+        case = fixed
+        if sign in SHORT_SIGNS:
+            sign = CASE_SIGN[fixed]
+    if case in CASE_COLOR:
+        color = CASE_COLOR[case]
+    elif case == "مبني" or (sign or "").startswith("مبني"):
+        color = "gray"
+    return word.model_copy(update={"word": text, "case": case, "sign": sign, "color": color})
+
+
 def to_parsed(text: str, words: list[dict]) -> ParsedSentence:
     """A Nahw sentence in the backend's shape: role, case, sign, the reason and the color of its case."""
     out = []
@@ -171,7 +195,9 @@ class NahwTeachingAi:
         sentences = split_sentences(body.text)[:30] or [body.text]
         if not all(normalize(" ".join(tokenize(s))) in BANK for s in sentences):
             try:
-                return await self.base.parse(body)
+                result = await self.base.parse(body)
+                result.sentences = [ParsedSentence(text=x.text, words=[consistent(w) for w in x.words]) for x in result.sentences]
+                return result
             except Exception as exc:  # noqa: BLE001 - any failure of the general parser falls back to Nahw Coach
                 logger.warning("general parse failed, using Nahw Coach: %s", type(exc).__name__)
         analyzed = await asyncio.gather(*(self._analyze(s) for s in sentences))

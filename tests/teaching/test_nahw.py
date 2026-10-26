@@ -142,3 +142,17 @@ def test_the_service_runs_the_grammar_coach_on_nahw(monkeypatch):
     )
     ai = main.get_ai(request)
     assert isinstance(ai, NahwTeachingAi) and isinstance(ai.provider, MockProvider)
+
+
+def test_the_general_parser_answer_is_made_consistent_with_the_role():
+    from teaching.nahw.coach import consistent
+    from teaching.schemas import ParsedWord
+
+    w = consistent(ParsedWord(word="العلمَ،", role="اسم إنّ", case="مرفوع", sign="الضمة", color="blue"))
+    assert (w.word, w.case, w.sign, w.color) == ("العلمَ", "منصوب", "الفتحة", "green")
+    w = consistent(ParsedWord(word="بالعلمِ؛", role="الباء حرف جر، العلمِ اسم مجرور", case="مجرور", sign="الكسرة", color="orange"))
+    assert (w.word, w.case) == ("بالعلمِ", "مجرور")
+    w = consistent(ParsedWord(word="المعلمونَ", role="مبتدأ", case="منصوب", sign="الواو", color="green"))
+    assert (w.case, w.sign, w.color) == ("مرفوع", "الواو", "blue")  # the case is fixed, a long sign is kept
+    w = consistent(ParsedWord(word="إنّ", role="حرف توكيد ونصب", case="مبني", sign="مبني على الفتح", color="blue"))
+    assert w.color == "gray"
