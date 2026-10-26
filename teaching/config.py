@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     llm_fallback_model: str = "groq:openai/gpt-oss-20b"
     # Reads photos of grammar passages (OCR). It must accept images.
     vision_model: str = "groq:meta-llama/llama-4-scout-17b-16e-instruct"
+    # "nahw": the grammar coach runs on Kareem's Nahw Coach engine (verified sentence bank, catalog-checked Groq
+    # analysis, Gemini OCR; teaching/nahw). "llm": the plain prompts of teaching/service.py.
+    grammar_engine: str = "nahw"
     llm_temperature: float = 0.2
     llm_reasoning_effort: str = "low"
     reply_timeout_seconds: float = 40

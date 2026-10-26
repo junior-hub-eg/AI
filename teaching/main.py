@@ -78,6 +78,10 @@ def get_ai(request: Request) -> TeachingAi:
             fallback = create_model(s.llm_fallback_model, s) if s.llm_fallback_model else None
             vision = create_model(s.vision_model, s) if s.vision_model else None
             state.teaching_ai = LlmTeachingAi(s, create_model(s.llm_model, s), fallback, vision)
+            if s.grammar_engine == "nahw":
+                from .nahw.coach import NahwTeachingAi
+
+                state.teaching_ai = NahwTeachingAi.from_env(state.teaching_ai)
     return state.teaching_ai
 
 
