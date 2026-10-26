@@ -156,3 +156,17 @@ def test_the_general_parser_answer_is_made_consistent_with_the_role():
     assert (w.case, w.sign, w.color) == ("مرفوع", "الواو", "blue")  # the case is fixed, a long sign is kept
     w = consistent(ParsedWord(word="إنّ", role="حرف توكيد ونصب", case="مبني", sign="مبني على الفتح", color="blue"))
     assert w.color == "gray"
+
+
+def test_a_word_with_an_attached_letter_is_split_into_its_two_parts():
+    from teaching.nahw.coach import consistent, split_attached
+    from teaching.schemas import ParsedWord
+
+    parts = split_attached(consistent(ParsedWord(word="بالعلمِ؛", role="الباء حرف جر، العلمِ اسم مجرور", case="مجرور", sign="الكسرة", color="orange")))
+    assert [(p.word, p.role, p.color) for p in parts] == [("بـ", "الباء حرف جر", "gray"), ("العلمِ", "اسم مجرور", "orange")]
+    parts = split_attached(consistent(ParsedWord(word="ويسهمُ", role="واو حرف عطف، فعل مضارع مرفوع", case="مرفوع", sign="الضمة", color="blue")))
+    assert [(p.word, p.role) for p in parts] == [("وـ", "واو حرف عطف"), ("يسهمُ", "فعل مضارع مرفوع")]
+    parts = split_attached(consistent(ParsedWord(word="فعلى", role="الفاء حرف استئناف، على حرف جر", case="مبني", sign="مبني على السكون", color="gray")))
+    assert [p.word for p in parts] == ["فـ", "على"]
+    single = split_attached(ParsedWord(word="الوطنِ", role="مضاف إليه", case="مجرور", sign="الكسرة", color="orange"))
+    assert len(single) == 1
