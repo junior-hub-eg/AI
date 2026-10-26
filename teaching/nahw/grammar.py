@@ -246,5 +246,29 @@ def validate_words(tokens: list[str], words: list) -> list[dict] | None:
     return clean
 
 
+def loose_words(tokens: list[str], words: list, fallback: list[dict]) -> list[dict] | None:
+    """A passage's analysis kept word by word: a word with a catalog role is checked as in validate_words, a role outside
+    the catalog (حال، ظرف، تمييز، معطوف …) keeps the AI's answer, and only a word with no answer takes `fallback`'s."""
+    if not isinstance(words, list) or len(words) != len(tokens) or len(fallback) != len(tokens):
+        return None
+    out = []
+    for tok, w, rule in zip(tokens, words, fallback):
+        strict = validate_words([tok], [w])
+        role = str(w.get("role") or "").strip() if isinstance(w, dict) else ""
+        if strict:
+            out.append(strict[0])
+        elif not role or role == UNKNOWN_ROLE:
+            out.append(rule)
+        else:
+            sign = str(w.get("sign") or "").strip()
+            case = None if sign.startswith("مبني") else (w.get("case") if w.get("case") in CASES else None)
+            item = {"text": tok, "type": w.get("type") if w.get("type") in WORD_TYPES else "اسم", "role": role[:60],
+                    "sign": "مبني" if sign.startswith("مبني") else sign[:60], "case": case}
+            if w.get("note"):
+                item["note"] = str(w["note"])[:120]
+            out.append(item)
+    return out
+
+
 def is_verb(role: str) -> bool:
     return role in VERB_ROLES

@@ -27,7 +27,14 @@ from teaching.nahw.arabic import normalize, split_sentences, tokenize
 from teaching.nahw.base import AIError, AIProvider
 from teaching.nahw.catalog import ROLE_FAMILIES, ROLES, UNKNOWN_ROLE
 from teaching.nahw.gemini_ocr import GeminiOCR
-from teaching.nahw.grammar import full_irab, mistake_message, reason_for, rule_analyze, validate_words
+from teaching.nahw.grammar import (
+    full_irab,
+    loose_words,
+    mistake_message,
+    reason_for,
+    rule_analyze,
+    validate_words,
+)
 from teaching.nahw.groq_provider import GroqProvider
 from teaching.nahw.guidance import build_steps
 from teaching.nahw.mock_provider import MockProvider
@@ -129,6 +136,16 @@ def split_attached(word: ParsedWord) -> list[ParsedWord]:
     return [prefix, consistent(word.model_copy(update={"word": word.word[1:], "role": rest_role[:60]}))]
 
 
+def _outside_catalog(w: dict) -> str:
+    """The إعراب of a role the catalog doesn't teach (حال، ظرف، معطوف …), as the AI gave it."""
+    if w.get("note"):
+        return w["note"]
+    if w.get("sign") == "مبني":
+        return f"{w['role']} مبني"
+    case = "" if (w.get("case") or "") in w["role"] else w.get("case") or ""  # «حال منصوب» not «حال منصوب منصوب»
+    return " ".join(x for x in (w["role"], case, f"وعلامته {w['sign']}" if w.get("sign") else "") if x)
+
+
 def to_parsed(text: str, words: list[dict]) -> ParsedSentence:
     """A Nahw sentence in the backend's shape: role, case, sign, the reason and the color of its case."""
     out = []
@@ -142,11 +159,39 @@ def to_parsed(text: str, words: list[dict]) -> ParsedSentence:
                 role=(w.get("role") or UNKNOWN_ROLE)[:60],
                 case=("مبني" if w.get("sign") == "مبني" else (w.get("case") or ""))[:40],
                 sign=(w.get("sign") or "")[:60],
-                explanation=(reason_for(words, i) if known else full_irab(w))[:300],
-                color=_color(w) if known else "gray",
+                explanation=(reason_for(words, i) if known else full_irab(w) if w.get("role") in (None, UNKNOWN_ROLE)
+                             else _outside_catalog(w))[:300],
+                color=_color(w) if known or w.get("role") != UNKNOWN_ROLE else "gray",
             )
         )
     return ParsedSentence(text=text[:400], words=out)
+
+
+PIECE_WORDS = 30  # words per call to the parser
+PARSE_CONCURRENCY = 3
+PARSE_BUDGET_SECONDS = 32  # the API answers within 40 s
+NAHW_RESERVE_SECONDS = 8  # left for Nahw Coach when the general parser fails
+
+
+def passage_pieces(text: str) -> list[str]:
+    """A photographed page in pieces of whole sentences of up to PIECE_WORDS words. The page's own line breaks join back
+    into sentences (a blank line stays a paragraph); a longer sentence is cut at its commas, else every PIECE_WORDS words."""
+    text = re.sub(r"[ \t]*\n(?![ \t]*\n)[ \t]*", " ", (text or "").replace("\r", ""))
+    parts: list[str] = []
+    for sentence in split_sentences(text):
+        if len(tokenize(sentence)) <= PIECE_WORDS:
+            parts.append(sentence)
+            continue
+        for clause in re.split(r"(?<=[،,])\s+", sentence):
+            words = clause.split()
+            parts += [" ".join(words[i : i + PIECE_WORDS]) for i in range(0, len(words), PIECE_WORDS)]
+    pieces: list[str] = []
+    for part in parts:
+        if pieces and len(tokenize(pieces[-1])) + len(tokenize(part)) <= PIECE_WORDS:
+            pieces[-1] += " " + part
+        else:
+            pieces.append(part)
+    return pieces
 
 
 class NahwTeachingAi:
@@ -195,7 +240,9 @@ class NahwTeachingAi:
         return await self.base.ask(body)
 
     # ----- analysis ----------------------------------------------------------------------------------------------
-    async def _analyze(self, sentence: str) -> list[dict]:
+    async def _analyze(self, sentence: str, loose: bool = False) -> list[dict]:
+        """`loose` (a passage from a book): the AI's word answers are kept one by one, so one role outside the catalog
+        doesn't turn the whole sentence into «غير محدد»."""
         tokens = tokenize(sentence)
         key = normalize(" ".join(tokens))
         if key in BANK and len(BANK[key]) == len(tokens):
@@ -203,6 +250,8 @@ class NahwTeachingAi:
         try:
             raw = await asyncio.to_thread(self.provider.analyze_sentence, sentence, tokens)
             words = validate_words(tokens, raw) if raw is not None else None
+            if not words and loose and raw is not None:
+                words = loose_words(tokens, raw, rule_analyze(sentence, BANK))
             if words:
                 return words
         except AIError as exc:
@@ -210,23 +259,39 @@ class NahwTeachingAi:
         return rule_analyze(sentence, BANK)
 
     async def parse(self, body: ParseRequest) -> ParseResponse:
-        """A passage from a book: whole sentences from the verified bank as they are; otherwise the general parser, which
-        handles attached letters (بـ، لـ، فـ…) and every role, with Nahw Coach as the fallback."""
+        """A passage from a book, in short pieces of whole sentences (two or three at a time, so a long page fits the
+        reply time): a piece from the verified bank as it is; otherwise the general parser, which handles attached
+        letters (بـ، لـ، فـ…) and every role, with Nahw Coach as the fallback."""
         started = time.perf_counter()
-        sentences = split_sentences(body.text)[:30] or [body.text]
-        if not all(normalize(" ".join(tokenize(s))) in BANK for s in sentences):
-            try:
-                result = await self.base.parse(body)
-                result.sentences = [
-                    ParsedSentence(text=x.text, words=[part for w in x.words for part in split_attached(consistent(w))][:40])
-                    for x in result.sentences
-                ]
-                return result
-            except Exception as exc:  # noqa: BLE001 - any failure of the general parser falls back to Nahw Coach
-                logger.warning("general parse failed, using Nahw Coach: %s", type(exc).__name__)
-        analyzed = await asyncio.gather(*(self._analyze(s) for s in sentences))
-        parsed = [to_parsed(" ".join(w["text"] for w in words), words) for words in analyzed if words]
-        return ParseResponse(sentences=parsed, meta=self._meta(started))
+        deadline = started + PARSE_BUDGET_SECONDS
+        gate = asyncio.Semaphore(PARSE_CONCURRENCY)
+        pieces = passage_pieces(body.text) or [body.text]
+        parsed = await asyncio.gather(*(self._parse_piece(piece, gate, deadline) for piece in pieces))
+        return ParseResponse(sentences=[s for piece in parsed for s in piece][:30], meta=self._meta(started))
+
+    async def _parse_piece(self, text: str, gate: asyncio.Semaphore, deadline: float) -> list[ParsedSentence]:
+        sentences = split_sentences(text) or [text]
+        async with gate:
+            if not all(normalize(" ".join(tokenize(s))) in BANK for s in sentences):
+                try:
+                    left = deadline - time.perf_counter() - NAHW_RESERVE_SECONDS
+                    result = await asyncio.wait_for(self.base.parse(ParseRequest(text=text)), timeout=max(left, 1))
+                    return [
+                        ParsedSentence(text=x.text, words=[part for w in x.words for part in split_attached(consistent(w))][:40])
+                        for x in result.sentences
+                    ]
+                except Exception as exc:  # noqa: BLE001 - any failure of the general parser falls back to Nahw Coach
+                    logger.warning("general parse failed, using Nahw Coach: %s", type(exc).__name__)
+            out = []
+            for sentence in sentences:
+                try:
+                    left = max(deadline - time.perf_counter(), 0.5)
+                    words = await asyncio.wait_for(self._analyze(sentence, loose=True), timeout=left)
+                except TimeoutError:
+                    words = rule_analyze(sentence, BANK)
+                if words:
+                    out.append(to_parsed(" ".join(w["text"] for w in words), words))
+            return out
 
     async def ocr(self, body: OcrRequest) -> OcrResponse:
         started = time.perf_counter()
