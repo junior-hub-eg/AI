@@ -89,6 +89,8 @@ def to_parsed(text: str, words: list[dict]) -> ParsedSentence:
     out = []
     for i, w in enumerate(words):
         known = w.get("role") in ROLES
+        if known and ROLES[w["role"]]["type"] == "حرف":  # particles are always مبني, whatever sign the model gave
+            w = {**w, "sign": "مبني", "case": None}
         out.append(
             ParsedWord(
                 word=w["text"][:40],
@@ -163,8 +165,15 @@ class NahwTeachingAi:
         return rule_analyze(sentence, BANK)
 
     async def parse(self, body: ParseRequest) -> ParseResponse:
+        """A passage from a book: whole sentences from the verified bank as they are; otherwise the general parser, which
+        handles attached letters (بـ، لـ، فـ…) and every role, with Nahw Coach as the fallback."""
         started = time.perf_counter()
         sentences = split_sentences(body.text)[:30] or [body.text]
+        if not all(normalize(" ".join(tokenize(s))) in BANK for s in sentences):
+            try:
+                return await self.base.parse(body)
+            except Exception as exc:  # noqa: BLE001 - any failure of the general parser falls back to Nahw Coach
+                logger.warning("general parse failed, using Nahw Coach: %s", type(exc).__name__)
         analyzed = await asyncio.gather(*(self._analyze(s) for s in sentences))
         parsed = [to_parsed(" ".join(w["text"] for w in words), words) for words in analyzed if words]
         return ParseResponse(sentences=parsed, meta=self._meta(started))
