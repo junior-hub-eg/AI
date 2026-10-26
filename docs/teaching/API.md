@@ -40,3 +40,19 @@ one of `blue` (مرفوع), `green` (منصوب), `orange` (مجرور), `purple
 
 The backend keeps the right answers (the practice sentence's roles, the quiz's `answer_index`) and checks the student's
 answers itself; the AI only writes content and explains mistakes.
+
+## Grammar engine (26 Oct 2026)
+
+The grammar endpoints run on **Nahw Coach** by Kareem (github.com/kareem1099/nahw_Juniorhub), vendored in
+`teaching/nahw/` (`TEACHING_GRAMMAR_ENGINE=nahw`, the default; `llm` goes back to the plain prompts):
+
+- parse: the verified sentence bank, else Groq analysis checked against the role catalog, else the rule analyzer
+- lesson: the topic's points and solved examples from the bank; the practice sentence is written by Groq and kept only
+  when a second, independent analysis agrees word by word (else a bank sentence of the level)
+- feedback: a message that names the mistake without the answer, the reason, and the guided questions
+- quick-check for a grammar topic: questions from the verified bank
+- ocr: Gemini (`GEMINI_API_KEY`), else Groq vision
+
+Keys: `GROQ_API_KEY` (without it everything runs offline on the bank and the rules), optional `GEMINI_API_KEY`,
+models `TEACHING_NAHW_MODEL`, `TEACHING_NAHW_FAST_MODEL`, `TEACHING_NAHW_VISION_MODEL`, `TEACHING_NAHW_OCR_MODEL`.
+The backend's token is checked with `TEACHING_AUTH_PUBLIC_KEY_PEM`.
