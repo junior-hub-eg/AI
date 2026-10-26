@@ -108,6 +108,26 @@ def consistent(word: ParsedWord) -> ParsedWord:
     return word.model_copy(update={"word": text, "case": case, "sign": sign, "color": color})
 
 
+PREFIX_SIGN = {"و": "مبني على الفتح", "ف": "مبني على الفتح", "ك": "مبني على الفتح", "ب": "مبني على الكسر", "ل": "مبني على الكسر"}
+GRAMMAR_WORDS = {"حرف", "فعل", "اسم", "ضمير", "مبتدأ", "خبر", "فاعل", "مفعول", "نائب", "مضاف", "نعت", "صفة", "توكيد", "بدل"}
+
+
+def split_attached(word: ParsedWord) -> list[ParsedWord]:
+    """A word with a letter attached in front (وَ، فَ، بِ، لِ، كَ) whose إعراب has two parts («الباء حرف جر، ناشئة اسم مجرور»)
+    becomes two words: the letter with its own إعراب, then the rest of the word with the rest of the إعراب."""
+    parts = [p.strip() for p in word.role.split("،") if p.strip()]
+    letter = word.word[:1]
+    if len(parts) < 2 or letter not in PREFIX_SIGN or "حرف" not in parts[0] or len(word.word) < 3:
+        return [word]
+    rest_role = "، ".join(parts[1:])
+    tokens = rest_role.split()
+    if len(tokens) >= 3 and tokens[0] not in GRAMMAR_WORDS:  # «العلمِ اسم مجرور» → «اسم مجرور»
+        rest_role = " ".join(tokens[1:])
+    prefix = ParsedWord(word=letter + "ـ", role=parts[0][:60], case="مبني", sign=PREFIX_SIGN[letter],
+                        explanation="حرف ملزوق في أول الكلمة، وله إعرابه لوحده.", color="gray")
+    return [prefix, consistent(word.model_copy(update={"word": word.word[1:], "role": rest_role[:60]}))]
+
+
 def to_parsed(text: str, words: list[dict]) -> ParsedSentence:
     """A Nahw sentence in the backend's shape: role, case, sign, the reason and the color of its case."""
     out = []
@@ -196,7 +216,10 @@ class NahwTeachingAi:
         if not all(normalize(" ".join(tokenize(s))) in BANK for s in sentences):
             try:
                 result = await self.base.parse(body)
-                result.sentences = [ParsedSentence(text=x.text, words=[consistent(w) for w in x.words]) for x in result.sentences]
+                result.sentences = [
+                    ParsedSentence(text=x.text, words=[part for w in x.words for part in split_attached(consistent(w))][:40])
+                    for x in result.sentences
+                ]
                 return result
             except Exception as exc:  # noqa: BLE001 - any failure of the general parser falls back to Nahw Coach
                 logger.warning("general parse failed, using Nahw Coach: %s", type(exc).__name__)
