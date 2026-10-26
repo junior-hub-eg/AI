@@ -19,6 +19,7 @@ import base64
 import logging
 import os
 import random
+import re
 import time
 
 from teaching import prompts
@@ -115,7 +116,7 @@ GRAMMAR_WORDS = {"حرف", "فعل", "اسم", "ضمير", "مبتدأ", "خبر
 def split_attached(word: ParsedWord) -> list[ParsedWord]:
     """A word with a letter attached in front (وَ، فَ، بِ، لِ، كَ) whose إعراب has two parts («الباء حرف جر، ناشئة اسم مجرور»)
     becomes two words: the letter with its own إعراب, then the rest of the word with the rest of the إعراب."""
-    parts = [p.strip() for p in word.role.split("،") if p.strip()]
+    parts = [p.strip() for p in re.split(r"[،,+]", word.role) if p.strip()]
     letter = word.word[:1]
     if len(parts) < 2 or letter not in PREFIX_SIGN or "حرف" not in parts[0] or len(word.word) < 3:
         return [word]

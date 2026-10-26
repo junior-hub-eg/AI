@@ -168,5 +168,7 @@ def test_a_word_with_an_attached_letter_is_split_into_its_two_parts():
     assert [(p.word, p.role) for p in parts] == [("وـ", "واو حرف عطف"), ("يسهمُ", "فعل مضارع مرفوع")]
     parts = split_attached(consistent(ParsedWord(word="فعلى", role="الفاء حرف استئناف، على حرف جر", case="مبني", sign="مبني على السكون", color="gray")))
     assert [p.word for p in parts] == ["فـ", "على"]
+    parts = split_attached(ParsedWord(word="بناشئةٍ", role="حرف جر + اسم مجرور", case="مجرور", sign="الكسرة", color="orange"))
+    assert [(p.word, p.role) for p in parts] == [("بـ", "حرف جر"), ("ناشئةٍ", "اسم مجرور")]
     single = split_attached(ParsedWord(word="الوطنِ", role="مضاف إليه", case="مجرور", sign="الكسرة", color="orange"))
     assert len(single) == 1
