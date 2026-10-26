@@ -3,8 +3,9 @@
 import asyncio
 
 from teaching.fake import FakeTeachingAi
+from teaching.nahw import coach as coach_module
 from teaching.nahw.base import AIError
-from teaching.nahw.coach import BANK, NahwTeachingAi, to_parsed
+from teaching.nahw.coach import BANK, NahwTeachingAi, passage_pieces, to_parsed
 from teaching.nahw.mock_provider import MockProvider
 from teaching.schemas import FeedbackRequest, LessonRequest, Mistake, ParseRequest, QuickCheckRequest
 
@@ -40,6 +41,57 @@ def test_when_the_general_parser_fails_nahw_parses_with_particles_built():
     assert [w.role for w in second.words] == ["حرف ناسخ", "اسم إنّ", "خبر إنّ"]
     assert second.words[1].color == "green" and second.words[0].case == "مبني" and second.words[0].sign == "مبني"
     assert all(w.explanation for w in second.words)
+
+
+class CountingBase(FakeTeachingAi):
+    def __init__(self):
+        super().__init__()
+        self.texts = []
+
+    async def parse(self, body):
+        self.texts.append(body.text)
+        return await super().parse(body)
+
+
+class SlowBase(FakeTeachingAi):
+    async def parse(self, body):
+        await asyncio.sleep(5)
+
+
+class BookRoles(MockProvider):
+    """Groq's answer for a book sentence, with roles the catalog doesn't teach."""
+
+    def analyze_sentence(self, sentence, tokens):
+        roles = {"عادَ": ("فعل", "فعل ماضٍ", "مبني"), "الطالبُ": ("اسم", "فاعل", "الضمة"),
+                 "مسرورًا": ("اسم", "حال منصوب", "الفتحة"), "صباحًا": ("اسم", "ظرف زمان", "الفتحة")}
+        return [{"type": roles[t][0], "role": roles[t][1], "sign": roles[t][2], "case": "منصوب"} if t in roles
+                else {"role": ""} for t in tokens]
+
+
+def test_a_photographed_page_is_parsed_in_short_pieces_of_whole_sentences():
+    line = "يَذهبُ الطالبُ إلى المدرسةِ كلَّ يومٍ مبكرًا"
+    page = "\n".join([line + "."] * 12)  # one sentence per printed line, 7 words each
+    pieces = passage_pieces(page)
+    assert len(pieces) == 3 and all(len(p.split()) <= 30 for p in pieces)
+    assert passage_pieces("كلمة " * 70) == [" ".join(["كلمة"] * 30)] * 2 + [" ".join(["كلمة"] * 10)]
+    assert passage_pieces("الدرسُ الأولُ\nيقرأُ\nالولدُ.") == ["الدرسُ الأولُ يقرأُ الولدُ."]  # a line break inside a sentence
+    base = CountingBase()
+    result = run(NahwTeachingAi(base, MockProvider()).parse(ParseRequest(text=page)))
+    assert len(base.texts) == 3 and result.sentences
+
+
+def test_roles_outside_the_catalog_are_kept_not_marked_unknown():
+    c = NahwTeachingAi(BrokenBase(), BookRoles())
+    words = run(c.parse(ParseRequest(text="عادَ الطالبُ مسرورًا صباحًا."))).sentences[0].words
+    assert [w.role for w in words] == ["فعل ماضٍ", "فاعل", "حال منصوب", "ظرف زمان"]
+    assert words[2].explanation == "حال منصوب وعلامته الفتحة" and words[2].color == "green"
+
+
+def test_a_slow_general_parser_still_answers_in_time(monkeypatch):
+    monkeypatch.setattr(coach_module, "PARSE_BUDGET_SECONDS", 1.5)
+    monkeypatch.setattr(coach_module, "NAHW_RESERVE_SECONDS", 0.5)
+    result = run(NahwTeachingAi(SlowBase(), MockProvider()).parse(ParseRequest(text="إنَّ الكتابَ مفيدٌ.")))
+    assert [w.role for w in result.sentences[0].words] == ["حرف ناسخ", "اسم إنّ", "خبر إنّ"]
 
 
 def test_lesson_gives_the_topic_points_two_examples_and_a_bank_sentence_of_the_level():
