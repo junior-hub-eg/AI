@@ -42,6 +42,7 @@ from teaching.nahw.seed_data import TOPICS
 from teaching.schemas import (
     AskRequest,
     AskResponse,
+    ConceptQuickCheckRequest,
     FeedbackItem,
     FeedbackRequest,
     FeedbackResponse,
@@ -49,6 +50,8 @@ from teaching.schemas import (
     LessonPoint,
     LessonRequest,
     LessonResponse,
+    LinkIdeasRequest,
+    LinkIdeasResponse,
     Meta,
     OcrRequest,
     OcrResponse,
@@ -61,6 +64,8 @@ from teaching.schemas import (
     QuickCheckResponse,
     VideoLinksRequest,
     VideoLinksResponse,
+    VideoSummaryRequest,
+    VideoSummaryResponse,
 )
 
 logger = logging.getLogger("teaching.nahw")
@@ -238,6 +243,15 @@ class NahwTeachingAi:
 
     async def ask(self, body: AskRequest) -> AskResponse:
         return await self.base.ask(body)
+
+    async def video_summary(self, body: VideoSummaryRequest) -> VideoSummaryResponse:
+        return await self.base.video_summary(body)
+
+    async def link_ideas(self, body: LinkIdeasRequest) -> LinkIdeasResponse:
+        return await self.base.link_ideas(body)
+
+    async def concept_quick_check(self, body: ConceptQuickCheckRequest) -> QuickCheckResponse:
+        return await self.base.concept_quick_check(body)
 
     # ----- analysis ----------------------------------------------------------------------------------------------
     async def _analyze(self, sentence: str, loose: bool = False) -> list[dict]:

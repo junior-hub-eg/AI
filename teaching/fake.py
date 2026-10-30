@@ -6,6 +6,7 @@ from .prompts import PROMPT_VERSION
 from .schemas import (
     AskRequest,
     AskResponse,
+    ConceptQuickCheckRequest,
     FeedbackItem,
     FeedbackRequest,
     FeedbackResponse,
@@ -14,6 +15,8 @@ from .schemas import (
     LessonRequest,
     LessonResponse,
     LinkIdea,
+    LinkIdeasRequest,
+    LinkIdeasResponse,
     Meta,
     OcrRequest,
     OcrResponse,
@@ -26,6 +29,8 @@ from .schemas import (
     QuickCheckResponse,
     VideoLinksRequest,
     VideoLinksResponse,
+    VideoSummaryRequest,
+    VideoSummaryResponse,
 )
 
 META = Meta(prompt_version=PROMPT_VERSION, model_id="fake", latency_ms=0)
@@ -82,3 +87,19 @@ class FakeTeachingAi:
 
     async def ask(self, body: AskRequest) -> AskResponse:
         return AskResponse(answer=f"(تجربة) في {body.topic_title}: {body.question} — الاسم بعد الفعل الناسخ اسمه ومرفوع.", meta=META)
+
+    async def video_summary(self, body: VideoSummaryRequest) -> VideoSummaryResponse:
+        return VideoSummaryResponse(what_it_is=f"(تجربة) {body.video_title}: إيه هو.", how_it_works="(تجربة) بيشتغل إزاي.",
+                                    where_used="(تجربة) بنستخدمه فين.", meta=META)
+
+    async def link_ideas(self, body: LinkIdeasRequest) -> LinkIdeasResponse:
+        start = len(body.avoid) + 1
+        return LinkIdeasResponse(ideas=[f"(تجربة) فكرة ربط رقم {i} بين {body.video_title} و{body.subject}."
+                                        for i in range(start, start + 3)], meta=META)
+
+    async def concept_quick_check(self, body: ConceptQuickCheckRequest) -> QuickCheckResponse:
+        return QuickCheckResponse(questions=[
+            Question(question=f"(تجربة) سؤال {i + 1} عن {body.video_title} و{body.subject}؟", options=["أ", "ب", "ج", "د"],
+                     answer_index=i % 4, explanation="لأن ده اللي في الربط.")
+            for i in range(body.count)
+        ], meta=META)

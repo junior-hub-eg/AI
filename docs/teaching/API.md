@@ -25,6 +25,21 @@ the track-video ↔ school-subject link and the Arabic grammar coach (مدرّب
 `POST /v1/teaching/quick-check` — `{ "title", "context", "count": 1–10, "language" }`
 → `{ "questions": [{ "question", "options": [2–5], "answer_index", "explanation" }], "meta" }`
 
+## AI concept videos (teacher's "AI Integration" page, 30 Oct 2026)
+
+A short recorded video about an AI concept (Computer Vision, …). The teacher links it to their subject; students watch
+it with the teacher's link under it and a 2-question Quick Check for XP. The AI works on text only (the transcript).
+Three separate calls:
+
+| When | Endpoint | Request | Response |
+|---|---|---|---|
+| once per video and language (the backend keeps it) | `POST /v1/teaching/video-summary` | `{ "video_title", "transcript", "language" }` | `{ "what_it_is", "how_it_works", "where_used" }` |
+| the teacher picks a subject, or asks for new ideas | `POST /v1/teaching/link-ideas` | `{ "video_title", "summary": [3], "subject", "grade"?, "avoid"?: [ideas already shown], "language" }` | `{ "ideas": [3 strings] }` |
+| the teacher approved an idea or wrote their own | `POST /v1/teaching/concept-quick-check` | `{ "video_title", "summary": [3], "subject", "link", "grade"?, "count": 1–5 (2), "language" }` | `{ "questions": [{ "question", "options": [4], "answer_index", "explanation" }] }` |
+
+The first question is about the teacher's link, the rest about the concept; the options are shuffled so the right one is
+not always first. Unlike `/quick-check`, this one never goes to the grammar engine.
+
 ## Grammar coach
 
 A parsed sentence: `{ "text", "words": [{ "word", "role", "case", "sign", "explanation", "color" }] }`, with `color`
