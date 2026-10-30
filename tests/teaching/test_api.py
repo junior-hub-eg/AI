@@ -14,7 +14,14 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 
 from app.main import create_app
 from teaching.config import Settings
-from teaching.schemas import LessonRequest, QuickCheckRequest, VideoLinksRequest
+from teaching.schemas import (
+    ConceptQuickCheckRequest,
+    LessonRequest,
+    LinkIdeasRequest,
+    QuickCheckRequest,
+    VideoLinksRequest,
+    VideoSummaryRequest,
+)
 from teaching.service import BadAnswer, LlmTeachingAi, extract_json
 from tests.conftest import make_settings
 
@@ -56,6 +63,33 @@ def test_quick_check_has_the_count_asked_for(client):
     data = client.post("/v1/teaching/quick-check", json={"title": "Computer Vision", "count": 5}).json()
     assert len(data["questions"]) == 5
     assert all(0 <= q["answer_index"] < len(q["options"]) for q in data["questions"])
+
+
+TRANSCRIPT = "Computer vision lets computers see. A camera turns the picture into numbers, and a model finds shapes."
+SUMMARY = ["إيه هو", "بيشتغل إزاي", "بنستخدمه فين"]
+
+
+def test_concept_video_summary_ideas_and_quick_check(client):
+    summary = client.post("/v1/teaching/video-summary", json={"video_title": "Computer Vision", "transcript": TRANSCRIPT}).json()
+    assert summary["what_it_is"] and summary["how_it_works"] and summary["where_used"]
+
+    body = {"video_title": "Computer Vision", "summary": SUMMARY, "subject": "Physics", "grade": 9}
+    first = client.post("/v1/teaching/link-ideas", json=body).json()["ideas"]
+    again = client.post("/v1/teaching/link-ideas", json={**body, "avoid": first}).json()["ideas"]
+    assert len(first) == len(again) == 3 and not set(first) & set(again)
+
+    quiz = client.post("/v1/teaching/concept-quick-check", json={
+        "video_title": "Computer Vision", "summary": SUMMARY, "subject": "Physics", "grade": 9,
+        "link": "الكاميرا بتلتقط الضوء بالعدسات والانعكاس، وده نفس اللي بتدرسه في البصريات."}).json()
+    assert len(quiz["questions"]) == 2
+    assert all(0 <= q["answer_index"] < len(q["options"]) for q in quiz["questions"])
+
+
+def test_concept_requests_are_checked(client):
+    assert client.post("/v1/teaching/video-summary", json={"video_title": "CV", "transcript": "short"}).status_code == 400
+    assert client.post("/v1/teaching/link-ideas", json={"video_title": "CV", "summary": [], "subject": "Physics"}).status_code == 400
+    assert client.post("/v1/teaching/concept-quick-check", json={
+        "video_title": "CV", "summary": SUMMARY, "subject": "Physics", "link": "x", "count": 9}).status_code == 400
 
 
 def test_grammar_ocr_parse_lesson_and_feedback(client):
@@ -133,3 +167,27 @@ async def test_lesson_uses_the_schema():
                        ensure_ascii=False)
     result = await ai(reply).lesson(LessonRequest(topic_title="إنّ وأخواتها"))
     assert result.practice.words[0].role == "حرف"
+
+
+async def test_video_summary_and_link_ideas_use_the_schema():
+    reply = json.dumps({"what_it_is": "a", "how_it_works": "b", "where_used": "c"})
+    summary = await ai(reply).video_summary(VideoSummaryRequest(video_title="CV", transcript=TRANSCRIPT))
+    assert (summary.what_it_is, summary.how_it_works, summary.where_used) == ("a", "b", "c")
+
+    two_ideas = json.dumps({"ideas": ["x", "y"]})
+    three = json.dumps({"ideas": ["x", "y", "z"]})
+    result = await ai(two_ideas, three).link_ideas(LinkIdeasRequest(video_title="CV", summary=SUMMARY, subject="Math", avoid=["old"]))
+    assert result.ideas == ["x", "y", "z"]
+
+
+async def test_concept_quick_check_keeps_the_right_answer_when_it_mixes_the_options():
+    reply = json.dumps({"questions": [
+        {"question": "q1", "options": ["العدسة", "الشاشة", "البطارية", "الميكروفون"], "answer_index": 0},
+        {"question": "q2", "options": ["a", "b"], "answer_index": 3},
+        {"question": "q3", "options": ["a", "b", "c"], "answer_index": 2},
+    ]}, ensure_ascii=False)
+    result = await ai(reply).concept_quick_check(ConceptQuickCheckRequest(
+        video_title="CV", summary=SUMMARY, subject="Physics", link="الكاميرا والعدسات"))
+    assert [q.question for q in result.questions] == ["q1", "q3"]
+    assert result.questions[0].options[result.questions[0].answer_index] == "العدسة"
+    assert result.questions[1].options[result.questions[1].answer_index] == "c"

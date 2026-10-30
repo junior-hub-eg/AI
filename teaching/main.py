@@ -3,6 +3,9 @@ assistant. Every call needs the backend's service token (RS256, audience teachin
 
     POST /v1/teaching/video-links        3-point summary of a track video and 3 ideas to link it to a school subject
     POST /v1/teaching/quick-check        multiple-choice questions about some content
+    POST /v1/teaching/video-summary      an AI concept video's transcript in 3 points (what, how, where it is used)
+    POST /v1/teaching/link-ideas         3 ideas to link the video's summary to the teacher's subject and grade
+    POST /v1/teaching/concept-quick-check  the students' Quick Check on the summary and the link the teacher approved
     POST /v1/teaching/grammar/ocr        the Arabic text in a photo
     POST /v1/teaching/grammar/parse      إعراب of every sentence of a text, word by word
     POST /v1/teaching/grammar/lesson     a grammar topic in 3-4 points, 2 solved sentences, a new one to try
@@ -29,10 +32,13 @@ from .fake import FakeTeachingAi
 from .schemas import (
     AskRequest,
     AskResponse,
+    ConceptQuickCheckRequest,
     FeedbackRequest,
     FeedbackResponse,
     LessonRequest,
     LessonResponse,
+    LinkIdeasRequest,
+    LinkIdeasResponse,
     OcrRequest,
     OcrResponse,
     ParseRequest,
@@ -41,6 +47,8 @@ from .schemas import (
     QuickCheckResponse,
     VideoLinksRequest,
     VideoLinksResponse,
+    VideoSummaryRequest,
+    VideoSummaryResponse,
 )
 from .service import BadAnswer, LlmTeachingAi, TeachingAi, create_model
 
@@ -144,6 +152,21 @@ async def video_links(body: VideoLinksRequest, request: Request):
 @router.post("/quick-check", response_model=QuickCheckResponse)
 async def quick_check(body: QuickCheckRequest, request: Request):
     return _token(request) or await _run(request, lambda ai: ai.quick_check(body))
+
+
+@router.post("/video-summary", response_model=VideoSummaryResponse)
+async def video_summary(body: VideoSummaryRequest, request: Request):
+    return _token(request) or await _run(request, lambda ai: ai.video_summary(body))
+
+
+@router.post("/link-ideas", response_model=LinkIdeasResponse)
+async def link_ideas(body: LinkIdeasRequest, request: Request):
+    return _token(request) or await _run(request, lambda ai: ai.link_ideas(body))
+
+
+@router.post("/concept-quick-check", response_model=QuickCheckResponse)
+async def concept_quick_check(body: ConceptQuickCheckRequest, request: Request):
+    return _token(request) or await _run(request, lambda ai: ai.concept_quick_check(body))
 
 
 @router.post("/grammar/ocr", response_model=OcrResponse)

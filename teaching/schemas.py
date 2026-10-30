@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -58,6 +58,50 @@ class Question(BaseModel):
 class QuickCheckResponse(BaseModel):
     questions: list[Question] = Field(min_length=1, max_length=10)
     meta: Meta | None = None
+
+
+# ----- AI concept videos (teacher's "AI Integration" page, 30 Oct 2026) ------------------------------------------
+# Three separate calls: the summary of the video's transcript (once, the backend keeps it), 3 ideas to link it to the
+# teacher's subject, and the students' Quick Check once the teacher approved a link.
+
+Point = Annotated[str, Field(min_length=1, max_length=400)]
+
+
+class VideoSummaryRequest(BaseModel):
+    video_title: str = Field(min_length=1, max_length=200, examples=["Computer Vision"])
+    transcript: str = Field(min_length=20, max_length=20000, description="The video's text.")
+    language: Language = "ar"
+
+
+class VideoSummaryResponse(BaseModel):
+    what_it_is: Point
+    how_it_works: Point
+    where_used: Point
+    meta: Meta | None = None
+
+
+class LinkIdeasRequest(BaseModel):
+    video_title: str = Field(min_length=1, max_length=200)
+    summary: list[Point] = Field(min_length=1, max_length=3, description="The 3 points of /video-summary.")
+    subject: str = Field(min_length=1, max_length=60, examples=["Physics"])
+    grade: int | None = Field(default=None, ge=1, le=12)
+    avoid: list[Point] = Field(default_factory=list, max_length=12, description="Ideas the teacher already saw.")
+    language: Language = "ar"
+
+
+class LinkIdeasResponse(BaseModel):
+    ideas: list[Point] = Field(min_length=3, max_length=3)
+    meta: Meta | None = None
+
+
+class ConceptQuickCheckRequest(BaseModel):
+    video_title: str = Field(min_length=1, max_length=200)
+    summary: list[Point] = Field(min_length=1, max_length=3)
+    subject: str = Field(min_length=1, max_length=60)
+    link: str = Field(min_length=1, max_length=1000, description="The link the teacher chose or wrote.")
+    grade: int | None = Field(default=None, ge=1, le=12)
+    count: int = Field(default=2, ge=1, le=5)
+    language: Language = "ar"
 
 
 # ----- Grammar coach (Arabic إعراب) --------------------------------------------------------------------------------

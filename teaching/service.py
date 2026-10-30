@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import random
 import re
 import time
 from typing import Any, Protocol, TypeVar
@@ -17,23 +18,33 @@ from .config import Settings
 from .schemas import (
     AskRequest,
     AskResponse,
+    ConceptQuickCheckRequest,
     FeedbackRequest,
     FeedbackResponse,
     LessonRequest,
     LessonResponse,
+    LinkIdeasRequest,
+    LinkIdeasResponse,
     Meta,
     OcrRequest,
     OcrResponse,
     ParseRequest,
     ParseResponse,
+    Question,
     QuickCheckRequest,
     QuickCheckResponse,
     VideoLinksRequest,
     VideoLinksResponse,
+    VideoSummaryRequest,
+    VideoSummaryResponse,
 )
 
 logger = logging.getLogger("teaching")
 T = TypeVar("T", bound=BaseModel)
+
+
+def _grade(grade: int | None) -> str:
+    return f" (الصف {grade})" if grade else ""
 
 
 class BadAnswer(Exception):
@@ -48,6 +59,18 @@ class TeachingAi(Protocol):
     async def lesson(self, body: LessonRequest) -> LessonResponse: ...
     async def feedback(self, body: FeedbackRequest) -> FeedbackResponse: ...
     async def ask(self, body: AskRequest) -> AskResponse: ...
+    async def video_summary(self, body: VideoSummaryRequest) -> VideoSummaryResponse: ...
+    async def link_ideas(self, body: LinkIdeasRequest) -> LinkIdeasResponse: ...
+    async def concept_quick_check(self, body: ConceptQuickCheckRequest) -> QuickCheckResponse: ...
+
+
+def shuffle_options(questions: list[Question]) -> list[Question]:
+    """Models tend to put the right option first; mix each question's options and move answer_index with them."""
+    mixed = []
+    for q in questions:
+        order = random.sample(range(len(q.options)), len(q.options))
+        mixed.append(q.model_copy(update={"options": [q.options[i] for i in order], "answer_index": order.index(q.answer_index)}))
+    return mixed
 
 
 def create_model(model_id: str, settings: Settings) -> BaseChatModel:
@@ -122,6 +145,37 @@ class LlmTeachingAi:
         result.questions = [q for q in result.questions if q.answer_index < len(q.options)][: body.count]
         if not result.questions:
             raise BadAnswer("QuickCheckResponse")
+        result.meta = self._meta(started)
+        return result
+
+    async def video_summary(self, body: VideoSummaryRequest) -> VideoSummaryResponse:
+        started = time.perf_counter()
+        system = prompts.VIDEO_SUMMARY.format(language=prompts.LANGUAGE[body.language])
+        payload = {"video_title": body.video_title, "transcript": body.transcript}
+        result = await self._structured(system, payload, VideoSummaryResponse)
+        result.meta = self._meta(started)
+        return result
+
+    async def link_ideas(self, body: LinkIdeasRequest) -> LinkIdeasResponse:
+        started = time.perf_counter()
+        avoid = prompts.AVOID.format(ideas="\n".join(f"- {i}" for i in body.avoid)) if body.avoid else ""
+        system = prompts.LINK_IDEAS.format(subject=body.subject, grade=_grade(body.grade), avoid=avoid,
+                                           language=prompts.LANGUAGE[body.language])
+        payload = {"video_title": body.video_title, "summary": body.summary, "subject": body.subject, "grade": body.grade}
+        result = await self._structured(system, payload, LinkIdeasResponse)
+        result.meta = self._meta(started)
+        return result
+
+    async def concept_quick_check(self, body: ConceptQuickCheckRequest) -> QuickCheckResponse:
+        started = time.perf_counter()
+        system = prompts.CONCEPT_QUICK_CHECK.format(subject=body.subject, grade=_grade(body.grade), count=body.count,
+                                                    language=prompts.LANGUAGE[body.language])
+        payload = {"video_title": body.video_title, "summary": body.summary, "subject": body.subject, "link": body.link}
+        result = await self._structured(system, payload, QuickCheckResponse)
+        questions = [q for q in result.questions if q.answer_index < len(q.options)][: body.count]
+        if not questions:
+            raise BadAnswer("QuickCheckResponse")
+        result.questions = shuffle_options(questions)
         result.meta = self._meta(started)
         return result
 
